@@ -37,9 +37,16 @@ npm run preview     # Serve the production build locally
 npm run typecheck
 npm test            # Rendering-independent physics tests
 npm run test:browser # Chrome interaction, layout, touch, and resource tests
+npm run test:production # Build and check all five level layouts on desktop/mobile
 ```
 
 The browser suite starts the development server if one is not running. It uses the locally installed Chrome channel, so a separate Playwright browser download is unnecessary. Screenshots and failure traces are written under `artifacts/`.
+
+The production layout check serves the optimized build under `/little-worlds/` and
+checks all five scenes at 1440px and 390px. It catches missing styles caused by
+production chunk loading, which the development server cannot expose. Screenshots
+are saved in `artifacts/production-layout/`. Set `LAYOUT_TEST_URL` when running
+`node scripts/check-production-layout.mjs` to check a deployed site instead.
 
 ## Play
 

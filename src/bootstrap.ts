@@ -6,14 +6,18 @@ initializeLanguage(
     ? level
     : 'jelly',
 );
-if (level === 'fire') {
-  void import('./fire/level');
-} else if (level === 'railway') {
-  void import('./railway/level');
-} else if (level === 'aquarium') {
-  void import('./aquarium/level');
-} else if (level === 'bubbles') {
-  void import('./bubbles/level');
-} else {
-  void import('./main');
-}
+// Keep each import in its own loader so production optimization cannot combine
+// the branches and associate every level with the default level's CSS preload.
+const loadLevel = {
+  fire: () => import('./fire/level'),
+  railway: () => import('./railway/level'),
+  aquarium: () => import('./aquarium/level'),
+  bubbles: () => import('./bubbles/level'),
+  jelly: () => import('./main'),
+};
+
+const selectedLevel =
+  level === 'fire' || level === 'railway' || level === 'aquarium' || level === 'bubbles'
+    ? level
+    : 'jelly';
+void loadLevel[selectedLevel]();
