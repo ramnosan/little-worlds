@@ -1,0 +1,601 @@
+@import '../level-nav.css';
+
+:root {
+  font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
+  color: #dfebe6;
+  background: #102a30;
+  font-synthesis: none;
+  font-weight: 400;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 360px;
+}
+button,
+input {
+  font: inherit;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  cursor: pointer;
+  color: inherit;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid #a2dfce;
+  outline-offset: 5px;
+}
+button {
+  border: 0;
+}
+h1,
+p {
+  margin: 0;
+}
+.aquarium-app {
+  min-height: 100svh;
+  overflow: hidden;
+  position: relative;
+  background: radial-gradient(ellipse at 46% 53%, #356167 0%, #1a3d44 35%, #102a30 72%);
+}
+.aq-header {
+  border-bottom: 1px solid #b5d4ce22;
+  z-index: 3;
+}
+.aq-brand {
+  display: flex;
+  align-items: center;
+  font-size: 25px;
+  letter-spacing: -1px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.aq-brand > span:not(.aq-mark) {
+  font-weight: 300;
+}
+.aq-brand sup {
+  font-size: 9px;
+  align-self: flex-start;
+  margin-top: 10px;
+  margin-left: 3px;
+}
+.aq-mark {
+  font-size: 45px;
+  margin-right: 10px;
+  font-weight: 300;
+  color: #ace0cc;
+}
+.aq-edition {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #92afb0;
+}
+.aquarium-app main {
+  position: relative;
+  min-height: 690px;
+  height: calc(100svh - 173px);
+}
+.aq-intro {
+  position: absolute;
+  left: 4.2%;
+  top: 43px;
+  z-index: 2;
+  pointer-events: none;
+}
+.aq-eyebrow {
+  font-size: 9px;
+  letter-spacing: 2.2px;
+  color: #b1cdc8;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.aq-eyebrow > span {
+  height: 1px;
+  width: 25px;
+  background: #95b9b1;
+}
+h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: clamp(33px, 3.4vw, 53px);
+  line-height: 1.13;
+  letter-spacing: -1.7px;
+  margin: 21px 0 18px;
+}
+h1 em {
+  font-weight: 400;
+  color: #b5d6c7;
+}
+.aq-description {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #9ab8b8;
+}
+.aq-scene {
+  position: absolute;
+  inset: 38px 280px 65px -15px;
+  touch-action: none;
+}
+.aq-scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+.aq-settings {
+  position: absolute;
+  right: 4.2%;
+  top: 60px;
+  width: 237px;
+  z-index: 2;
+  border: 1px solid #aac7c329;
+  background: #17383e91;
+  backdrop-filter: blur(12px);
+  padding: 24px 23px;
+  border-radius: 5px;
+}
+.aq-panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  margin-bottom: 24px;
+}
+.aq-panel-title > span:last-child {
+  font-size: 25px;
+  color: #a8ccbc;
+}
+.aq-settings label {
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  margin: 22px 0 9px;
+}
+.aq-settings output {
+  color: #93b4b3;
+  font-size: 10px;
+}
+input[type='range'] {
+  width: 100%;
+  accent-color: #c2dccb;
+  height: 3px;
+  cursor: pointer;
+  display: block;
+  margin: 14px 0;
+}
+.aq-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  color: #93afb0;
+}
+.aq-toggle {
+  margin: 27px 0 22px;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  font-size: 11px;
+}
+.aq-toggle i {
+  width: 28px;
+  height: 16px;
+  border-radius: 12px;
+  background: #39565a;
+  position: relative;
+}
+.aq-toggle i:after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  background: #a9c4bd;
+}
+.aq-toggle[aria-pressed='true'] i {
+  background: #bad7c4;
+}
+.aq-toggle[aria-pressed='true'] i:after {
+  left: 15px;
+  background: #24494b;
+}
+.aq-ball {
+  width: 100%;
+  padding: 13px 8px;
+  border-radius: 4px;
+  background: #bad8c5;
+  color: #1f4242;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.aq-ball kbd {
+  font-size: 8px;
+  font-family: inherit;
+  opacity: 0.6;
+  border: 1px solid #24494b3f;
+  padding: 1px 3px;
+  margin-left: 7px;
+}
+.aq-panel-note {
+  font-size: 8px;
+  text-align: center;
+  margin: 11px 0 20px;
+  color: #91b0b1;
+}
+.aq-quality {
+  font-size: 10px;
+  color: #a5bebb;
+  background: none;
+  border-top: 1px solid #adc8c124;
+  padding: 16px 0 0;
+  width: 100%;
+  text-align: left;
+}
+.aq-quality[aria-pressed='true'] {
+  color: #e3f7dc;
+}
+.aq-specimen {
+  position: absolute;
+  left: 5%;
+  bottom: 183px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 7px;
+  letter-spacing: 1.8px;
+  color: #8db1b4;
+  pointer-events: none;
+}
+.aq-specimen i {
+  height: 26px;
+  width: 1px;
+  background: #89aaab55;
+}
+.aq-bottom {
+  position: absolute;
+  bottom: 21px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.aq-hint {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  font-size: 12px;
+}
+.aq-ripple-icon {
+  font-size: 33px;
+  color: #a8cdbe;
+}
+.aq-hint small {
+  display: block;
+  color: #91b1b3;
+  font-size: 9px;
+  margin-top: 6px;
+}
+.aq-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #18383de6;
+  border: 1px solid #98bfb63b;
+  border-radius: 40px;
+  padding: 10px 22px;
+  box-shadow: 0 10px 35px #041c232f;
+}
+.aq-toolbar button {
+  background: none;
+  font-size: 15px;
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.aq-toolbar button span {
+  font-size: 10px;
+}
+.aq-toolbar button:hover {
+  color: #c9f3d5;
+}
+.aq-divider {
+  height: 16px;
+  width: 1px;
+  background: #7d9c9840;
+}
+#aq-ripple {
+  position: relative;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  min-width: 114px;
+}
+#aq-ripple::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: #b9ebcf;
+  transform: scaleX(var(--charge, 0));
+  transform-origin: left;
+}
+#aq-ripple.is-charging {
+  color: #d6ffe4;
+}
+.aq-charge-hint {
+  margin-top: -10px;
+  font-size: 9px;
+  color: #91b1b3;
+}
+.aq-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 8px;
+  letter-spacing: 0.3px;
+  color: #91b3b4;
+}
+.aq-live {
+  background: #b4d8b9;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 9px #b4d8b955;
+}
+#aq-koi-status {
+  border-left: 1px solid #6e959755;
+  padding-left: 9px;
+}
+#aq-koi-retry {
+  background: none;
+  color: #c6e3d4;
+  font-size: 9px;
+  text-decoration: underline;
+  padding: 0;
+}
+.aq-status {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+#aq-count {
+  padding-left: 9px;
+  border-left: 1px solid #6e959755;
+}
+.aq-notice {
+  position: absolute;
+  bottom: 178px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-size: 11px;
+  color: #daeee4;
+  pointer-events: none;
+  text-align: center;
+}
+.aq-footer {
+  height: 73px;
+  margin: 0 4.2%;
+  border-top: 1px solid #b5d4ce22;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #8daeb0;
+  font-size: 10px;
+  position: relative;
+  z-index: 2;
+}
+.aq-footer em {
+  font-family: Georgia, serif;
+  color: #b9d1c6;
+}
+.aq-footer > span:last-child {
+  font-size: 7px;
+  letter-spacing: 1.4px;
+}
+.aq-footer b {
+  font-size: 20px;
+  color: #a3c9b9;
+  margin-left: 30px;
+  font-weight: 400;
+}
+.aq-error {
+  position: absolute;
+  inset: 45% 10% auto;
+  text-align: center;
+  background: #143137;
+  padding: 25px;
+  z-index: 5;
+}
+@media (min-width: 1650px) {
+  .aq-scene {
+    right: 300px;
+    left: 70px;
+    top: 0;
+  }
+  .aq-settings {
+    top: 100px;
+  }
+  .aq-intro {
+    top: 65px;
+  }
+}
+@media (max-width: 1100px) {
+  .aq-edition {
+    display: none;
+  }
+  .aq-settings {
+    right: 3%;
+    width: 215px;
+    padding: 18px;
+  }
+  .aq-scene {
+    right: 210px;
+    left: -65px;
+    top: 100px;
+  }
+  .aq-intro {
+    left: 4%;
+    top: 28px;
+  }
+  h1 {
+    font-size: 37px;
+  }
+  .aq-specimen {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .aq-brand {
+    font-size: 21px;
+  }
+  .aq-mark {
+    font-size: 30px;
+  }
+  .aq-brand sup {
+    margin-top: 5px;
+  }
+  .aquarium-app main {
+    height: auto;
+    min-height: 1020px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .aq-intro {
+    top: 27px;
+    left: 25px;
+  }
+  .aq-eyebrow {
+    font-size: 8px;
+  }
+  h1 {
+    font-size: 35px;
+    margin: 15px 0 12px;
+  }
+  .aq-description {
+    font-size: 11px;
+  }
+  .aq-scene {
+    inset: 195px -10px auto;
+    height: 350px;
+  }
+  .aq-settings {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 560px;
+    width: calc(100% - 48px);
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+  }
+  .aq-panel-title {
+    grid-column: 1/-1;
+    margin-bottom: 0;
+  }
+  .aq-settings label {
+    margin-top: 15px;
+  }
+  .aq-settings label[for='aq-strength'] {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .aq-settings label[for='aq-damping'] {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  #aq-strength {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  #aq-damping {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .aq-range-labels {
+    grid-row: 4;
+  }
+  .aq-toggle {
+    grid-column: 1/-1;
+    margin: 20px 0;
+  }
+  .aq-ball {
+    grid-column: 1/-1;
+    font-size: 11px;
+  }
+  .aq-panel-note {
+    grid-column: 1/-1;
+    margin-bottom: 6px;
+  }
+  .aq-quality {
+    grid-column: 1/-1;
+    margin-top: 10px;
+    padding-top: 12px;
+  }
+  .aq-bottom {
+    position: relative;
+    bottom: auto;
+    gap: 16px;
+    margin: 25px 0;
+  }
+  .aq-hint {
+    display: none;
+  }
+  .aq-toolbar {
+    gap: 12px;
+    padding: 9px 16px;
+  }
+  .aq-toolbar button span {
+    font-size: 9px;
+  }
+  .aq-notice {
+    bottom: 135px;
+    width: 90%;
+  }
+  .aq-footer {
+    height: 75px;
+    margin: 0 24px;
+    font-size: 9px;
+  }
+  .aq-footer > span:last-child {
+    font-size: 0;
+  }
+  .aq-footer b {
+    font-size: 22px;
+    margin-left: 0;
+  }
+}

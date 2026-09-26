@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "variety": "koi-1",
+      "high": "./7plus-high.glb",
+      "low": "./7plus-low.glb",
+      "swimClip": "Swim",
+      "deformation": "morph",
+      "textureSize": 1024
+    },
+    {
+      "variety": "koi-2",
+      "high": "./7plus-high.glb",
+      "low": "./7plus-low.glb",
+      "swimClip": "Swim",
+      "deformation": "morph",
+      "textureSize": 1024
+    }
+  ]
+}

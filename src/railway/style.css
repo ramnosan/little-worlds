@@ -1,0 +1,477 @@
+@import '../level-nav.css';
+
+:root {
+  font-synthesis: none;
+  background: #f5f2e9;
+}
+body {
+  margin: 0;
+  min-width: 360px;
+}
+
+.railway-app {
+  --ink: #344a3c;
+  --muted: #7c806e;
+  color: var(--ink);
+  background: #f5f2e9;
+  min-height: 100dvh;
+  padding: 0 4.5%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.railway-app * {
+  box-sizing: border-box;
+}
+.rw-header {
+  border-bottom: 1px solid #deded1;
+  margin: 0;
+}
+.rw-brand {
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+.rw-brand > span:not(.rw-mark) {
+  font-weight: 400;
+}
+.rw-brand sup {
+  font-size: 10px;
+  align-self: flex-start;
+  margin-top: 10px;
+}
+.rw-mark {
+  font-size: 36px;
+  margin-right: 12px;
+  color: #8b9a73;
+}
+.rw-header nav a {
+  text-decoration: none;
+}
+.rw-edition {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+}
+.railway-app main {
+  max-width: 1550px;
+  margin: auto;
+}
+.rw-intro {
+  padding-top: 42px;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+.rw-eyebrow {
+  margin: 0 0 18px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+.rw-eyebrow span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #82976a;
+  margin-right: 8px;
+}
+.rw-intro h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(40px, 4vw, 61px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -2px;
+  margin: 0;
+}
+.rw-intro h1 em {
+  color: #7b8b60;
+  font-weight: 400;
+}
+.rw-intro > p:last-child {
+  margin: 20px 0 0;
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+.rw-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 24px;
+  margin-top: -100px;
+  align-items: center;
+}
+.rw-stage {
+  min-width: 0;
+  position: relative;
+}
+.rw-scene {
+  width: 100%;
+  height: clamp(490px, 56vw, 660px);
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 65%, #d8d4c8 0%, #ece8df66 48%, #f5f2e900 72%);
+}
+.rw-scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline-offset: -6px;
+  touch-action: none;
+}
+.rw-caption {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 34px;
+  margin-top: -18px;
+  position: relative;
+  pointer-events: none;
+  color: #878977;
+  font-size: 8px;
+  letter-spacing: 1.8px;
+}
+.rw-settings {
+  border: 1px solid #dcded0;
+  border-radius: 14px;
+  padding: 25px 23px;
+  background: #faf8f0dd;
+  margin-top: 25px;
+}
+.rw-panel-title {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  margin-bottom: 24px;
+}
+.rw-panel-title > span:last-child {
+  font-size: 17px;
+  color: #819468;
+}
+.rw-ticket {
+  border-bottom: 1px dashed #d4d7c7;
+  padding-bottom: 24px;
+  margin-bottom: 27px;
+}
+.rw-ticket > span {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #939781;
+  margin-bottom: 12px;
+}
+.rw-ticket strong {
+  font:
+    19px Georgia,
+    serif;
+  display: block;
+  white-space: nowrap;
+}
+.rw-ticket i {
+  margin: 0 8px;
+  color: #a9ae94;
+  font-style: normal;
+}
+.rw-ticket small {
+  display: block;
+  font-size: 9px;
+  margin-top: 10px;
+  color: var(--muted);
+}
+.rw-settings label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 16px;
+}
+.rw-settings output {
+  color: #859071;
+  font-size: 10px;
+}
+.rw-settings input {
+  width: 100%;
+  accent-color: #657e53;
+  cursor: pointer;
+  height: 18px;
+  margin: 0;
+}
+.rw-range-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #909581;
+  font-size: 8px;
+  margin-top: 6px;
+}
+.rw-note {
+  font:
+    italic 15px/1.65 Georgia,
+    serif;
+  color: #92967e;
+  margin: 27px 0;
+}
+.railway-app button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+.rw-quality {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid #e1e2d6;
+  background: transparent;
+  font-size: 18px !important;
+}
+.rw-quality span {
+  font-size: 10px;
+}
+.rw-quality[aria-pressed='true'] {
+  color: #497546;
+}
+.rw-bottom {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 22px;
+  margin: 20px 0 35px;
+}
+.rw-hint {
+  font:
+    17px Georgia,
+    serif;
+  position: relative;
+  padding-left: 40px;
+  margin: 0;
+}
+.rw-hint > span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 26px;
+  color: #8c9b75;
+}
+.rw-hint small {
+  display: block;
+  font:
+    9px/1.6 Arial,
+    sans-serif;
+  color: #868c77;
+  margin-top: 6px;
+  max-width: 245px;
+}
+.rw-toolbar {
+  display: flex;
+  border: 1px solid #d5dac7;
+  background: #fffdf6;
+  border-radius: 40px;
+  box-shadow: 0 5px 18px #68784f0b;
+  padding: 6px;
+  align-items: center;
+}
+.rw-toolbar button {
+  background: none;
+  border: 0;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-size: 17px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.rw-toolbar button span {
+  font-size: 11px;
+}
+.rw-toolbar button:hover {
+  background: #edf0e4;
+}
+.rw-toolbar > span {
+  width: 1px;
+  height: 20px;
+  background: #e2e4d7;
+}
+.rw-status {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  color: #81896f;
+}
+#rw-live {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7c9c61;
+}
+#rw-live.is-still {
+  background: #b5a683;
+}
+.rw-footer {
+  border-top: 1px solid #deded1;
+  padding: 23px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  color: #8b8e7b;
+  font-size: 10px;
+}
+.rw-footer em {
+  font-family: Georgia, serif;
+}
+.rw-footer > span:last-child {
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.rw-footer b {
+  font-size: 20px;
+  margin-left: 20px;
+  color: #8a9b6f;
+}
+.rw-notice:empty {
+  display: none;
+}
+.rw-notice,
+.rw-error {
+  padding: 20px;
+  color: #824f34;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.rw-error {
+  padding-top: 180px;
+  text-align: center;
+}
+.railway-app :focus-visible {
+  outline: 2px solid #647f4f;
+  outline-offset: 4px;
+}
+.railway-app button:disabled,
+.railway-app input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (min-width: 1650px) {
+  .rw-layout {
+    margin-top: -70px;
+  }
+}
+@media (max-width: 1150px) {
+  .rw-edition {
+    display: none;
+  }
+  .rw-layout {
+    grid-template-columns: minmax(0, 1fr) 245px;
+    gap: 10px;
+    margin-top: -45px;
+  }
+  .rw-settings {
+    padding: 23px 18px;
+  }
+  .rw-scene {
+    height: 500px;
+  }
+  .rw-bottom {
+    grid-template-columns: 1fr auto;
+  }
+  .rw-status {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .railway-app {
+    padding: 0 6%;
+  }
+  .rw-header {
+    margin: 0;
+  }
+  .rw-brand {
+    font-size: 23px;
+  }
+  .rw-mark {
+    font-size: 29px;
+  }
+  .rw-intro {
+    padding-top: 30px;
+  }
+  .rw-eyebrow {
+    font-size: 8px;
+    margin-bottom: 16px;
+  }
+  .rw-intro h1 {
+    font-size: 43px;
+  }
+  .rw-intro > p:last-child {
+    font-size: 11px;
+    margin-top: 15px;
+  }
+  .rw-layout {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    gap: 30px;
+  }
+  .rw-stage {
+    width: calc(100% + 28px);
+  }
+  .rw-scene {
+    height: 375px;
+    border-radius: 12px;
+  }
+  .rw-caption {
+    padding: 0 15px;
+    font-size: 6px;
+    letter-spacing: 1px;
+    margin-top: -8px;
+  }
+  .rw-settings {
+    width: 100%;
+    margin: 0;
+    padding: 22px;
+  }
+  .rw-panel-title {
+    margin-bottom: 18px;
+  }
+  .rw-ticket {
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+  }
+  .rw-note {
+    font-size: 14px;
+    margin: 18px 0;
+  }
+  .rw-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 23px;
+    margin: 25px 0;
+  }
+  .rw-toolbar {
+    order: -1;
+  }
+  .rw-hint {
+    font-size: 16px;
+    align-self: center;
+  }
+  .rw-status {
+    display: flex;
+    margin: 0;
+  }
+  .rw-footer {
+    text-align: center;
+    justify-content: center;
+    padding: 20px 0;
+  }
+  .rw-footer > span:last-child {
+    display: none;
+  }
+}

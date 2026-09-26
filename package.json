@@ -1,0 +1,30 @@
+{
+  "name": "little-worlds",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "tsx --test tests/physics.test.ts tests/collisions.test.ts tests/bubbles.test.ts tests/fusion.test.ts tests/smooth-fusion.test.ts tests/aquarium.test.ts tests/koi.test.ts tests/railway.test.ts tests/fire.test.ts tests/i18n.test.ts",
+    "typecheck": "tsc --noEmit",
+    "test:browser": "playwright test",
+    "benchmark:fusion": "tsx scripts/benchmark-fusion.ts",
+    "validate:koi": "tsx scripts/validate-koi-assets.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^20.17.0",
+    "@types/three": "^0.180.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.2",
+    "vite": "^6.4.0"
+  }
+}

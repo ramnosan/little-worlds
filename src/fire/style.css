@@ -1,0 +1,537 @@
+@import '../level-nav.css';
+
+:root {
+  font-synthesis: none;
+  background: #171918;
+  color: #e9e5dc;
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  min-width: 360px;
+}
+.fire-app {
+  --muted: #979b92;
+  min-height: 100dvh;
+  padding: 0 4%;
+  font-family: 'Avenir Next', 'Segoe UI', sans-serif;
+  background: radial-gradient(ellipse at 50% 75%, #28231c55, transparent 70%), #171918;
+}
+.fire-app * {
+  box-sizing: border-box;
+}
+.fire-app button,
+.fire-app input {
+  font: inherit;
+}
+.fire-app button {
+  cursor: pointer;
+}
+.fire-app button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.fire-app :focus-visible {
+  outline: 2px solid #e9af73;
+  outline-offset: 5px;
+}
+.fire-header {
+  margin: 0;
+  border-bottom: 1px solid #e6e0c918;
+}
+.fire-brand {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  letter-spacing: -1px;
+  font-weight: 650;
+  white-space: nowrap;
+  color: #e9e5dc;
+  text-decoration: none;
+}
+.fire-brand > span:not(.fire-mark) {
+  font-weight: 350;
+}
+.fire-brand sup {
+  font-size: 10px;
+  margin: 0 0 15px 2px;
+}
+.fire-mark {
+  color: #dfab71;
+  font-size: 35px;
+  margin-right: 11px;
+}
+.fire-edition {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  color: #8f958c;
+  text-align: right;
+}
+.fire-app .level-nav {
+  --nav-border: #e1d8be28;
+  --nav-text: #a5a99e;
+  --nav-active-bg: #e1b07c;
+  --nav-active-text: #2b251c;
+}
+.fire-app .level-nav a {
+  text-decoration: none;
+  padding-inline: 12px;
+}
+.fire-app main {
+  max-width: 1640px;
+  margin: auto;
+}
+.fire-intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 35px 0 28px;
+  gap: 24px;
+}
+.fire-eyebrow {
+  font-size: 10px;
+  font-weight: 550;
+  letter-spacing: 2px;
+  margin: 0 0 16px;
+  color: #d4b28e;
+}
+.fire-eyebrow i,
+.fire-scene-label i {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #dca166;
+  margin-right: 10px;
+}
+.fire-intro h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(42px, 4.3vw, 66px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin: 0;
+}
+.fire-intro h1 em {
+  font-weight: 400;
+  color: #dbb48c;
+}
+.fire-intro > p {
+  color: #a8aca3;
+  font-size: 13px;
+  line-height: 1.9;
+  margin: 0 2px 6px;
+}
+.fire-stage {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid #d8c9aa20;
+  border-radius: 7px;
+  overflow: hidden;
+  background: #111820;
+}
+.fire-world {
+  height: 590px;
+  width: 100%;
+}
+.fire-world canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.fire-scene-label {
+  position: absolute;
+  top: 24px;
+  left: 26px;
+  right: 26px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  color: #bdc0b5;
+}
+.fire-scene-label span:last-child {
+  margin-right: 280px;
+  color: #b1b5ac80;
+}
+.fire-perspective {
+  position: absolute;
+  bottom: 23px;
+  left: 26px;
+  pointer-events: none;
+  font-size: 8px;
+  letter-spacing: 1.3px;
+  color: #b3b8ae;
+}
+.fire-settings {
+  position: absolute;
+  right: 22px;
+  top: 72px;
+  bottom: auto;
+  width: 246px;
+  padding: 24px 22px;
+  background: #1b201fda;
+  backdrop-filter: blur(18px);
+  border: 1px solid #ded5c31c;
+  border-radius: 5px;
+}
+.fire-panel-title {
+  display: flex;
+  justify-content: space-between;
+  color: #b9b7a7;
+  font-size: 9px;
+  letter-spacing: 1.35px;
+  border-bottom: 1px solid #e6dec31a;
+  padding-bottom: 17px;
+}
+.fire-panel-title > span:last-child {
+  color: #cfac81;
+  font-size: 15px;
+}
+.fire-readout {
+  padding: 20px 0 17px;
+}
+.fire-readout > span {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 22px;
+  color: #e1c2a0;
+}
+.fire-readout small {
+  display: block;
+  margin-top: 7px;
+  color: #8b968c;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+.fire-settings button {
+  width: 100%;
+  border-radius: 3px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11px;
+  min-height: 39px;
+  padding: 9px 12px;
+}
+.fire-primary {
+  background: #dcb185;
+  color: #28251e;
+  border: 1px solid #e4bf98;
+}
+.fire-primary:hover:not(:disabled) {
+  background: #edc49b;
+}
+.fire-primary kbd {
+  margin-left: auto;
+  font: 9px inherit;
+  border: 1px solid #2e2b2240;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+.fire-secondary {
+  background: transparent;
+  border: 1px solid #b6b6a430;
+  color: #cfccb9;
+  margin-top: 8px;
+}
+.fire-settings label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #b5b9ae;
+  margin: 25px 0 9px;
+}
+.fire-settings output {
+  color: #dec19d;
+  font-size: 10px;
+}
+.fire-settings input {
+  width: 100%;
+  accent-color: #d4a97a;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+}
+.fire-range {
+  display: flex;
+  justify-content: space-between;
+  color: #7f8a80;
+  font-size: 8px;
+  margin-top: 5px;
+}
+.fire-note {
+  font-family: Georgia, serif;
+  font-style: italic;
+  color: #a4ac9e;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 22px 0 17px;
+}
+.fire-settings .fire-option {
+  padding: 7px 0;
+  min-height: 30px;
+  font-size: 10px;
+  color: #9ca697;
+  border: 0;
+  background: transparent;
+}
+.fire-option[aria-pressed='true'] {
+  color: #e4b888;
+}
+.fire-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 23px 0;
+}
+.fire-bottom > p {
+  position: relative;
+  font-family: Georgia, serif;
+  font-size: 17px;
+  margin: 0;
+  padding-left: 42px;
+  color: #d4d2c5;
+}
+.fire-bottom small {
+  display: block;
+  font-family: 'Segoe UI', sans-serif;
+  color: #879286;
+  font-size: 10px;
+  margin-top: 5px;
+}
+.fire-small-flame {
+  position: absolute;
+  left: 0;
+  top: 3px;
+  color: #c5a178;
+  font-size: 27px;
+}
+.fire-toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid #dad6c027;
+  border-radius: 30px;
+  padding: 4px 15px;
+}
+.fire-toolbar button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: transparent;
+  color: #d1d4c5;
+  border: 0;
+  padding: 10px;
+  font-size: 12px;
+}
+.fire-toolbar > i {
+  width: 1px;
+  height: 18px;
+  background: #d5d5ba26;
+}
+.fire-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #9dada0;
+}
+.fire-status i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d3a472;
+  box-shadow: 0 0 8px #d7a06166;
+}
+.fire-status i.is-still {
+  background: #7c887d;
+  box-shadow: none;
+}
+.fire-notice {
+  font-size: 12px;
+  color: #e7b18d;
+}
+.fire-notice:empty {
+  display: none;
+}
+.fire-footer {
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: 21px 0 24px;
+  border-top: 1px solid #e0d9be1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #7e897d;
+  font-size: 10px;
+}
+.fire-footer em {
+  color: #b4b7a5;
+}
+.fire-footer > span:last-child {
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.fire-footer b {
+  font-size: 24px;
+  margin-left: 24px;
+  color: #d2ad7e;
+  vertical-align: middle;
+}
+.fire-error {
+  padding: 100px 30px;
+  max-width: 550px;
+  color: #e8bd96;
+}
+@media (min-width: 1400px) {
+  .fire-world {
+    height: 620px;
+  }
+}
+@media (max-width: 1200px) {
+  .fire-edition {
+    display: none;
+  }
+  .fire-header {
+    grid-template-columns: auto 1fr;
+  }
+  .fire-header .level-nav {
+    justify-self: end;
+  }
+  .fire-world {
+    height: 570px;
+  }
+  .fire-settings {
+    width: 225px;
+    right: 16px;
+    padding: 20px 18px;
+  }
+  .fire-scene-label span:last-child {
+    margin-right: 250px;
+  }
+  .fire-status {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .fire-app {
+    padding: 0 20px;
+  }
+  .fire-header {
+    grid-template-columns: 1fr auto;
+  }
+  .fire-header .level-nav {
+    justify-self: center;
+  }
+  .fire-brand {
+    font-size: 22px;
+  }
+  .fire-app .level-nav a {
+    padding-inline: 10px;
+  }
+  .fire-intro {
+    padding: 28px 0 25px;
+    display: block;
+  }
+  .fire-intro h1 {
+    font-size: 46px;
+  }
+  .fire-intro > p {
+    font-size: 11px;
+    margin: 16px 0 0;
+    line-height: 1.7;
+  }
+  .fire-eyebrow {
+    font-size: 8px;
+    margin-bottom: 15px;
+  }
+  .fire-world {
+    height: 420px;
+  }
+  .fire-scene-label {
+    left: 17px;
+    right: 17px;
+    top: 18px;
+    font-size: 7px;
+  }
+  .fire-scene-label span:last-child {
+    margin-right: 0;
+    font-size: 6px;
+  }
+  .fire-perspective {
+    top: 393px;
+    bottom: auto;
+    left: 17px;
+    font-size: 6px;
+    letter-spacing: 0.7px;
+  }
+  .fire-settings {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: auto;
+    border: 0;
+    border-top: 1px solid #ded5c31c;
+    border-radius: 0;
+    padding: 23px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 12px;
+    background: #1d2220;
+    backdrop-filter: none;
+  }
+  .fire-panel-title,
+  .fire-readout,
+  .fire-settings label,
+  .fire-settings input,
+  .fire-range {
+    grid-column: 1/-1;
+  }
+  .fire-readout {
+    padding: 15px 0;
+  }
+  .fire-readout > span {
+    font-size: 24px;
+  }
+  .fire-secondary {
+    margin: 0;
+  }
+  .fire-note {
+    display: none;
+  }
+  .fire-settings .fire-option {
+    margin-top: 17px;
+    font-size: 9px;
+  }
+  .fire-settings label {
+    margin-top: 22px;
+  }
+  .fire-bottom {
+    flex-direction: column;
+    gap: 20px;
+    padding: 22px 0;
+  }
+  .fire-bottom > p {
+    align-self: flex-start;
+    font-size: 16px;
+  }
+  .fire-toolbar {
+    width: 100%;
+    justify-content: center;
+  }
+  .fire-footer {
+    gap: 15px;
+  }
+  .fire-footer > span:last-child {
+    font-size: 0;
+  }
+  .fire-footer b {
+    font-size: 25px;
+    margin: 0;
+  }
+}

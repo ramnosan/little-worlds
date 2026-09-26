@@ -1,0 +1,582 @@
+@import '../style.css';
+
+.bubble-app {
+  color: #f6f1df;
+  background: #263c33;
+  min-height: 100svh;
+  font-weight: 400;
+}
+#bubble-world {
+  position: absolute;
+  inset: 0;
+}
+#bubble-world canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+}
+.scene-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, #172f2ae8 0%, #20362caa 24%, #20352b15 55%, transparent 80%),
+    linear-gradient(0deg, #182e2be0, transparent 25%, transparent 85%, #20352b60);
+}
+.bubble-header {
+  z-index: 2;
+  border-bottom: 1px solid #f4edcf26;
+}
+.bubble-brand {
+  display: flex;
+  align-items: center;
+  font-size: 27px;
+  letter-spacing: -1.3px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.bubble-brand > span:not(.brand-orbit) {
+  font-weight: 350;
+}
+.bubble-brand .brand-orbit {
+  font-size: 47px;
+  margin-right: 13px;
+  line-height: 1;
+  font-weight: 300;
+}
+.bubble-brand sup {
+  font-size: 9px;
+  margin-left: 4px;
+  align-self: flex-start;
+  padding-top: 12px;
+}
+.header-note {
+  margin-left: auto;
+  font-size: 8px;
+  letter-spacing: 1.8px;
+  opacity: 0.55;
+}
+.bubble-main {
+  position: relative;
+  height: calc(100svh - 158px);
+  min-height: 650px;
+  pointer-events: none;
+}
+.bubble-main button,
+.bubble-main input {
+  pointer-events: auto;
+}
+.bubble-app button {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.bubble-intro {
+  position: absolute;
+  left: 64px;
+  top: 63px;
+  width: 325px;
+}
+.bubble-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 9px;
+  letter-spacing: 2.1px;
+  color: #e4dfbe;
+}
+.bubble-eyebrow > span {
+  width: 23px;
+  height: 1px;
+  background: #e5d8a0;
+}
+.bubble-intro h1 {
+  font:
+    400 62px/1.05 Georgia,
+    'Times New Roman',
+    serif;
+  letter-spacing: -2.8px;
+  margin: 25px 0 20px;
+}
+.bubble-intro h1 em {
+  color: #e6d5a3;
+  font-weight: 400;
+  display: block;
+}
+.bubble-intro > p {
+  font-size: 13px;
+  color: #d3dac9b0;
+  line-height: 1.9;
+}
+.bubble-goal {
+  margin-top: 42px;
+  border-top: 1px solid #f4ebcd30;
+  padding-top: 22px;
+  width: 265px;
+}
+.goal-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 1.7px;
+  color: #dedfc2ab;
+}
+#goal-count {
+  letter-spacing: 1px;
+  color: #eee5c8;
+  font-variant-numeric: tabular-nums;
+}
+.bubble-goal p {
+  font-size: 14px;
+  margin-top: 13px;
+}
+.goal-track {
+  height: 3px;
+  border-radius: 5px;
+  background: #edf0d526;
+  margin-top: 17px;
+  overflow: hidden;
+}
+#goal-fill {
+  height: 100%;
+  width: 0;
+  background: #dfd3a3;
+  transition: width 0.5s;
+}
+#goal-message {
+  display: block;
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.6;
+  color: #d5dbc398;
+}
+.bubble-settings {
+  margin-top: 33px;
+  width: 265px;
+}
+.bubble-settings label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+.bubble-settings output {
+  font-size: 10px;
+  color: #d7dabb9c;
+}
+.bubble-settings input {
+  width: 100%;
+  margin: 17px 0 10px;
+  accent-color: #e2d6ac;
+  height: 3px;
+  cursor: pointer;
+  background: #e0e3ce3d;
+}
+.bubble-settings input::-webkit-slider-thumb {
+  background: #e2d6ac;
+  border-color: #e2d6ac;
+}
+.wind-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #d7dabb6e;
+}
+.text-button {
+  padding: 0;
+  margin-top: 23px;
+  font-size: 10px;
+  background: transparent;
+  color: #dedfc4a6;
+}
+.text-button[aria-pressed='true'] {
+  color: #fff6d8;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.scene-caption {
+  position: absolute;
+  right: 48px;
+  top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #fcf4d8ad;
+}
+.caption-line {
+  height: 1px;
+  width: 24px;
+  background: #fff4;
+  margin: 0 2px;
+}
+.live-light {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #dbdfb2;
+  box-shadow: 0 0 9px #ebefb750;
+  display: inline-block;
+}
+.blow-controls {
+  position: absolute;
+  bottom: 96px;
+  left: calc(50% + 130px);
+  transform: translateX(-50%);
+  text-align: center;
+  width: 370px;
+}
+.blow-hint {
+  font-size: 11px;
+  color: #e5e4cbbe;
+  margin-bottom: 18px;
+  letter-spacing: 0.2px;
+}
+#blow {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  height: 65px;
+  border-radius: 40px;
+  background: #f6f0da;
+  color: #2e493e;
+  box-shadow:
+    0 8px 35px #091e2838,
+    inset 0 1px 0 #fff;
+  user-select: none;
+  touch-action: none;
+}
+#blow:hover {
+  background: #fff9e5;
+  box-shadow:
+    0 8px 38px #091e2850,
+    0 0 0 5px #fff2;
+}
+#blow.is-blowing {
+  box-shadow: 0 0 0 7px #f4ecca18;
+}
+#blow-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+#blow kbd {
+  font:
+    8px 'Segoe UI',
+    sans-serif;
+  letter-spacing: 1px;
+  border: 1px solid #39514230;
+  border-radius: 4px;
+  padding: 5px;
+  color: #617465;
+}
+.blow-icon {
+  font-size: 32px;
+  line-height: 1;
+  position: relative;
+  width: 30px;
+  font-family: Georgia, serif;
+}
+.blow-icon i {
+  position: absolute;
+  font-style: normal;
+  right: -7px;
+  top: -9px;
+}
+#blow-meter {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: #87ac7133;
+  z-index: -1;
+}
+.blow-controls p {
+  font-size: 9px;
+  color: #d4dcc191;
+  margin-top: 13px;
+}
+.bubble-toolbar {
+  position: absolute;
+  bottom: 25px;
+  left: calc(50% + 130px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 19px;
+}
+.bubble-toolbar button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  background: transparent;
+  color: #ecedd5c7;
+  padding: 8px 0;
+  white-space: nowrap;
+}
+.bubble-toolbar button span {
+  font-size: 10px;
+}
+.bubble-toolbar #bubble-darts[aria-pressed='true'] {
+  color: #ffe1a0;
+  text-shadow: 0 0 15px #ffde9950;
+}
+#dart-count {
+  color: #ffe1a0;
+}
+@media (max-width: 760px) {
+  .bubble-toolbar {
+    gap: 12px;
+  }
+  .bubble-toolbar button {
+    gap: 5px;
+  }
+  .bubble-toolbar button span {
+    font-size: 9px;
+  }
+}
+.bubble-toolbar > span {
+  width: 1px;
+  height: 12px;
+  background: #fff3;
+}
+.bubble-status {
+  position: absolute;
+  bottom: 34px;
+  left: 64px;
+  font-size: 10px;
+  color: #d6dbc4a1;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.bubble-notice {
+  position: absolute;
+  bottom: 215px;
+  left: calc(50% + 130px);
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #fff4d1;
+  text-align: center;
+  width: min(340px, 90vw);
+}
+.bubble-footer {
+  position: relative;
+  height: 58px;
+  margin: 0 48px;
+  border-top: 1px solid #f4edcf26;
+  color: #d1d8bd7d;
+  font-size: 10px;
+}
+.bubble-footer em {
+  font-family: Georgia, serif;
+  color: #e2dfbbbe;
+  font-size: 12px;
+}
+.bubble-footer > span:last-child {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.bubble-footer > span:last-child > span {
+  font-size: 25px;
+  color: #e6ddb4;
+}
+.bubble-app button:focus-visible,
+.bubble-app a:focus-visible,
+.bubble-app input:focus-visible {
+  outline-color: #f7e0a4;
+}
+.bubble-error {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  width: 50%;
+  padding: 30px;
+  background: #243d34;
+  color: #fff5d7;
+  z-index: 5;
+  line-height: 1.7;
+}
+@media (max-height: 850px) and (min-width: 761px) {
+  .bubble-main {
+    min-height: 565px;
+  }
+  .bubble-intro {
+    top: 35px;
+  }
+  .bubble-intro h1 {
+    font-size: 53px;
+    margin: 18px 0;
+  }
+  .bubble-goal {
+    margin-top: 27px;
+  }
+  .bubble-settings {
+    margin-top: 24px;
+  }
+}
+@media (max-width: 1100px) {
+  .header-note {
+    display: none;
+  }
+  .bubble-intro {
+    left: 35px;
+    width: 270px;
+  }
+  .bubble-intro h1 {
+    font-size: 53px;
+  }
+  .bubble-goal,
+  .bubble-settings {
+    width: 235px;
+  }
+  .bubble-status {
+    left: 35px;
+  }
+  .bubble-footer {
+    margin: 0 30px;
+  }
+}
+@media (max-width: 760px) {
+  .bubble-brand {
+    font-size: 22px;
+  }
+  .bubble-brand .brand-orbit {
+    font-size: 34px;
+    margin-right: 7px;
+  }
+  .bubble-main {
+    height: calc(100svh - 172px);
+    min-height: 640px;
+  }
+  .bubble-intro {
+    top: 25px;
+    left: 25px;
+    width: calc(100% - 50px);
+  }
+  .bubble-eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.6px;
+  }
+  .bubble-intro h1 {
+    font-size: 40px;
+    letter-spacing: -1.5px;
+    line-height: 1.02;
+    margin: 16px 0 12px;
+  }
+  .bubble-intro h1 em {
+    display: inline;
+  }
+  .bubble-intro > p {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .bubble-goal {
+    margin-top: 22px;
+    padding-top: 15px;
+    width: 215px;
+  }
+  .bubble-goal p {
+    font-size: 12px;
+    margin-top: 9px;
+  }
+  .goal-track {
+    margin-top: 12px;
+  }
+  #goal-message {
+    font-size: 9px;
+    max-width: 215px;
+    margin-top: 9px;
+  }
+  .bubble-settings {
+    position: absolute;
+    top: 291px;
+    width: 125px;
+    margin: 0;
+  }
+  .bubble-settings label {
+    font-size: 10px;
+  }
+  .bubble-settings output {
+    display: none;
+  }
+  .bubble-settings input {
+    margin-top: 13px;
+  }
+  .text-button {
+    margin-top: 16px;
+    font-size: 9px;
+  }
+  .wind-labels {
+    font-size: 8px;
+  }
+  .scene-shade {
+    background:
+      linear-gradient(90deg, #172f2a99, transparent 80%),
+      linear-gradient(0deg, #182e2bf5, transparent 35%, #20352b22 60%, #20352b85);
+  }
+  .scene-caption {
+    display: none;
+  }
+  .blow-controls {
+    bottom: 82px;
+    left: 50%;
+    width: calc(100% - 50px);
+    max-width: 360px;
+  }
+  .blow-hint {
+    font-size: 10px;
+    margin-bottom: 12px;
+  }
+  #blow {
+    height: 57px;
+    gap: 12px;
+  }
+  #blow kbd {
+    display: none;
+  }
+  .bubble-toolbar {
+    left: 50%;
+    bottom: 25px;
+  }
+  .bubble-status {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 6px;
+    font-size: 8px;
+    white-space: nowrap;
+  }
+  .bubble-footer {
+    margin: 0 22px;
+    height: 46px;
+    font-size: 8px;
+  }
+  .bubble-footer > span:last-child {
+    font-size: 6px;
+    letter-spacing: 0.6px;
+    gap: 6px;
+    max-width: 125px;
+  }
+  .bubble-footer > span:last-child > span {
+    font-size: 21px;
+  }
+  .bubble-footer em {
+    font-size: 10px;
+  }
+  .bubble-notice {
+    bottom: 198px;
+    left: 50%;
+  }
+  .bubble-error {
+    left: 5%;
+    width: 90%;
+  }
+}
