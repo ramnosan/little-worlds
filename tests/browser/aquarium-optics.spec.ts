@@ -59,6 +59,23 @@ test('photon caustics follow waves, respond to object occlusion, and freeze exac
     window.aquariumOpticsFixture.measure(true, true, 0.92);
   });
   expect((await page.evaluate(() => window.aquariumOpticsFixture.snapshot())).volumeSlices).toBe(0);
+  const efficient = await page.evaluate(() => {
+    const f = window.aquariumOpticsFixture;
+    return {
+      flat: f.measure(),
+      waves: f.measure(true),
+      blocked: f.measure(false, true),
+      lamp: f.lampAlignment(),
+    };
+  });
+  expect(efficient.flat.mean).toBeGreaterThan(0.2);
+  expect(efficient.flat.deviation / efficient.flat.mean).toBeLessThan(0.08);
+  expect(efficient.waves.deviation).toBeGreaterThan(efficient.flat.deviation + 0.1);
+  expect(
+    efficient.blocked.pixels.filter((p, i) => p < efficient.flat.pixels[i] * 0.6).length,
+  ).toBeGreaterThan(20);
+  expect(efficient.lamp.center).toBeGreaterThan(0.2);
+  expect(efficient.lamp.center - efficient.lamp.ring).toBeGreaterThan(0.04);
   const [opaque, cutout] = await page.evaluate(() => window.aquariumOpticsFixture.finCoverage());
   expect(opaque).toBeGreaterThan(100);
   expect(cutout / opaque).toBeGreaterThan(0.4);
@@ -70,6 +87,11 @@ test('clock scrubbing, manual hold, resume and reset work while paused', async (
   const found = errors(page);
   await page.goto('/?level=aquarium');
   await expect(page.locator('#aq-time')).toBeVisible({ timeout: 20_000 });
+  await page.waitForFunction(
+    () => (window as any).__aquariumDebug?.().rendering.activeMode === 'high',
+    undefined,
+    { timeout: 60000 },
+  );
   await page.locator('#aq-pause').click();
   await page.locator('#aq-time').fill('1320');
   await expect(page.locator('#aq-time-value')).toHaveText('22:00');

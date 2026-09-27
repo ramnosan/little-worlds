@@ -1,8 +1,53 @@
 import type { en } from './en';
 
 export const de: { [Key in keyof typeof en]: string } = {
+  'aq.graphicsHigh': 'Grafik: Hohe Qualität',
+  'aq.graphicsEfficient': 'Grafik: Effizient',
   'aq.time': 'Tageszeit',
   'aq.cycle': 'Automatischer Wechsel',
+  'page.airplane': 'Modellflug · Little Worlds',
+  'Model Flight': 'Modellflug',
+  'flight.edition': 'KLEINES FLUGZEUG. WEITER HIMMEL.',
+  'flight.eyebrow': 'LEVEL 06 / MODELLFLUG',
+  'flight.title': 'Ein kleines Flugzeug.',
+  'flight.titleAccent': 'Ein weiter Himmel.',
+  'flight.intro':
+    'Die Füße im Gras. Die Flügel im Blick. Übernimm die Steuerung eines kleinen gelben Hochdeckers.',
+  'flight.field': 'Flugplatz im Grünen',
+  'flight.chaseView': 'Verfolgeransicht',
+  'flight.groundView': 'Bodenansicht',
+  'flight.chaseCaption': 'Verfolgerkamera · C: Ansicht wechseln',
+  'flight.shortcuts': 'LEERTASTE: PAUSE · R: NEU BEGINNEN · C: ANSICHT',
+  'flight.pilot': 'Fester Pilotenstand · Autozoom',
+  'flight.speed': 'Tempo',
+  'flight.height': 'Höhe',
+  'flight.throttle': 'Gas',
+  'flight.crashed': 'Eine harte Landung.',
+  'flight.crashHelp': 'Der Flug ist beendet. Zurück auf die Piste und noch einmal versuchen.',
+  'flight.restart': 'Zurück auf die Piste',
+  'flight.leftStick': 'Gas / Seitenruder',
+  'flight.rightStick': 'Höhen- / Querruder',
+  'flight.takeoff': 'Abheben',
+  'flight.takeoffHelp':
+    'Shift halten, um Gas zu geben. Auf der Piste Fahrt aufnehmen, dann mit S kurz die Nase anheben. Loslassen und fliegen lassen.',
+  'flight.controls': 'An der Steuerung',
+  'flight.controlsHelp':
+    'W / S drücken / ziehen · A / D rollen · Q / E Seitenruder · Shift / Strg mehr / weniger Gas. Kurz tippen für kleine Korrekturen, halten für mehr Ausschlag. Auf Touchscreens beide Knüppel nutzen. Die Gasstellung bleibt erhalten.',
+  'flight.landing': 'Heimkommen',
+  'flight.landingHelp':
+    'Mit Strg Gas reduzieren. Zur Piste ausrichten, sanft sinken und kurz vor dem Aufsetzen leicht ziehen. Zu langsam oder zu steil droht ein Strömungsabriss.',
+  'flight.footer': 'Ein wenig Geduld. Ein wenig Auftrieb.',
+  'flight.webgl': 'Modellflug benötigt WebGL 2. Hardwarebeschleunigung aktivieren und neu laden.',
+  'flight.canvas':
+    'Modellflugzeug. W/S Höhenruder, A/D Querruder, Q/E Seitenruder, Shift für mehr Gas, Strg für weniger Gas, C für die Ansicht.',
+  'flight.graphicsLost':
+    'Grafik unterbrochen. Verbindung wird wiederhergestellt; bei Bedarf die Seite neu laden.',
+  'flight.graphicsRestored':
+    'Grafik wiederhergestellt. Der Flug ist pausiert; bei Bereitschaft fortsetzen.',
+  'flight.paused': 'Flug pausiert',
+  'flight.ground': 'Auf der Piste / am Boden',
+  'flight.flying': 'Im Flug',
+  'flight.stalled': 'Strömungsabriss — Nase senken',
   Strawberry: 'Erdbeere',
   Peach: 'Pfirsich',
   Mint: 'Minze',

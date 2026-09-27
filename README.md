@@ -37,20 +37,32 @@ npm run preview     # Serve the production build locally
 npm run typecheck
 npm test            # Rendering-independent physics tests
 npm run test:browser # Chrome interaction, layout, touch, and resource tests
-npm run test:production # Build and check all five level layouts on desktop/mobile
+npm run test:production # Build and check all six level layouts on desktop/mobile
 ```
 
 The browser suite starts the development server if one is not running. It uses the locally installed Chrome channel, so a separate Playwright browser download is unnecessary. Screenshots and failure traces are written under `artifacts/`.
 
 The production layout check serves the optimized build under `/little-worlds/` and
-checks all five scenes at 1440px and 390px. It catches missing styles caused by
+checks all six scenes at 1440px and 390px. It catches missing styles caused by
 production chunk loading, which the development server cannot expose. Screenshots
 are saved in `artifacts/production-layout/`. Set `LAYOUT_TEST_URL` when running
 `node scripts/check-production-layout.mjs` to check a deployed site instead.
 
 ## Play
 
-All five levels support **English** and **German**. English is the default, regardless of your browser's language. Use **Language / Sprache** in the header to choose **English** or **Deutsch**. Changing language restarts the current level and remembers your choice for future visits and other levels. The game's Reset action keeps your language preference. If browser storage is blocked, the game defaults to English and explains why the selection cannot be saved.
+All six levels support **English** and **German**. English is the default, regardless of your browser's language. Use **Language / Sprache** in the header to choose **English** or **Deutsch**. Changing language restarts the current level and remembers your choice for future visits and other levels. The game's Reset action keeps your language preference. If browser storage is blocked, the game defaults to English and explains why the selection cannot be saved.
+
+### Level 06: Model Flight
+
+Open **06 · Model Flight** or `/?level=airplane`. Fly a yellow Piper-Cub-inspired electric RC high-wing airplane from a countryside runway. The crafted miniature setting includes patchwork fields, hedgerows, tree clusters, low distant hills and a timber clubhouse. Ground view starts at a fixed pilot position, 1.7 m above ground, with smooth panning and bounded automatic zoom. Use **Chase view / Ground view** or **C** to switch to a smooth camera behind and above the airplane with a level horizon. The camera shortens its distance around the clubhouse. Switching works while paused or crashed; reset keeps the selected perspective, while reloading starts in ground view. There is no automatic aircraft leveling.
+
+Keyboard inputs build progressively: tap for small corrections, hold for full travel. Control surfaces move with finite servo speed and a softer response around center; the motor spools up gradually. Airspeed affects control authority, ailerons weaken after a stall, and turns require banking with rudder coordination. Ground steering uses load-limited tire forces at the steerable tailwheel. Rotational dynamics include inertia coupling and adverse yaw; these remain tuned approximations. See [NASA on banking turns](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/banking-turns/) for the underlying behavior.
+
+Hold **Shift / Ctrl (Strg)** to increase / decrease throttle; throttle stays at its last setting. **A / D** operate ailerons, **S** pulls the nose up, **W** pushes down, and **Q / E** operate the rudder and tailwheel steering. Add power, gain speed, then briefly pull back to take off. Reduce power and approach gently for landing. Excessive angle of attack stalls the wings; lower the nose to recover. A hard gear impact or ground contact with the fuselage or wings ends the flight; use **Back to the runway** or **R** to restart.
+
+Touchscreens offer two simultaneous Mode 2 sticks: throttle/rudder on the left and elevator/ailerons on the right. **Space** pauses, **R** resets, and **Lighter graphics** reduces pixel density and disables shadows. Losing focus or hiding the tab pauses flight and clears held inputs; explicitly resume to continue. Shortcuts leave focused controls alone. English and German are supported. There is no wind, audio, score, mission or gamepad support in this version.
+
+The model and scenery are procedural. Lighter graphics hides small vegetation. Fields use the same flat ground contacts as the airfield; furnishings, distant vegetation and hills are decorative. A fixed 120 Hz simulation applies aerodynamic forces, body-axis torques and three wheel contacts; grass has higher rolling resistance. Parameters are tuned for RC play, not a calibrated flight simulator. Development-only read-only `window.__airplaneDebug()` snapshots report flight, camera and resource state; `&airplaneFixture=near`, `far`, `overhead` and `crash` provide reproducible validation scenes. Fixtures and diagnostics are absent from production.
 
 ### Level 05: Lagerfeuer
 
@@ -64,9 +76,9 @@ Development builds expose read-only `window.__fireDebug()` snapshots. Reproducib
 
 ### Level 04: Modelleisenbahn
 
-Open **04 · Modelleisenbahn** in any level's navigation, or visit `/?level=railway`. A tabletop scale model holds the Alpine village of Kleinwald: textured grassy hills, rocky cuttings, dense conifers, timber-and-plaster houses, a station, and a steel road bridge. A red electric locomotive and two passenger carriages circle on an oval railway with a parallel scenic track and overhead contact wires. Their wheel axles follow the same track path as the rails.
+Open **04 · Modelleisenbahn** in any level's navigation, or visit `/?level=railway`. A tabletop scale model holds the Alpine village of Kleinwald: layered mountain ridges, rocky cuttings, dense miniature conifers, timber-and-plaster houses, a station, and a valley railway bridge. A red electric locomotive and two passenger carriages travel along a winding mountain railway with gentle gradients, a parallel scenic track and overhead contact wires. The train, buildings and track details are one third of their original size on the same tabletop. Two open mountain tunnels have stone portals, interior vaults and warm lamps; the locomotive has a working headlight and the passenger windows glow. Their wheel axles follow the same track path as the rails.
 
-Drag with either mouse button to orbit and scroll to zoom. On touchscreens, drag to orbit and pinch to zoom. Set speed from 0–200%; 100% completes a circuit in 25 seconds. **Space** pauses and **R** resets the train, speed, camera, and graphics. Camera controls remain available while paused, and shortcuts leave focused controls alone. Lighter graphics reduces pixel density, disables real-time shadows, and hides small gravel and scrub details. Hidden tabs suspend the scene without catching up when restored.
+Drag with either mouse button to orbit and scroll to zoom. On touchscreens, drag to orbit and pinch to zoom. Set speed from 0–200%; 100% completes a circuit in 75 seconds. **Space** pauses and **R** resets the train, speed, camera, and graphics. Camera controls remain available while paused, and shortcuts leave focused controls alone. Lighter graphics reduces pixel density, disables real-time shadows, and hides small gravel and scrub details. Hidden tabs suspend the scene without catching up when restored.
 
 The fixed layout, surface textures, and models are generated locally with Three.js, without new dependencies or downloaded assets. Static scenery is batched by material; trees, rock, sleepers, and small scenery use instancing. This is a scenic model railway, with no track editing, objectives, or audio. Development builds expose read-only `window.__railwayDebug()` snapshots. Unit tests cover path continuity, rail gauge, terrain clearance, carriage spacing, frame-rate independence, speed, pause, and reset; browser checks cover controls, navigation, touch, responsive layouts, and GPU resource stability.
 
@@ -76,7 +88,7 @@ Open **Level 03 · Aquarium** in either level's navigation, or visit `/?level=aq
 
 Adjust wave strength and damping, toggle the wave maker, or drop up to six buoyant balls. **Space** pauses, **N** adds a ball, and **R** resets. The ripple button is keyboard accessible. Pause freezes the simulation and lighting animation; reset restores the initial scene and camera. Lighter graphics lowers pixel density. The level is lazy-loaded and its koi assets are served locally.
 
-The water keeps its deterministic 120 Hz CPU height-field solver. A shared GPU surface drives refracted light, animated koi intersections, glass/water refraction, depth absorption and underwater beams. High quality adds a 24-slice light volume, dispersion, temporal filtering and restrained bloom; lighter graphics retains refraction and floor caustics. Devices without the required floating-point targets use the original raster renderer.
+The water keeps its deterministic 120 Hz CPU height-field solver. **Graphics: High quality / Efficient** switches rendering modes and remembers your choice. High quality is the first-visit default, with traced refraction, animated koi intersections, underwater beams, dispersion and restrained bloom. Efficient mode renders at 30 fps with clear animated fish, shared surface waves, planar reflections, ripple-driven caustics and shadows; it performs no mesh tracing or volume rendering. Reflection, caustic and shadow updates run at 15 Hz. Reset preserves your graphics selection. Devices without the required floating-point targets use the efficient raster fallback.
 
 An eight-minute day–night cycle starts at 15:00. A moving sun gives way to one warm overhead lamp; the backdrop follows daylight, sunset and night. **Time of day** switches to manual lighting, and **Automatic cycle** resumes from that time. Pause freezes water and the cycle while allowing manual lighting changes. Reset restores afternoon and automatic cycling. See [optics architecture, limitations and validation](docs/aquarium-optics.md). Development builds provide read-only `window.__aquariumDebug()` snapshots with lighting and rendering-pass information.
 

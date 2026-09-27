@@ -3,14 +3,14 @@
 :root {
   font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
   color: #35483b;
-  background: #f6f5ef;
+  background: #a6b6a8;
   font-synthesis: none;
   font-weight: 400;
   --ink: #35483b;
-  --muted: #92968a;
-  --line: #e5e6dc;
+  --muted: #45594b;
+  --line: #899e8b;
   --green: #385c47;
-  --paper: #f6f5ef;
+  --paper: #a6b6a8;
 }
 * {
   box-sizing: border-box;
@@ -105,7 +105,7 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #7b8275;
+  color: #45594b;
 }
 .tiny-dot {
   width: 6px;
@@ -151,7 +151,7 @@ button {
   padding: 10px 0;
 }
 .help-button:hover {
-  color: #779675;
+  color: #45594b;
 }
 main {
   position: relative;
@@ -173,7 +173,7 @@ main {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #87907e;
+  color: #45594b;
 }
 .line {
   width: 23px;
@@ -190,11 +190,11 @@ h1 {
 }
 h1 em {
   font-weight: 400;
-  color: #7a8e6b;
+  color: #45594b;
 }
 .intro p {
   font-size: 12px;
-  color: #909489;
+  color: #45594b;
   margin-top: 11px;
   letter-spacing: 0.1px;
 }
@@ -203,7 +203,7 @@ h1 em {
   left: 40px;
   top: 40px;
   width: 257px;
-  background: rgba(255, 255, 250, 0.63);
+  background: #bcc8b9e8;
   border: 1px solid #e3e5d9;
   border-radius: 17px;
   z-index: 4;
@@ -245,7 +245,7 @@ h1 em {
 .control-label span:not(:first-child),
 .control-label output {
   font-size: 10px;
-  color: #899080;
+  color: #45594b;
 }
 .swatches {
   display: flex;
@@ -307,7 +307,7 @@ h1 em {
   padding: 9px 5px;
   flex: 1;
   border-radius: 5px;
-  color: #8d9387;
+  color: #45594b;
 }
 .size-button.active {
   color: #4e6148;
@@ -350,7 +350,7 @@ h1 em {
 }
 .spawn-button kbd {
   margin-left: auto;
-  color: #bdcab7;
+  color: #45594b;
   border: 1px solid #71856e;
   padding: 1px 5px;
   border-radius: 3px;
@@ -366,7 +366,7 @@ h1 em {
   font-size: 8px;
   font-weight: 600;
   letter-spacing: 1.7px;
-  color: #a0a492;
+  color: #45594b;
   margin-bottom: 23px;
 }
 .physics-section .control-label {
@@ -404,7 +404,7 @@ h1 em {
   margin: 9px 0 0;
   font-size: 10px;
   line-height: 1.5;
-  color: #818976;
+  color: #45594b;
 }
 .physics-section .control-label output {
   color: #708465;
@@ -444,7 +444,7 @@ h1 em {
   display: flex;
   justify-content: space-between;
   font-size: 9px;
-  color: #9b9f91;
+  color: #45594b;
 }
 .gravity-label {
   margin-top: 25px;
@@ -456,7 +456,7 @@ h1 em {
   border-top: 1px solid var(--line);
   padding: 16px 21px;
   font-size: 10px;
-  color: #8b9281;
+  color: #45594b;
 }
 .quality-row > span {
   display: flex;
@@ -526,7 +526,7 @@ h1 em {
   gap: 7px;
   font-size: 8px;
   letter-spacing: 1.1px;
-  color: #929b84;
+  color: #45594b;
 }
 .scene-pill .tiny-dot {
   height: 4px;
@@ -537,7 +537,7 @@ h1 em {
   font-family: monospace;
   font-size: 9px;
   letter-spacing: 1.1px;
-  color: #aeb3a1;
+  color: #45594b;
 }
 .grab-hint {
   position: absolute;
@@ -548,7 +548,7 @@ h1 em {
   display: flex;
   gap: 8px;
   align-items: center;
-  color: #849177;
+  color: #45594b;
   pointer-events: none;
   white-space: nowrap;
   transition: opacity 0.35s;
@@ -568,7 +568,7 @@ h1 em {
   align-items: center;
   gap: 8px;
   font-size: 9px;
-  color: #8c9580;
+  color: #45594b;
   white-space: nowrap;
 }
 .scene-status .tiny-dot {
@@ -581,7 +581,7 @@ h1 em {
 }
 .status-divider {
   margin: 0 2px;
-  color: #c2c8b7;
+  color: #45594b;
 }
 .performance {
   font-family: monospace;
@@ -600,7 +600,7 @@ h1 em {
   display: flex;
   align-items: center;
   padding: 0 10px;
-  background: #fffffacf;
+  background: #bcc8b9ed;
   border: 1px solid #e0e4d5;
   border-radius: 12px;
   box-shadow: 0 5px 16px #42512808;
@@ -625,7 +625,7 @@ h1 em {
 }
 .tool-button kbd {
   font-size: 8px;
-  color: #a2aa95;
+  color: #45594b;
   border: 1px solid #e5e8dd;
   border-radius: 3px;
   padding: 2px 4px;
@@ -645,7 +645,7 @@ h1 em {
   display: flex;
   gap: 24px;
   white-space: nowrap;
-  color: #929c85;
+  color: #45594b;
   font-size: 9px;
 }
 .interaction-guide span {
@@ -686,7 +686,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #939987;
+  color: #45594b;
   font-size: 10px;
   position: relative;
 }
@@ -718,7 +718,7 @@ dialog {
   max-width: calc(100vw - 32px);
   border: 1px solid #e2e7d7;
   border-radius: 20px;
-  background: #fafbf4;
+  background: #bcc8b9;
   color: var(--ink);
   box-shadow: 0 30px 100px #21392725;
 }
@@ -739,12 +739,12 @@ dialog h2 {
   margin: 23px 0 17px;
 }
 dialog h2 em {
-  color: #7a8e6b;
+  color: #45594b;
 }
 dialog p {
   font-size: 12px;
   line-height: 1.7;
-  color: #8a927e;
+  color: #45594b;
 }
 dialog ul {
   list-style: none;
@@ -758,7 +758,7 @@ dialog li {
   margin: 19px 0;
   font-size: 11px;
   line-height: 1.6;
-  color: #86907d;
+  color: #45594b;
 }
 dialog li svg {
   flex-shrink: 0;
@@ -776,11 +776,11 @@ dialog strong {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 9px;
-  color: #89947d;
+  color: #45594b;
 }
 .help-shortcuts kbd {
   border: 1px solid #dce3d0;
-  background: #f1f4e9;
+  background: #b1c1ad;
   padding: 2px 4px;
   border-radius: 4px;
   margin-right: 3px;
@@ -948,7 +948,7 @@ dialog strong {
     z-index: 3;
     align-items: center;
     gap: 7px;
-    background: #fdfef6;
+    background: #bcc8b9;
     border: 1px solid #dfe4d3;
     border-radius: 8px;
     font-size: 11px;
@@ -965,7 +965,7 @@ dialog strong {
     width: 257px;
     max-height: calc(100% - 245px);
     overflow-y: auto;
-    background: #fcfdf7;
+    background: #bcc8b9;
     box-shadow: 0 12px 45px #34492c20;
   }
   .settings.open {

@@ -42,8 +42,9 @@ test('reflection clips submerged geometry per fragment and tracks above-water ob
     expect(result.crossing.count).toBeLessThan(result.above.count * 0.85);
     // The reflected camera's up vector is mirrored, reversing texture-space X.
     expect(result.left.centerX - result.right.centerX).toBeGreaterThan(15);
-    expect(result.above.width).toBe(low ? 400 : 650);
-    expect(result.above.height).toBe(low ? 300 : 488);
+    // A capability fallback always uses the efficient reflection budget.
+    expect(result.above.width).toBe(400);
+    expect(result.above.height).toBe(300);
   }
   await page.evaluate(() => window.reflectionFixture.dispose());
   expect(errors).toEqual([]);

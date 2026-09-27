@@ -2,7 +2,7 @@
 
 :root {
   font-synthesis: none;
-  background: #f5f2e9;
+  background: #a6af98;
 }
 body {
   margin: 0;
@@ -11,9 +11,9 @@ body {
 
 .railway-app {
   --ink: #344a3c;
-  --muted: #7c806e;
+  --muted: #48533e;
   color: var(--ink);
-  background: #f5f2e9;
+  background: #a6af98;
   min-height: 100dvh;
   padding: 0 4.5%;
   font-family: Arial, Helvetica, sans-serif;
@@ -89,7 +89,7 @@ body {
   margin: 0;
 }
 .rw-intro h1 em {
-  color: #7b8b60;
+  color: #4b633e;
   font-weight: 400;
 }
 .rw-intro > p:last-child {
@@ -115,7 +115,7 @@ body {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 65%, #d8d4c8 0%, #ece8df66 48%, #f5f2e900 72%);
+  background: radial-gradient(ellipse at 50% 65%, #89967c 0%, #96a28766 48%, #a6af9800 72%);
 }
 .rw-scene canvas {
   display: block;
@@ -131,7 +131,7 @@ body {
   margin-top: -18px;
   position: relative;
   pointer-events: none;
-  color: #878977;
+  color: #48533e;
   font-size: 8px;
   letter-spacing: 1.8px;
 }
@@ -139,7 +139,7 @@ body {
   border: 1px solid #dcded0;
   border-radius: 14px;
   padding: 25px 23px;
-  background: #faf8f0dd;
+  background: #bdc5ace8;
   margin-top: 25px;
 }
 .rw-panel-title {
@@ -163,7 +163,7 @@ body {
   display: block;
   font-size: 8px;
   letter-spacing: 2px;
-  color: #939781;
+  color: #48533e;
   margin-bottom: 12px;
 }
 .rw-ticket strong {
@@ -191,7 +191,7 @@ body {
   margin-bottom: 16px;
 }
 .rw-settings output {
-  color: #859071;
+  color: #48533e;
   font-size: 10px;
 }
 .rw-settings input {
@@ -204,7 +204,7 @@ body {
 .rw-range-labels {
   display: flex;
   justify-content: space-between;
-  color: #909581;
+  color: #48533e;
   font-size: 8px;
   margin-top: 6px;
 }
@@ -212,7 +212,7 @@ body {
   font:
     italic 15px/1.65 Georgia,
     serif;
-  color: #92967e;
+  color: #48533e;
   margin: 27px 0;
 }
 .railway-app button {
@@ -264,14 +264,14 @@ body {
   font:
     9px/1.6 Arial,
     sans-serif;
-  color: #868c77;
+  color: #48533e;
   margin-top: 6px;
   max-width: 245px;
 }
 .rw-toolbar {
   display: flex;
   border: 1px solid #d5dac7;
-  background: #fffdf6;
+  background: #bdc5ac;
   border-radius: 40px;
   box-shadow: 0 5px 18px #68784f0b;
   padding: 6px;
@@ -304,7 +304,7 @@ body {
   align-items: center;
   gap: 7px;
   font-size: 9px;
-  color: #81896f;
+  color: #48533e;
 }
 #rw-live {
   width: 5px;
@@ -321,7 +321,7 @@ body {
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  color: #8b8e7b;
+  color: #48533e;
   font-size: 10px;
 }
 .rw-footer em {

@@ -2,13 +2,18 @@ import { initializeLanguage } from './i18n';
 
 const level = new URLSearchParams(location.search).get('level');
 initializeLanguage(
-  level === 'fire' || level === 'railway' || level === 'aquarium' || level === 'bubbles'
+  level === 'airplane' ||
+    level === 'fire' ||
+    level === 'railway' ||
+    level === 'aquarium' ||
+    level === 'bubbles'
     ? level
     : 'jelly',
 );
 // Keep each import in its own loader so production optimization cannot combine
 // the branches and associate every level with the default level's CSS preload.
 const loadLevel = {
+  airplane: () => import('./airplane/level'),
   fire: () => import('./fire/level'),
   railway: () => import('./railway/level'),
   aquarium: () => import('./aquarium/level'),
@@ -17,7 +22,11 @@ const loadLevel = {
 };
 
 const selectedLevel =
-  level === 'fire' || level === 'railway' || level === 'aquarium' || level === 'bubbles'
+  level === 'airplane' ||
+  level === 'fire' ||
+  level === 'railway' ||
+  level === 'aquarium' ||
+  level === 'bubbles'
     ? level
     : 'jelly';
 void loadLevel[selectedLevel]();

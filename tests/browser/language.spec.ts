@@ -2,6 +2,14 @@ import { test, expect, type Page } from '@playwright/test';
 
 const levels = [
   {
+    id: 'airplane',
+    title: ['Model Flight · Little Worlds', 'Modellflug · Little Worlds'],
+    pause: '#flight-pause',
+    reset: '#flight-reset',
+    status: '#flight-status',
+    paused: ['Flight paused', 'Flug pausiert'],
+  },
+  {
     id: 'jelly',
     title: [
       'Little Worlds — A soft little space to play',
@@ -87,6 +95,14 @@ for (const [languageIndex, language] of ['en', 'de'].entries()) {
           await page.locator('#help-close').click();
         }
         if (level.id === 'aquarium') {
+          await expect(page.locator('#aq-quality')).toHaveText(
+            language === 'de' ? 'Grafik: Hohe Qualität' : 'Graphics: High quality',
+          );
+          await page.locator('#aq-quality').click();
+          await expect(page.locator('#aq-quality')).toHaveText(
+            language === 'de' ? 'Grafik: Effizient' : 'Graphics: Efficient',
+          );
+          await expect(page.locator('#aq-quality')).toHaveAttribute('aria-pressed', 'true');
           await expect(page.locator('label[for="aq-time"]')).toContainText(
             language === 'de' ? 'Tageszeit' : 'Time of day',
           );

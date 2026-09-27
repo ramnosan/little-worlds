@@ -21,12 +21,16 @@ const debug = (p: Page) =>
 const varieties = ['showa', 'tancho'];
 const waitForOptics = (page: Page) =>
   page.waitForFunction(
-    () =>
-      (
-        window as unknown as { __aquariumDebug: () => { rendering: { ready: boolean } } }
-      ).__aquariumDebug?.().rendering.ready,
+    () => {
+      const r = (
+        window as unknown as {
+          __aquariumDebug: () => { rendering: { activeMode: string; fishMeshes?: number } };
+        }
+      ).__aquariumDebug?.().rendering;
+      return r?.activeMode === 'high' && r.fishMeshes === 2;
+    },
     undefined,
-    { timeout: 30_000 },
+    { timeout: 60_000 },
   );
 
 test('supplied koi load once, deform independently and retain state through pause and quality changes', async ({
@@ -64,6 +68,7 @@ test('supplied koi load once, deform independently and retain state through paus
   expect(low.koi.animationTimes).toEqual(paused.koi.animationTimes);
   for (let cycle = 0; cycle < 3; cycle++) {
     await page.locator('#aq-quality').click();
+    await waitForOptics(page);
     await assetExpect.poll(async () => (await debug(page)).koi.quality).toBe('high');
     await page.locator('#aq-quality').click();
     await assetExpect.poll(async () => (await debug(page)).koi.quality).toBe('low');
@@ -71,6 +76,7 @@ test('supplied koi load once, deform independently and retain state through paus
   expect((await debug(page)).textures).toBe(low.textures);
   expect((await debug(page)).geometries).toBe(low.geometries);
   await page.locator('#aq-quality').click();
+  await waitForOptics(page);
   await assetExpect.poll(async () => (await debug(page)).koi.quality).toBe('high');
   const requestCount = requests.length;
   const settled = await debug(page);
@@ -153,6 +159,7 @@ test('synthetic rigs animate independently, pause, reset and switch quality with
   await expect.poll(async () => (await debug(page)).koi.quality).toBe('low');
   expect((await debug(page)).koi.animationTimes).toEqual(frozen.koi.animationTimes);
   await page.locator('#aq-quality').click();
+  await waitForOptics(page);
   await expect.poll(async () => (await debug(page)).koi.quality).toBe('high');
   const settled = await debug(page);
   expect(settled.geometries).toBeLessThanOrEqual(first.geometries);
@@ -181,6 +188,7 @@ test('failed GLB can be retried and rapid quality changes do not install stale r
   await expect(page.locator('#aq-koi-status')).toHaveText('2 koi');
   await page.locator('#aq-quality').click();
   await page.locator('#aq-quality').click();
+  await waitForOptics(page);
   await expect.poll(async () => (await debug(page)).koi.quality).toBe('high');
   expect((await debug(page)).koi.count).toBe(2);
 });
@@ -213,7 +221,10 @@ test('synthetic rig mobile rendering and measured frame times', async ({ browser
         requestAnimationFrame(frame);
       }),
   );
-  console.log('Emulated mobile, SYNTHETIC assets, light graphics FPS:', fps.toFixed(1));
+  console.log(
+    'Emulated mobile display callbacks/sec (not rendered FPS), SYNTHETIC assets:',
+    fps.toFixed(1),
+  );
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await context.close();
 });

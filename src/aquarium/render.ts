@@ -16,45 +16,30 @@ import {
 } from './lighting';
 import { AquariumSurface } from './surface-field';
 import { AquariumOptics } from './optics';
-
-const vertex = `varying vec3 vWorld; varying vec3 vNormal;
-void main(){ vec4 p=modelMatrix*vec4(position,1.); vWorld=p.xyz;
-vNormal=normalize(mat3(modelMatrix)*normal); gl_Position=projectionMatrix*viewMatrix*p; }`;
-const caustic = `
-uniform float time; uniform sampler2D heightMap;
-float lightPattern(vec2 p) {
-  vec2 uv=p/vec2(6.,3.6)+.5;
-  float h=texture2D(heightMap,clamp(uv,0.,1.)).r;
-  p *= 3.4;
-  p += vec2(sin(p.y*1.6+time*.7),cos(p.x*1.4-time*.6))*.45 + h*8.;
-  float a=sin(p.x+sin(p.y+time*.45));
-  float b=sin(p.y+cos(p.x-time*.37));
-  return pow(max(0.,1.-abs(a+b)*.65),14.)*.65;
-}`;
-// Sand remains visible directly through the transparent water.
-const sand = `
-float sandHash(vec2 p) {
-  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
-}
-float sandNoise(vec2 p) {
-  vec2 cell=floor(p), f=fract(p);
-  f=f*f*(3.-2.*f);
-  return mix(mix(sandHash(cell),sandHash(cell+vec2(1.,0.)),f.x),
-             mix(sandHash(cell+vec2(0.,1.)),sandHash(cell+vec2(1.,1.)),f.x),f.y);
-}
-vec3 sandColor(vec2 p) {
-  float patches=sandNoise(p*2.1);
-  float ripples=sin(p.y*24.+sin(p.x*2.8)*1.7+patches*2.);
-  float grain=sandNoise(p*155.);
-  float grainVisibility=1.-smoothstep(.35,1.5,max(fwidth(p.x),fwidth(p.y))*155.);
-  vec3 color=mix(vec3(.43,.31,.16),vec3(.72,.59,.37),.45+patches*.35);
-  color*=.96+ripples*.04+(grain-.5)*.24*grainVisibility;
-  return color;
-}`;
+import { AquariumGpuTiming } from './gpu-timing';
+import { EfficientCaustics, rasterWaterVertex } from './efficient';
+import { AquariumFrameSchedule, type AquariumMode } from './mode';
 
 export class AquariumRenderer {
   readonly lighting = new AquariumLighting();
-  readonly ready: Promise<void>;
+  private pending = Promise.resolve();
+  private preparations = new Set<Promise<void>>();
+  get ready() {
+    return this.pending;
+  }
+  mode: AquariumMode = 'high';
+  private generation = 0;
+  private disposed = false;
+  private supported = false;
+  private dirty = true;
+  private frames = 0;
+  private schedule = new AquariumFrameSchedule();
+  private lastEffects = -Infinity;
+  private lastState = '';
+  private efficient!: EfficientCaustics;
+  private cpuMs = 0;
+  private cpuTotalMs = 0;
+  private timing?: AquariumGpuTiming;
   readonly renderer = new T.WebGLRenderer({
     antialias: true,
     alpha: true,
@@ -69,8 +54,6 @@ export class AquariumRenderer {
   private sides = new T.Group();
   private ballMeshes = new Map<number, T.Mesh<T.SphereGeometry, T.MeshPhysicalMaterial>>();
   private environment: T.WebGLRenderTarget;
-  private heightTexture: T.DataTexture;
-  private timeUniform = { value: 0 };
   private observer: ResizeObserver;
   private raycaster = new T.Raycaster();
   private pointer = new T.Vector2();
@@ -83,7 +66,7 @@ export class AquariumRenderer {
   private floor!: T.Mesh;
   private sun = new T.DirectionalLight(0xffffff, 3);
   private fill = new T.HemisphereLight(0xd6e8ff, 0x162a30, 0.4);
-  private lamp = new T.PointLight(0xffbf7d, 0, 12, 2);
+  private lamp = new T.SpotLight(0xffbf7d, 0, 12, Math.acos(0.55), 0.5, 2);
   private lampEmitter!: T.Mesh<T.SphereGeometry, T.MeshBasicMaterial>;
   private lightingRevision = -1;
   private fallbackLight = { value: 1 };
@@ -91,11 +74,18 @@ export class AquariumRenderer {
   constructor(
     readonly container: HTMLElement,
     readonly world: AquariumWorld,
-    options: { forceRaster?: boolean } = {},
+    options: { forceRaster?: boolean; mode?: AquariumMode } = {},
   ) {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
     this.renderer.toneMapping = T.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.1;
+    this.supported = !options.forceRaster && AquariumOptics.supported(this.renderer);
+    if (this.supported) this.surface.enableGPU();
+    this.efficient = new EfficientCaustics(this.surface.texture, this.supported);
+    if (import.meta.env.DEV)
+      this.timing = new AquariumGpuTiming(this.renderer.getContext() as WebGL2RenderingContext);
+    this.renderer.shadowMap.type = T.PCFSoftShadowMap;
+    this.renderer.shadowMap.autoUpdate = false;
     const canvas = this.renderer.domElement;
     canvas.tabIndex = 0;
     canvas.setAttribute(
@@ -104,6 +94,9 @@ export class AquariumRenderer {
     );
     container.append(canvas);
     this.controls = new OrbitControls(this.camera, canvas);
+    this.controls.addEventListener('change', () => {
+      this.dirty = true;
+    });
     this.controls.enableDamping = true;
     this.controls.enablePan = false;
     this.controls.minDistance = 7;
@@ -126,6 +119,17 @@ export class AquariumRenderer {
     pmrem.dispose();
     this.scene.add(this.sun, this.fill, this.lamp);
     this.lamp.position.set(...LAMP_POSITION);
+    this.lamp.target.position.set(LAMP_POSITION[0], 0, LAMP_POSITION[2]);
+    this.scene.add(this.lamp.target);
+    for (const source of [this.sun, this.lamp]) {
+      source.shadow.mapSize.set(512, 512);
+      source.shadow.bias = -0.0003;
+      source.shadow.normalBias = 0.015;
+      source.shadow.camera.near = 0.1;
+      source.shadow.camera.far = 30;
+    }
+    Object.assign(this.sun.shadow.camera, { left: -4, right: 4, top: 3, bottom: -3 });
+    this.sun.shadow.camera.updateProjectionMatrix();
     this.lampEmitter = new T.Mesh(
       new T.SphereGeometry(0.105, 16, 10),
       new T.MeshBasicMaterial({ color: 0xffbd73 }),
@@ -149,34 +153,14 @@ export class AquariumRenderer {
     );
     cable.position.copy(this.lamp.position).add(new T.Vector3(0, 1.2, 0));
     this.scene.add(cable);
-    this.heightTexture = new T.DataTexture(this.surface.heights, NX, NZ, T.RedFormat, T.FloatType);
-    this.heightTexture.minFilter = T.NearestFilter;
-    this.heightTexture.magFilter = T.NearestFilter;
-    this.heightTexture.needsUpdate = true;
-    const underwaterLighting = new UnderwaterLighting(this.heightTexture, this.timeUniform);
+    const underwaterLighting = new UnderwaterLighting(this.surface.texture, this.efficient.uniform);
     this.koi = new KoiVisuals(world.koi, (m) => underwaterLighting.prepare(m));
     this.scene.add(this.koi.group);
-    const floorMaterial = new T.ShaderMaterial({
-      vertexShader: vertex,
-      fragmentShader: `
-      varying vec3 vWorld; varying vec3 vNormal; uniform float lightLevel; ${caustic} ${sand}
-      void main(){
-        float light=lightPattern(vWorld.xz);
-        vec3 color=sandColor(vWorld.xz);
-        color+=vec3(.42,.48,.3)*light;
-        color*=.86+.14*dot(normalize(vNormal),normalize(vec3(-.3,1.,.4)));
-        gl_FragColor=vec4(color*lightLevel,1.);
-        #include <tonemapping_fragment>
-        #include <colorspace_fragment>
-      }`,
-      uniforms: {
-        time: this.timeUniform,
-        heightMap: { value: this.heightTexture },
-        lightLevel: this.fallbackLight,
-      },
-    });
+    const floorMaterial = new T.MeshStandardMaterial({ color: 0xb6a580, roughness: 0.95 });
+    underwaterLighting.prepare(floorMaterial, true);
     const floor = new T.Mesh(new T.BoxGeometry(WIDTH, 0.14, DEPTH), floorMaterial);
     floor.name = 'Sand bed';
+    floor.receiveShadow = true;
     floor.position.y = -0.07;
     this.floor = floor;
     this.scene.add(floor);
@@ -248,9 +232,11 @@ export class AquariumRenderer {
     this.water = new T.Mesh(
       waterGeometry,
       new T.ShaderMaterial({
-        vertexShader: vertex,
+        vertexShader: rasterWaterVertex,
         fragmentShader: waterReflectionFragment,
         uniforms: {
+          surfaceMap: { value: this.surface.texture },
+          sideSurface: { value: 0 },
           reflectionMap: { value: this.reflection.texture },
           reflectionMatrix: { value: this.reflection.matrix },
           reflectionView: { value: this.reflection.viewMatrix },
@@ -283,21 +269,18 @@ export class AquariumRenderer {
       geo.setIndex(indices);
       geo.computeVertexNormals();
       const mat = new T.ShaderMaterial({
-        vertexShader: vertex,
+        vertexShader: rasterWaterVertex,
         fragmentShader: `
-        varying vec3 vWorld; varying vec3 vNormal; uniform float lightLevel; ${caustic}
-        void main(){
-          float depth=clamp(1.-vWorld.y/1.65,0.,1.);
-          vec3 color=mix(vec3(.15,.56,.58),vec3(.035,.24,.29),depth);
-          float glimmer=lightPattern(vWorld.xz+vWorld.y*.25);
-          color+=vec3(.28,.66,.56)*glimmer*.45;
-          gl_FragColor=vec4(color*lightLevel,.23+depth*.23);
+        varying vec3 vWorld;varying vec3 vNormal;uniform float lightLevel;
+        void main(){float depth=clamp(1.-vWorld.y/1.65,0.,1.);
+          vec3 color=mix(vec3(.10,.33,.35),vec3(.025,.13,.17),depth)*lightLevel;
+          gl_FragColor=vec4(color,.055+depth*.09);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`,
         uniforms: {
-          time: this.timeUniform,
-          heightMap: { value: this.heightTexture },
+          surfaceMap: { value: this.surface.texture },
+          sideSurface: { value: 1 },
           lightLevel: this.fallbackLight,
         },
         transparent: true,
@@ -312,16 +295,40 @@ export class AquariumRenderer {
     this.scene.add(this.sides);
     this.glass.renderOrder = 4;
     this.glass.children.forEach((m) => (m.renderOrder = 4));
-    const opticalSupport = AquariumOptics.supported(this.renderer);
-    if (!options.forceRaster && opticalSupport) {
-      this.surface.enableGPU();
-      this.optics = new AquariumOptics(this.surface.texture);
-    }
-    if (!opticalSupport) this.reflection.useByteTarget();
+    if (!this.supported) this.reflection.useByteTarget();
     this.observer = new ResizeObserver(() => this.resize());
     this.observer.observe(container);
+    this.pending = this.setMode(options.mode ?? 'high', false);
+  }
+  invalidate() {
+    this.dirty = true;
+    this.optics?.invalidate();
+  }
+  setMode(mode: AquariumMode, loadAssets = true): Promise<void> {
+    if (this.disposed) return Promise.resolve();
+    if (this.mode === mode && (mode === 'efficient' || this.optics)) {
+      this.invalidate();
+      return this.pending;
+    }
+    const generation = ++this.generation;
+    this.mode = mode;
+    this.lowQuality = mode === 'efficient' || !this.supported;
+    this.optics?.dispose();
+    this.optics = undefined;
+    if (mode === 'high' && this.supported) this.optics = new AquariumOptics(this.surface.texture);
     this.resize();
-    this.ready = this.optics?.prepare(this.renderer) ?? Promise.resolve();
+    this.invalidate();
+    this.lastEffects = -Infinity;
+    const optics = this.optics;
+    const preparation = optics?.prepare(this.renderer) ?? Promise.resolve();
+    this.preparations.add(preparation);
+    const complete = () => this.preparations.delete(preparation);
+    void preparation.then(complete, complete);
+    const assets = loadAssets ? this.koi.load(this.lowQuality) : Promise.resolve();
+    this.pending = Promise.all([preparation, assets]).then(() => {
+      if (!this.disposed && generation === this.generation) this.invalidate();
+    });
+    return this.pending;
   }
   resetCamera() {
     this.optics?.invalidate();
@@ -334,11 +341,10 @@ export class AquariumRenderer {
     this.controls.enableDamping = true;
   }
   quality(low: boolean) {
-    this.lowQuality = low;
-    void this.koi.load(low);
-    this.resize();
+    void this.setMode(low ? 'efficient' : 'high');
   }
   private resize() {
+    this.invalidate();
     const w = this.container.clientWidth,
       h = this.container.clientHeight;
     this.camera.aspect = w / Math.max(h, 1);
@@ -346,7 +352,7 @@ export class AquariumRenderer {
     this.camera.updateProjectionMatrix();
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, this.lowQuality ? 1 : 1.6));
     this.renderer.setSize(w, h);
-    this.reflection.resize(w, h, this.lowQuality);
+    this.reflection.resize(w, h, true);
     this.optics?.resize(
       w * this.renderer.getPixelRatio(),
       h * this.renderer.getPixelRatio(),
@@ -365,7 +371,21 @@ export class AquariumRenderer {
       ? { x: this.hit.x, z: this.hit.z }
       : null;
   }
-  render() {
+  render(now?: number) {
+    const start = performance.now();
+    this.controls.update();
+    const state = `${this.world.paused}/${this.world.strength}/${this.world.waveMaker}/${this.koi.status}/${this.koi.activeQuality}/${this.lighting.revision}/${this.world.time < this.lastEffects}`;
+    if (state !== this.lastState) {
+      this.dirty = true;
+      this.lastState = state;
+    }
+    const raster = !this.optics?.ready;
+    if (now !== undefined && !this.schedule.due(now, raster, this.world.paused, this.dirty)) return;
+    const refresh =
+      this.dirty || now === undefined || this.world.time - this.lastEffects >= 1 / 15 - 0.0001;
+    this.dirty = false;
+
+    this.timing?.begin();
     this.renderer.info.autoReset = false;
     this.renderer.info.reset();
     this.koi.sync();
@@ -392,25 +412,6 @@ export class AquariumRenderer {
       .closest<HTMLElement>('.aquarium-app')
       ?.style.setProperty('--aq-sunset', String(light.sunset));
     this.surface.update(this.world, this.renderer);
-    this.timeUniform.value = this.world.time;
-    this.heightTexture.needsUpdate = true;
-    const positions = this.water.geometry.attributes.position;
-    for (let i = 0; i < this.surface.heights.length; i++)
-      positions.setY(i, this.surface.heights[i]);
-    positions.needsUpdate = true;
-    this.water.geometry.computeVertexNormals();
-    for (const child of this.sides.children) {
-      const mesh = child as T.Mesh<T.BufferGeometry>,
-        side = mesh.userData.side as number,
-        count = side < 2 ? NX : NZ;
-      const p = mesh.geometry.attributes.position;
-      for (let i = 0; i < count; i++) {
-        const k =
-          side === 0 ? i : side === 1 ? (NZ - 1) * NX + i : side === 2 ? i * NX : i * NX + NX - 1;
-        p.setY(i * 2 + 1, WATER_Y + this.surface.heights[k]);
-      }
-      p.needsUpdate = true;
-    }
     for (const [id, mesh] of this.ballMeshes)
       if (!this.world.balls.some((b) => b.id === id)) {
         this.scene.remove(mesh);
@@ -425,12 +426,21 @@ export class AquariumRenderer {
           new T.SphereGeometry(b.radius, 32, 20),
           new T.MeshPhysicalMaterial({ color: b.color, roughness: 0.25, clearcoat: 1 }),
         );
+        mesh.castShadow = mesh.receiveShadow = true;
         this.scene.add(mesh);
         this.ballMeshes.set(b.id, mesh);
       }
       mesh.position.set(b.x, b.y, b.z);
     }
-    this.controls.update();
+    this.renderer.shadowMap.enabled = raster;
+    this.sun.castShadow = raster && light.sun > 0;
+    this.lamp.castShadow = raster && light.lamp > 0;
+    this.koi.group.traverse((o) => {
+      if ((o as T.Mesh).isMesh) {
+        o.castShadow = true;
+        o.receiveShadow = true;
+      }
+    });
     if (this.optics?.ready)
       this.optics.render(
         this.renderer,
@@ -449,20 +459,63 @@ export class AquariumRenderer {
         ],
       );
     else {
-      this.reflection.render(this.renderer, this.scene, this.camera, this.water, this.sides);
+      if (refresh) {
+        this.efficient.render(this.renderer, this.world, light);
+        // Reflector suppresses shadow updates, so generate the active shadow in the main pass.
+        this.reflection.render(
+          this.renderer,
+          this.scene,
+          this.camera,
+          this.water,
+          this.sides,
+          light,
+          this.koi.group,
+        );
+        this.renderer.shadowMap.needsUpdate = true;
+        this.lastEffects = this.world.time;
+      }
       this.renderer.render(this.scene, this.camera);
     }
+    this.timing?.end();
+    this.frames++;
+    this.cpuMs = performance.now() - start;
+    this.cpuTotalMs += this.cpuMs;
   }
   renderingSnapshot() {
-    return this.optics?.snapshot() ?? { mode: 'raster-fallback' };
+    return {
+      ...(this.optics?.ready
+        ? this.optics.snapshot()
+        : {
+            mode: this.supported ? 'raster-efficient' : 'raster-fallback',
+            ready: true,
+            quality: 'efficient',
+            volumeSlices: 0,
+            scatteringSamples: 0,
+            passes: ['surface', 'floor-caustics-15hz', 'reflection-15hz', 'shadow-15hz', 'raster'],
+          }),
+      requestedMode: this.mode,
+      activeMode: this.optics?.ready ? 'high' : 'efficient',
+      frames: this.frames,
+      frameLimit: this.optics?.ready ? null : 30,
+      bvh: !!this.optics,
+      causticUpdates: this.efficient.updates,
+      cpuSubmitMs: this.cpuMs,
+      cpuTotalMs: this.cpuTotalMs,
+      gpu: this.timing?.snapshot(),
+    };
   }
   readOpticalHits() {
     if (import.meta.env.DEV) return this.optics?.readHits(this.renderer);
   }
   readOpticalCaustics() {
-    if (import.meta.env.DEV) return this.optics?.readCaustics(this.renderer);
+    if (import.meta.env.DEV)
+      return this.optics?.ready
+        ? this.optics.readCaustics(this.renderer)
+        : this.efficient.read(this.renderer);
   }
   dispose() {
+    this.disposed = true;
+    this.generation++;
     this.koi.dispose();
     this.scene.remove(this.koi.group);
     this.observer.disconnect();
@@ -484,12 +537,16 @@ export class AquariumRenderer {
     }
     geometries.forEach((g) => g.dispose());
     textures.forEach((t) => t.dispose());
-    this.heightTexture.dispose();
+    this.timing?.dispose();
+    this.efficient.dispose();
+    this.sun.shadow.dispose();
+    this.lamp.shadow.dispose();
     this.optics?.dispose();
     this.surface.dispose();
     this.reflection.dispose();
     this.environment.dispose();
-    this.renderer.dispose();
+    // Preserve material properties used by any outstanding compileAsync poll.
+    void Promise.allSettled([...this.preparations]).then(() => this.renderer.dispose());
     this.renderer.domElement.remove();
   }
 }

@@ -16,7 +16,7 @@ let failures = 0;
 try {
   browser = await chromium.launch({ channel: 'chrome', headless: true });
   for (const width of [1440, 390]) {
-    for (const level of ['jelly', 'bubbles', 'aquarium', 'railway', 'fire']) {
+    for (const level of ['jelly', 'bubbles', 'aquarium', 'railway', 'fire', 'airplane']) {
       const page = await browser.newPage({ viewport: { width, height: 1000 } });
       const errors = [];
       page.on('pageerror', (error) => errors.push(error.message));

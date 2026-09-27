@@ -100,7 +100,7 @@ export class AquariumSurface {
         const x = (i * WIDTH) / (NX - 1) - WIDTH / 2,
           z = (j * DEPTH) / (NZ - 1) - DEPTH / 2;
         let h = world.heights[j * NX + i];
-        for (let w = 0; w < this.waves.length; w++) {
+        for (let w = 0; w < 6; w++) {
           const wave = this.waves[w];
           h +=
             Math.sin(wave.x * x + wave.y * z - wave.z * world.time + wave.w) *
@@ -110,6 +110,18 @@ export class AquariumSurface {
         }
         this.heights[j * NX + i] = h;
         this.data[(j * NX + i) * 4] = h;
+      }
+    for (let j = 0; j < NZ; j++)
+      for (let i = 0; i < NX; i++) {
+        const k = j * NX + i;
+        this.data[k * 4 + 1] =
+          (this.heights[j * NX + Math.min(NX - 1, i + 1)] -
+            this.heights[j * NX + Math.max(0, i - 1)]) /
+          0.12;
+        this.data[k * 4 + 2] =
+          (this.heights[Math.min(NZ - 1, j + 1) * NX + i] -
+            this.heights[Math.max(0, j - 1) * NX + i]) /
+          0.12;
       }
     this.cpuTexture.needsUpdate = true;
   }

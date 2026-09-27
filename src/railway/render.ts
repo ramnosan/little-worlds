@@ -2,9 +2,17 @@ import { t } from '../i18n';
 import * as T from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { AXLE_OFFSET, RailwayWorld, WHEEL_RADIUS, trackPose } from './physics';
-import { GAUGE, RAIL_TOP, RailwayScenery } from './scenery';
+import {
+  AXLE_OFFSET,
+  RailwayWorld,
+  WHEEL_RADIUS,
+  MODEL_SCALE,
+  ROUTE_SECTIONS,
+  trackPose,
+} from './physics';
+import { GAUGE, RailwayScenery } from './scenery';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RailwayClouds } from './clouds';
 
 export class RailwayRenderer {
   readonly renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
@@ -13,6 +21,7 @@ export class RailwayRenderer {
   readonly controls: OrbitControls;
   private observer: ResizeObserver;
   private scenery: RailwayScenery;
+  private clouds: RailwayClouds;
   private environment: T.WebGLRenderTarget;
   private floorMaterial = new T.ShadowMaterial({ opacity: 0.16 });
   private materials = new Map<string, T.MeshStandardMaterial>();
@@ -21,6 +30,7 @@ export class RailwayRenderer {
   private couplings: T.Mesh[] = [];
   private sun = new T.DirectionalLight(0xfff5e9, 2.5);
   private lowQuality = false;
+  private headlight = new T.SpotLight(0xffe2ad, 1.5, 1.5, Math.PI / 7, 0.65, 2);
   private from = new T.Vector3();
   private to = new T.Vector3();
   private direction = new T.Vector3();
@@ -75,6 +85,7 @@ export class RailwayRenderer {
     this.sun.shadow.bias = -0.0002;
     this.scene.add(this.sun);
     this.scenery = new RailwayScenery(this.scene);
+    this.clouds = new RailwayClouds(this.scene);
     const floor = new T.Mesh(
       this.geometry('floor', () => new T.PlaneGeometry(200, 200)),
       this.floorMaterial,
@@ -86,7 +97,10 @@ export class RailwayRenderer {
     [0, 1, 2].forEach((i) => this.buildCar(i));
     for (let i = 0; i < 2; i++) {
       const coupling = this.mesh(
-        this.geometry('coupling', () => new T.CylinderGeometry(0.025, 0.025, 1, 8)),
+        this.geometry(
+          'coupling',
+          () => new T.CylinderGeometry(0.025 * MODEL_SCALE, 0.025 * MODEL_SCALE, 1, 8),
+        ),
         '#393f38',
       );
       this.couplings.push(coupling);
@@ -168,9 +182,13 @@ export class RailwayRenderer {
   private buildCar(index: number) {
     const body = new T.Group();
     this.scene.add(body);
+    body.scale.setScalar(MODEL_SCALE);
     const carColor = '#a92524';
     this.material(carColor).roughness = 0.37;
     const glazing = this.material('#253940');
+    const windows = this.material('#e8c886');
+    windows.emissive.set('#ffca70');
+    windows.emissiveIntensity = 0.8;
     glazing.metalness = 0.5;
     glazing.roughness = 0.16;
     this.box(1.3, 0.09, 0.39, 0, 0.13, 0, '#343a39', body);
@@ -190,7 +208,7 @@ export class RailwayRenderer {
         this.box(0.15, 0.057, 0.009, 0, 0.29, z, '#dedbd0', body);
       } else {
         for (let i = 0; i < 6; i++)
-          this.box(0.123, 0.16, 0.009, -0.435 + i * 0.174, 0.421, z, '#253940', body, true);
+          this.box(0.123, 0.16, 0.009, -0.435 + i * 0.174, 0.421, z, '#e8c886', body, true);
         for (const x of [-0.56, 0.56]) {
           this.box(0.075, 0.3, 0.012, x, 0.347, z, '#c7c8ba', body);
           this.box(0.048, 0.11, 0.015, x, 0.43, z, '#253940', body);
@@ -215,6 +233,17 @@ export class RailwayRenderer {
         this.box(0.04, 0.033, 0.048, x + end * 0.023, 0.14, z, '#414844', body);
       }
     }
+    if (index === 0) {
+      this.material('#fff0ca').emissive.set('#ffe5b0');
+      this.material('#fff0ca').emissiveIntensity = 2;
+      this.headlight.position.set(0.67, 0.27, 0);
+      this.headlight.target.position.set(3.7, 0.12, 0);
+      this.headlight.castShadow = true;
+      this.headlight.shadow.mapSize.set(512, 512);
+      this.headlight.shadow.camera.near = 0.015;
+      this.headlight.shadow.bias = -0.0002;
+      body.add(this.headlight, this.headlight.target);
+    }
     // Roof equipment and raised pantograph, aligned beneath the contact wire.
     if (index === 0) {
       this.box(0.47, 0.045, 0.21, 0, 0.61, 0, '#616b66', body);
@@ -233,15 +262,16 @@ export class RailwayRenderer {
     for (let axle = 0; axle < 2; axle++) {
       const group = new T.Group();
       this.scene.add(group);
+      group.scale.setScalar(MODEL_SCALE);
       axles.push(group);
       const rod = this.cylinder(0.021, 0.34, 0, 0, 0, '#333e35', group);
       rod.rotation.x = Math.PI / 2;
       for (const side of [-1, 1]) {
         const wheel = new T.Group();
-        wheel.position.z = (side * GAUGE) / 2;
+        wheel.position.z = (side * GAUGE) / (2 * MODEL_SCALE);
         group.add(wheel);
         wheels.push(wheel);
-        const disk = this.cylinder(WHEEL_RADIUS, 0.033, 0, 0, 0, '#344238', wheel);
+        const disk = this.cylinder(WHEEL_RADIUS / MODEL_SCALE, 0.033, 0, 0, 0, '#344238', wheel);
         disk.rotation.x = Math.PI / 2;
         const hub = this.cylinder(0.028, 0.04, 0, 0, 0, '#606965', wheel);
         hub.rotation.x = Math.PI / 2;
@@ -276,9 +306,11 @@ export class RailwayRenderer {
   quality(light: boolean) {
     this.lowQuality = light;
     this.scenery.quality(light);
+    this.clouds.quality(light);
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, light ? 1 : 1.6));
     this.renderer.shadowMap.enabled = !light;
     this.sun.castShadow = !light;
+    this.headlight.castShadow = !light;
     this.materials.forEach((material) => {
       material.needsUpdate = true;
     });
@@ -291,13 +323,15 @@ export class RailwayRenderer {
         back = trackPose(distance - AXLE_OFFSET);
       car.body.position.set(
         (front.x + back.x) / 2,
-        RAIL_TOP + WHEEL_RADIUS,
+        (front.y + back.y) / 2 + WHEEL_RADIUS,
         (front.z + back.z) / 2,
       );
-      car.body.rotation.y = Math.atan2(back.z - front.z, front.x - back.x);
+      const yaw = Math.atan2(back.z - front.z, front.x - back.x);
+      const pitch = Math.atan2(front.y - back.y, Math.hypot(front.x - back.x, front.z - back.z));
+      car.body.rotation.set(0, yaw, pitch, 'YXZ');
       [front, back].forEach((p, j) => {
-        car.axles[j].position.set(p.x, RAIL_TOP + WHEEL_RADIUS, p.z);
-        car.axles[j].rotation.y = p.yaw;
+        car.axles[j].position.set(p.x, p.y + WHEEL_RADIUS, p.z);
+        car.axles[j].rotation.set(0, p.yaw, p.pitch, 'YXZ');
       });
       car.wheels.forEach((wheel) => {
         wheel.rotation.z = -this.world.travel / WHEEL_RADIUS;
@@ -315,6 +349,8 @@ export class RailwayRenderer {
       mesh.quaternion.setFromUnitVectors(this.up, this.direction.normalize());
     });
     this.controls.update();
+    this.camera.updateMatrixWorld();
+    this.clouds.update(this.camera, this.world.elapsed);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -324,7 +360,14 @@ export class RailwayRenderer {
       light: this.lowQuality,
       geometries: this.renderer.info.memory.geometries,
       textures: this.renderer.info.memory.textures,
+      modelScale: MODEL_SCALE,
+      tunnels: ROUTE_SECTIONS.filter((s) => s.kind === 'tunnel'),
+      headlight: {
+        position: this.headlight.getWorldPosition(new T.Vector3()).toArray(),
+        intensity: this.headlight.intensity,
+      },
       drawCalls: this.renderer.info.render.calls,
+      clouds: this.clouds.stats(),
     };
   }
 
@@ -334,12 +377,14 @@ export class RailwayRenderer {
     this.geometries.forEach((geometry) => geometry.dispose());
     this.materials.forEach((material) => material.dispose());
     this.scenery.dispose();
+    this.clouds.dispose();
     this.environment.dispose();
     this.floorMaterial.dispose();
     this.scene.traverse((object) => {
       if (object instanceof T.InstancedMesh) object.dispose();
     });
     this.sun.shadow.dispose();
+    this.headlight.shadow.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }

@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { Reflector } from 'three/addons/objects/Reflector.js';
+import type { AquariumLight } from './lighting';
 import { WATER_Y } from './tank';
 
 /** Three.js's mirrored camera / oblique clip plane, independent of the wave mesh. */
@@ -41,19 +42,30 @@ export class WaterReflection {
     camera: T.PerspectiveCamera,
     water: T.Object3D,
     sides: T.Object3D,
+    light?: AquariumLight,
+    submergedFish?: T.Object3D,
   ) {
     const background = scene.background;
     const intensity = scene.backgroundIntensity;
     const blur = scene.backgroundBlurriness;
     const waterVisible = water.visible,
       sidesVisible = sides.visible;
+    const fishVisible = submergedFish?.visible;
     const target = renderer.getRenderTarget();
     const xr = renderer.xr.enabled,
       shadows = renderer.shadowMap.autoUpdate;
     try {
       water.visible = sides.visible = false;
-      // Reuse the same studio environment that already illuminates the tank.
-      scene.background = scene.environment;
+      // Fish remain below the waterline; skip submitting them to the mirror pass.
+      if (submergedFish) submergedFish.visible = false;
+      // Keep the reflected sky in step with the tank's day/night lighting.
+      scene.background = light
+        ? new T.Color().setRGB(
+            0.012 + light.daylight * 0.08 + light.sunset * 0.13,
+            0.019 + light.daylight * 0.15 + light.sunset * 0.025,
+            0.035 + light.daylight * 0.2,
+          )
+        : scene.environment;
       scene.backgroundIntensity = Math.min(0.65, scene.environmentIntensity);
       scene.backgroundBlurriness = 0.08;
       camera.updateMatrixWorld();
@@ -74,6 +86,7 @@ export class WaterReflection {
       scene.backgroundBlurriness = blur;
       water.visible = waterVisible;
       sides.visible = sidesVisible;
+      if (submergedFish) submergedFish.visible = fishVisible!;
       renderer.xr.enabled = xr;
       renderer.shadowMap.autoUpdate = shadows;
       renderer.setRenderTarget(target);

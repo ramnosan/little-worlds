@@ -35,9 +35,10 @@ let side = false;
 async function configure(axis: 'front' | 'side', low: boolean, phase = 0.5) {
   view.lighting.setTime(phase);
   side = axis === 'side';
-  view.quality(low);
+  await view.setMode(low ? 'efficient' : 'high');
   await view.koi.load(low);
   if (view.koi.status !== 'ready') throw new Error('Waterline quality load failed');
+  view.renderer.shadowMap.autoUpdate = false;
   view.koi.group.children.slice(1).forEach((o) => (o.visible = false));
   view.controls.target.set(0, 0.85, 0);
   view.camera.position.set(side ? 9 : 0, 4, side ? 0 : 9);

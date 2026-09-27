@@ -55,6 +55,7 @@ export class AquariumOptics {
   private frame = 0;
   private lastFishRevision = -1;
   private disposed = false;
+  private compiling = false;
 
   static supported(renderer: T.WebGLRenderer) {
     if (!renderer.extensions.has('EXT_color_buffer_float')) return false;
@@ -172,6 +173,7 @@ export class AquariumOptics {
     this.validHistory = false;
   }
   async prepare(renderer: T.WebGLRenderer) {
+    this.compiling = true;
     const previousTarget = renderer.getRenderTarget(),
       tone = renderer.toneMapping;
     const programs = new T.Scene();
@@ -197,7 +199,12 @@ export class AquariumOptics {
       renderer.toneMapping = tone;
       renderer.setRenderTarget(previousTarget);
     }
-    await Promise.all(pending);
+    try {
+      await Promise.all(pending);
+    } finally {
+      this.compiling = false;
+      if (this.disposed) this.disposeMaterials();
+    }
     if (!this.disposed) this.ready = true;
   }
   readHits(renderer: T.WebGLRenderer) {
@@ -245,6 +252,9 @@ export class AquariumOptics {
     const autoClear = renderer.autoClear;
     const visibility = hidden.map((o) => o.visible);
     try {
+      // A paused view may draw only once. Allocate both ping-pong buffers together,
+      // including after resize, so resuming does not allocate another texture.
+      if (!this.low) for (const target of this.history) renderer.initRenderTarget(target);
       this.fish.update(fish);
       if (this.lastFishRevision !== this.fish.revision) {
         this.invalidate();
@@ -384,6 +394,7 @@ export class AquariumOptics {
     };
   }
   dispose() {
+    if (this.disposed) return;
     this.disposed = true;
     this.fish.dispose();
     this.triangle.dispose();
@@ -398,6 +409,11 @@ export class AquariumOptics {
       this.oldInfo,
     ])
       t.dispose();
+    // Three.js compileAsync polls material properties until linking completes.
+    // Disposing those materials early removes the program that its poll needs.
+    if (!this.compiling) this.disposeMaterials();
+  }
+  private disposeMaterials() {
     for (const m of [
       this.photonMaterial,
       this.causticMaterial,

@@ -1,0 +1,363 @@
+@import '../level-nav.css';
+:root {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #30463f;
+  background: #a9babd;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+.flight-app {
+  max-width: 1800px;
+  margin: auto;
+  padding: 0 4%;
+}
+.flight-app .studio-header {
+  margin: 0;
+  border-bottom: 1px solid #d8dbcb;
+}
+.flight-brand {
+  color: inherit;
+  text-decoration: none;
+  font-size: 24px;
+  white-space: nowrap;
+  letter-spacing: -1px;
+}
+.flight-brand sup {
+  font-size: 10px;
+  margin-left: 3px;
+}
+.flight-edition {
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+.flight-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 30px;
+  padding: 30px 0 24px;
+}
+.flight-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin: 0 0 10px;
+}
+.flight-intro h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(30px, 3.6vw, 58px);
+  font-weight: 400;
+  letter-spacing: -2px;
+  margin: 0;
+}
+.flight-intro h1 em {
+  color: #46624d;
+}
+.flight-intro > p {
+  font-size: 13px;
+  line-height: 1.7;
+  max-width: 300px;
+  margin: 0 0 3px;
+  color: #435c56;
+}
+.flight-stage {
+  position: relative;
+  border: 1px solid #b4c6b9;
+  border-radius: 5px;
+  overflow: hidden;
+}
+#flight-world {
+  height: clamp(360px, 52vh, 690px);
+  width: 100%;
+}
+#flight-world canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.flight-caption {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+.flight-telemetry {
+  position: absolute;
+  bottom: 20px;
+  left: 24px;
+  display: flex;
+  gap: 26px;
+  pointer-events: none;
+  background: #a9babdd9;
+  border: 1px solid #ffffff70;
+  border-radius: 4px;
+  padding: 12px 20px;
+}
+.flight-telemetry div {
+  min-width: 48px;
+}
+.flight-telemetry span {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.flight-telemetry strong {
+  font-size: 25px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.flight-telemetry small {
+  margin-left: 5px;
+  font-size: 10px;
+}
+.flight-console {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid #d8dbcb;
+}
+.flight-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  min-width: 145px;
+}
+.flight-status i {
+  width: 6px;
+  height: 6px;
+  background: #6f875c;
+  border-radius: 50%;
+}
+.flight-gas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+.flight-gas input {
+  width: 110px;
+  accent-color: #687e59;
+}
+.flight-actions {
+  display: flex;
+  gap: 8px;
+}
+.flight-app button {
+  border: 1px solid #c9cebb;
+  background: #a9babd;
+  color: inherit;
+  padding: 11px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+.flight-app button:hover {
+  background: #b7c8c5;
+}
+.flight-app button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.flight-app :focus-visible {
+  outline: 2px solid #ac7934;
+  outline-offset: 3px;
+}
+.flight-guide {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  padding: 24px 0;
+}
+.flight-guide span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+}
+.flight-guide p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #435c56;
+  margin: 9px 0 0;
+}
+.flight-app footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid #d8dbcb;
+  padding: 18px 0 24px;
+  font-size: 10px;
+  color: #435c56;
+}
+.flight-crash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 25px;
+  width: min(340px, 88%);
+  background: #a9babdf5;
+  text-align: center;
+  border: 1px solid #c9cebb;
+  border-radius: 5px;
+}
+.flight-crash strong {
+  font:
+    28px Georgia,
+    serif;
+}
+.flight-crash p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.flight-touch {
+  display: none;
+  justify-content: space-around;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;
+}
+.flight-touch p {
+  font-size: 10px;
+  text-align: center;
+}
+.flight-touch > span {
+  text-align: center;
+  font-size: 9px;
+  line-height: 2;
+  letter-spacing: 2px;
+}
+.flight-stick {
+  position: relative;
+  width: 122px;
+  height: 122px;
+  border-radius: 50%;
+  border: 1px solid #bbc5b1;
+  background:
+    linear-gradient(transparent 49.5%, #c9d0c0 50%, transparent 50.5%),
+    linear-gradient(90deg, transparent 49.5%, #c9d0c0 50%, transparent 50.5%), #b7c8c5;
+  touch-action: none;
+  user-select: none;
+  --stick-x: 0%;
+  --stick-y: 0%;
+}
+.flight-stick i {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: translate(var(--stick-x), var(--stick-y));
+  pointer-events: none;
+}
+.flight-stick i::after {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  top: calc(50% - 16px);
+  left: calc(50% - 16px);
+  background: #738665;
+  border: 4px solid #a9babd;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px #30463f30;
+}
+@media (pointer: coarse), (max-width: 700px) {
+  .flight-touch {
+    display: flex;
+  }
+}
+@media (max-width: 1100px) {
+  .flight-edition {
+    display: none;
+  }
+  .flight-console {
+    flex-wrap: wrap;
+  }
+  .flight-actions {
+    margin-left: auto;
+  }
+}
+@media (max-width: 700px) {
+  .flight-app {
+    padding: 0 4%;
+  }
+  .flight-intro {
+    display: block;
+    padding: 23px 0 18px;
+  }
+  .flight-intro h1 {
+    letter-spacing: -1px;
+  }
+  .flight-intro > p {
+    margin-top: 12px;
+    max-width: none;
+    font-size: 12px;
+  }
+  #flight-world {
+    height: 380px;
+  }
+  .flight-caption {
+    left: 12px;
+    right: 12px;
+    top: 14px;
+    font-size: 8px;
+    letter-spacing: 0.7px;
+  }
+  .flight-caption span:last-child {
+    max-width: 110px;
+    text-align: right;
+  }
+  .flight-telemetry {
+    left: 12px;
+    bottom: 12px;
+    padding: 10px 14px;
+    gap: 20px;
+  }
+  .flight-telemetry strong {
+    font-size: 22px;
+  }
+  .flight-console {
+    gap: 12px;
+  }
+  .flight-gas {
+    margin-left: auto;
+  }
+  .flight-gas input {
+    width: 90px;
+  }
+  .flight-actions {
+    width: 100%;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .flight-actions button {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+  .flight-guide {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 20px 0;
+  }
+  .flight-app footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

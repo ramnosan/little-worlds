@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { AquariumFrameSchedule, readMode, saveMode, MODE_KEY } from '../src/aquarium/mode';
 import {
   AquariumLighting,
   AFTERNOON,
@@ -46,4 +47,46 @@ test('sun and lamp never compete and the daylight curve is continuous', () => {
   }
   assert.equal(sampleLighting(0.5).sun, 1);
   assert.equal(sampleLighting(0).lamp, 1);
+});
+
+test('efficient rendering stays near 30 fps independently of display refresh', () => {
+  for (const hz of [60, 120, 144]) {
+    const schedule = new AquariumFrameSchedule();
+    let frames = 0;
+    for (let i = 0; i < hz * 10; i++)
+      if (schedule.due((i * 1000) / hz, true, false, i === 0)) frames++;
+    assert.ok(Math.abs(frames - 300) <= 2, `${hz} Hz produced ${frames} frames`);
+    assert.equal(schedule.due(12000, true, true, false), false);
+    assert.equal(schedule.due(12001, true, true, true), true);
+    assert.equal(schedule.due(50000, true, false, false), true);
+    assert.equal(schedule.due(50001, true, false, false), false);
+  }
+});
+test('graphics preference is aquarium-specific and tolerates unavailable storage', () => {
+  const values = new Map<string, string>();
+  const storage = {
+    getItem: (key: string) => values.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      values.set(key, value);
+    },
+  };
+  assert.equal(readMode(storage), 'high');
+  saveMode('efficient', storage);
+  assert.equal(values.get(MODE_KEY), 'efficient');
+  assert.equal(readMode(storage), 'efficient');
+  assert.equal(
+    readMode({
+      getItem() {
+        throw new Error('blocked');
+      },
+    }),
+    'high',
+  );
+  assert.doesNotThrow(() =>
+    saveMode('efficient', {
+      setItem() {
+        throw new Error('blocked');
+      },
+    }),
+  );
 });

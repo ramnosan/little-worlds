@@ -78,10 +78,16 @@ function finCoverage() {
     fin.position.y = 1;
     view.koi.group.add(fin);
     view.render();
-    const hits = view.readOpticalHits()!;
+    const hits = view.readOpticalHits();
     let count = 0;
-    for (let i = 2; i < hits.data.length; i += 4)
-      if (T.DataUtils.fromHalfFloat(hits.data[i]) === 4) count++;
+    if (hits) {
+      for (let i = 2; i < hits.data.length; i += 4)
+        if (T.DataUtils.fromHalfFloat(hits.data[i]) === 4) count++;
+    } else {
+      const pixels = framePixels();
+      for (let i = 0; i < pixels.length; i += 4)
+        if (pixels[i] > pixels[i + 1] * 1.25 && pixels[i] > 60) count++;
+    }
     coverage.push(count);
     view.koi.group.remove(fin);
     fin.geometry.dispose();

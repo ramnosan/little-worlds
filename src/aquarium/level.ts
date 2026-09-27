@@ -3,6 +3,7 @@ import { levelNav } from '../level-nav';
 import './style.css';
 import { AquariumWorld, BALL_LIMIT } from './physics';
 import { AquariumRenderer } from './render';
+import { readMode, saveMode } from './mode';
 
 const root = document.getElementById('app')!;
 root.innerHTML = `<div class="aquarium-app">
@@ -30,7 +31,7 @@ root.innerHTML = `<div class="aquarium-app">
       <button id="aq-waves" class="aq-toggle" aria-pressed="true"><span>${t('Gentle waves')}</span><i></i></button>
       <button id="aq-ball" class="aq-ball">＋ ${t('Add a floating ball')} <kbd>N</kbd></button>
       <p class="aq-panel-note">${t('A little splash. A growing circle.')}</p>
-      <button id="aq-quality" class="aq-quality" aria-pressed="false">◌ &nbsp; ${t('Lighter graphics')}</button>
+      <button id="aq-quality" class="aq-quality" aria-pressed="false">◌ &nbsp; ${t('aq.graphicsHigh')}</button>
     </aside>
     <div class="aq-bottom"><div class="aq-hint"><span class="aq-ripple-icon">◎</span><span>${t('Make little circles.')}<small>${t('Click & drag to move the water.')}</small></span></div>
       <div class="aq-toolbar"><button id="aq-ripple" aria-label="${t('Make a wave')}" aria-describedby="aq-charge-hint">◎ <span>${t('Make a wave')}</span></button><span class="aq-divider"></span><button id="aq-pause" aria-label="${t('Pause simulation')}">Ⅱ <span>${t('Pause')}</span></button><span class="aq-divider"></span><button id="aq-reset">↻ <span>${t('Reset')}</span></button></div>
@@ -46,8 +47,15 @@ mountLanguageSelector(root);
 const el = (id: string) => document.getElementById(id)!;
 const world = new AquariumWorld();
 let view: AquariumRenderer;
+let storage: Storage | undefined;
 try {
-  view = new AquariumRenderer(el('aquarium-world'), world);
+  storage = window.localStorage;
+} catch {
+  /* A session-only choice remains available. */
+}
+const initialMode = readMode(storage);
+try {
+  view = new AquariumRenderer(el('aquarium-world'), world, { mode: initialMode });
 } catch (error) {
   el('aquarium-world').innerHTML =
     `<div class="aq-error" role="alert">${t('Aquarium needs WebGL 2. Please enable hardware acceleration and reload the page.')}</div>`;
@@ -60,7 +68,7 @@ const abort = new AbortController(),
   signal = abort.signal;
 let frame = 0,
   last = performance.now(),
-  reduced = false,
+  reduced = initialMode === 'efficient',
   contextLost = false;
 let drag: number | null = null,
   touchStart: { id: number; x: number; y: number } | null = null,
@@ -120,6 +128,8 @@ function cancel() {
 function sync() {
   el('aq-waves').setAttribute('aria-pressed', String(world.waveMaker));
   el('aq-quality').setAttribute('aria-pressed', String(reduced));
+  el('aq-quality').textContent = t(reduced ? 'aq.graphicsEfficient' : 'aq.graphicsHigh');
+  view.invalidate();
   el('aq-pause').innerHTML = world.paused
     ? `▷ <span>${t('Resume')}</span>`
     : `Ⅱ <span>${t('Pause')}</span>`;
@@ -157,8 +167,7 @@ function reset() {
   cancel();
   world.reset();
   view.lighting.reset();
-  reduced = false;
-  view.quality(false);
+  view.invalidate();
   view.resetCamera();
   sync();
   notice(t('Everything is calm again.'));
@@ -256,7 +265,7 @@ view.koi.onStatus = () => {
   retry.hidden = status !== 'error' && status !== 'unavailable';
   retry.disabled = contextLost;
 };
-void view.koi.load();
+void view.koi.load(reduced);
 on('aq-waves', () => {
   world.waveMaker = !world.waveMaker;
   sync();
@@ -264,6 +273,7 @@ on('aq-waves', () => {
 on('aq-quality', () => {
   reduced = !reduced;
   view.quality(reduced);
+  saveMode(reduced ? 'efficient' : 'high', storage);
   sync();
 });
 for (const name of ['strength', 'damping'] as const)
@@ -385,7 +395,7 @@ function animate(now: number) {
   world.advance(delta);
   view.lighting.advance(Math.min(delta, 0.1), world.paused);
   syncLighting();
-  view.render();
+  view.render(now);
 }
 sync();
 frame = requestAnimationFrame(animate);

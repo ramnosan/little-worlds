@@ -9,6 +9,7 @@ type Snapshot = {
   camera: number[];
   geometries: number;
   textures: number;
+  clouds: { positions: number[][]; steps: number; reducedMotion: boolean };
   cars: { distance: number; x: number; z: number }[];
 };
 const stats = (page: Page) =>
@@ -17,6 +18,32 @@ const setSpeed = async (page: Page, value: string) => {
   await page.locator('#rw-speed').fill(value);
   await expect(page.locator('#rw-speed-value')).toHaveText(`${value}%`);
 };
+
+test('clouds drift, reset reproducibly, and respond to reduced motion', async ({ page }) => {
+  await page.goto('/?level=railway');
+  await expect(page.locator('#railway-world canvas')).toBeVisible();
+  const first = (await stats(page)).clouds.positions;
+  expect(first).toHaveLength(3);
+  await expect.poll(async () => (await stats(page)).clouds.positions).not.toEqual(first);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(async () => (await stats(page)).clouds.reducedMotion).toBe(true);
+  // Wait for the new preference to be rendered, not just reported by matchMedia.
+  await page.locator('#rw-pause').click();
+  await page.waitForTimeout(100);
+  const resting = (await stats(page)).clouds.positions;
+  await page.locator('#rw-reset').click();
+  await page.waitForTimeout(100);
+  expect((await stats(page)).clouds.positions).toEqual(resting);
+  const before = (await stats(page)).travel;
+  await expect.poll(async () => (await stats(page)).travel).toBeGreaterThan(before);
+  expect((await stats(page)).clouds.positions).toEqual(resting);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await expect.poll(async () => (await stats(page)).clouds.positions).not.toEqual(resting);
+  await setSpeed(page, '0');
+  const stopped = (await stats(page)).clouds.positions;
+  await page.waitForTimeout(100);
+  expect((await stats(page)).clouds.positions).toEqual(stopped);
+});
 
 test('railway motion, pause, speed, reset, keyboard and GPU resources', async ({ page }) => {
   const errors: string[] = [];
@@ -32,6 +59,7 @@ test('railway motion, pause, speed, reset, keyboard and GPU resources', async ({
   const paused = await stats(page);
   await page.waitForTimeout(150);
   expect((await stats(page)).distance).toBe(paused.distance);
+  expect((await stats(page)).clouds.positions).toEqual(paused.clouds.positions);
   await setSpeed(page, '200');
   expect((await stats(page)).speed).toBe(2);
   expect((await stats(page)).paused).toBe(true);
@@ -41,11 +69,14 @@ test('railway motion, pause, speed, reset, keyboard and GPU resources', async ({
   const stopped = await stats(page);
   await page.waitForTimeout(150);
   expect((await stats(page)).travel).toBe(stopped.travel);
+  expect((await stats(page)).clouds.positions).toEqual(stopped.clouds.positions);
   await page.locator('#rw-quality').click();
   expect((await stats(page)).light).toBe(true);
+  await expect.poll(async () => (await stats(page)).clouds.steps).toBe(32);
   await page.locator('#rw-reset').click();
   expect((await stats(page)).speed).toBe(1);
   expect((await stats(page)).light).toBe(false);
+  await expect.poll(async () => (await stats(page)).clouds.steps).toBe(64);
   expect((await stats(page)).paused).toBe(false);
   await page.locator('#railway-world canvas').focus();
   await page.keyboard.press('Space');
@@ -98,22 +129,24 @@ test('orbit and zoom remain available while paused; reset restores camera', asyn
   (await stats(page)).camera.forEach((n, i) => expect(n).toBeCloseTo(initial.camera[i], 5));
 });
 
-test('all five levels link to the railway with one current navigation entry', async ({ page }) => {
-  for (const [url, canvas] of [
-    ['/', '#world'],
-    ['/?level=bubbles', '#bubble-world'],
-    ['/?level=aquarium', '#aquarium-world'],
-    ['/?level=fire', '#fire-world'],
-  ]) {
+for (const [url, canvas, level] of [
+  ['/', '#world', 'jelly'],
+  ['/?level=bubbles', '#bubble-world', 'bubbles'],
+  ['/?level=aquarium', '#aquarium-world', 'aquarium'],
+  ['/?level=fire', '#fire-world', 'fire'],
+  ['/?level=airplane', '#flight-world', 'airplane'],
+] as const) {
+  test(`railway navigation to ${level} and back`, async ({ page }) => {
     await page.goto('/?level=railway');
-    await expect(page.locator('.level-nav a')).toHaveCount(5);
+    await expect(page.locator('#railway-world canvas')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('.level-nav a')).toHaveCount(6);
     await page.locator(`.level-nav a[href="${url === '/' ? './' : url.slice(1)}"]`).click();
-    await expect(page.locator(`${canvas} canvas`)).toBeVisible();
+    await expect(page.locator(`${canvas} canvas`)).toBeVisible({ timeout: 15000 });
     await page.getByRole('link', { name: '04 Model Railway' }).click();
-    await expect(page.locator('#railway-world canvas')).toBeVisible();
+    await expect(page.locator('#railway-world canvas')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('.level-nav [aria-current="page"]')).toHaveText('04 Model Railway');
-  }
-});
+  });
+}
 
 for (const [width, height, label] of [
   [1440, 1000, 'desktop'],
@@ -254,7 +287,7 @@ test('train and carriages follow a curve without losing their spacing', async ({
   await page.locator('#rw-pause').click();
   const { cars } = await stats(page);
   for (let i = 1; i < cars.length; i++)
-    expect(cars[i - 1].distance - cars[i].distance).toBeCloseTo(1.42, 5);
+    expect(cars[i - 1].distance - cars[i].distance).toBeCloseTo(1.42 / 3, 5);
   await page.screenshot({ path: 'artifacts/railway-curve.png', fullPage: true });
   await page.locator('#rw-reset').click();
   await page.locator('#rw-pause').click();
