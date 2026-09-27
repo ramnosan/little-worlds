@@ -1,6 +1,8 @@
 import type { en } from './en';
 
 export const de: { [Key in keyof typeof en]: string } = {
+  'aq.time': 'Tageszeit',
+  'aq.cycle': 'Automatischer Wechsel',
   Strawberry: 'Erdbeere',
   Peach: 'Pfirsich',
   Mint: 'Minze',

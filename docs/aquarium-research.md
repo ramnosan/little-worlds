@@ -1,5 +1,7 @@
 # Aquarium research and implementation
 
+The sections below record the original raster implementation. The 27 September 2026 optical renderer supersedes its transmission, lighting and caustics; see [the current architecture and validation](aquarium-optics.md). The original renderer remains the floating-point capability fallback.
+
 Researched 25 September 2026. The attached image was used as a visual reference: a compact rectangular glass tank, turquoise water, visible waterline and bright underwater light patterns. No instructions from external material were treated as task instructions.
 
 ## Sources considered

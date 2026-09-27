@@ -19,6 +19,15 @@ type Debug = {
 const debug = (p: Page) =>
   p.evaluate(() => (window as unknown as { __aquariumDebug: () => Debug }).__aquariumDebug());
 const varieties = ['showa', 'tancho'];
+const waitForOptics = (page: Page) =>
+  page.waitForFunction(
+    () =>
+      (
+        window as unknown as { __aquariumDebug: () => { rendering: { ready: boolean } } }
+      ).__aquariumDebug?.().rendering.ready,
+    undefined,
+    { timeout: 30_000 },
+  );
 
 test('supplied koi load once, deform independently and retain state through pause and quality changes', async ({
   page,
@@ -37,6 +46,7 @@ test('supplied koi load once, deform independently and retain state through paus
   });
   await page.goto('/?level=aquarium');
   await assetExpect(page.locator('#aq-koi-status')).toHaveText('2 koi');
+  await waitForOptics(page);
   await expect.poll(async () => (await debug(page)).time).toBeGreaterThan(0.5);
   const initial = await debug(page);
   expect(initial.koi.skeletons).toEqual([0, 0]);
@@ -63,10 +73,15 @@ test('supplied koi load once, deform independently and retain state through paus
   await page.locator('#aq-quality').click();
   await assetExpect.poll(async () => (await debug(page)).koi.quality).toBe('high');
   const requestCount = requests.length;
+  const settled = await debug(page);
   for (let i = 0; i < 3; i++) await page.locator('#aq-reset').click();
   expect(requests).toHaveLength(requestCount);
-  expect((await debug(page)).textures).toBe(initial.textures);
-  expect((await debug(page)).geometries).toBe(initial.geometries);
+  // The temporary raster warmup can allocate a morph texture that optics no longer needs.
+  // Repeated low/high cycles above must still have exactly stable resource counts.
+  expect(settled.textures).toBeLessThanOrEqual(initial.textures);
+  expect(settled.geometries).toBeLessThanOrEqual(initial.geometries);
+  expect((await debug(page)).textures).toBe(settled.textures);
+  expect((await debug(page)).geometries).toBe(settled.geometries);
   expect((await debug(page)).koi.count).toBe(2);
   await expect(page.locator('.aq-footer a')).toHaveAttribute('href', './models/koi/credits.html');
   expect(errors).toEqual([]);
@@ -122,6 +137,7 @@ test('synthetic rigs animate independently, pause, reset and switch quality with
   });
   await fixtures(page);
   await page.goto('/?level=aquarium');
+  await waitForOptics(page);
   await expect(page.locator('#aq-koi-status')).toHaveText('2 koi');
   await expect.poll(async () => (await debug(page)).time).toBeGreaterThan(0.4);
   const first = await debug(page);
@@ -138,10 +154,12 @@ test('synthetic rigs animate independently, pause, reset and switch quality with
   expect((await debug(page)).koi.animationTimes).toEqual(frozen.koi.animationTimes);
   await page.locator('#aq-quality').click();
   await expect.poll(async () => (await debug(page)).koi.quality).toBe('high');
-  await expect.poll(async () => (await debug(page)).geometries).toBe(first.geometries);
-  expect((await debug(page)).textures).toBe(first.textures);
+  const settled = await debug(page);
+  expect(settled.geometries).toBeLessThanOrEqual(first.geometries);
+  expect(settled.textures).toBeLessThanOrEqual(first.textures);
   for (let i = 0; i < 3; i++) await page.locator('#aq-reset').click();
-  await expect.poll(async () => (await debug(page)).geometries).toBe(first.geometries);
+  await expect.poll(async () => (await debug(page)).geometries).toBe(settled.geometries);
+  expect((await debug(page)).textures).toBe(settled.textures);
   expect((await debug(page)).koi.count).toBe(2);
   expect(errors).toEqual([]);
 });
@@ -176,6 +194,7 @@ test('synthetic rig mobile rendering and measured frame times', async ({ browser
   const page = await context.newPage();
   await fixtures(page);
   await page.goto('http://127.0.0.1:5173/?level=aquarium');
+  await waitForOptics(page);
   await expect(page.locator('#aq-koi-status')).toHaveText('2 koi');
   await page.locator('#aq-quality').click();
   await expect.poll(async () => (await debug(page)).koi.quality).toBe('low');

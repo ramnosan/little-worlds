@@ -5,7 +5,9 @@ import { AquariumRenderer } from '../../src/aquarium/render';
 const world = new AquariumWorld();
 world.paused = true;
 world.heights.fill(0);
-const view = new AquariumRenderer(document.querySelector<HTMLElement>('#tank')!, world);
+const view = new AquariumRenderer(document.querySelector<HTMLElement>('#tank')!, world, {
+  forceRaster: true,
+});
 view.controls.enableDamping = false;
 view.camera.position.set(0, 5, 9);
 view.controls.target.set(0, WATER_Y, 0);

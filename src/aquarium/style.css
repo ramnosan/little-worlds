@@ -52,7 +52,22 @@ p {
   min-height: 100svh;
   overflow: hidden;
   position: relative;
-  background: radial-gradient(ellipse at 46% 53%, #356167 0%, #1a3d44 35%, #102a30 72%);
+  --aq-day: 1;
+  --aq-sunset: 0;
+  background: radial-gradient(
+    ellipse at 46% 53%,
+    rgb(
+        calc(12 + var(--aq-day) * 41 + var(--aq-sunset) * 65) calc(23 + var(--aq-day) * 74)
+          calc(37 + var(--aq-day) * 66 - var(--aq-sunset) * 25)
+      )
+      0%,
+    rgb(
+        calc(5 + var(--aq-day) * 21 + var(--aq-sunset) * 32) calc(11 + var(--aq-day) * 50)
+          calc(23 + var(--aq-day) * 45 - var(--aq-sunset) * 14)
+      )
+      40%,
+    rgb(calc(3 + var(--aq-day) * 13) calc(7 + var(--aq-day) * 35) calc(16 + var(--aq-day) * 32)) 72%
+  );
 }
 .aq-header {
   border-bottom: 1px solid #b5d4ce22;
@@ -159,6 +174,16 @@ h1 em {
   font-size: 9px;
   letter-spacing: 1.6px;
   margin-bottom: 24px;
+}
+.aq-light-controls {
+  border-bottom: 1px solid #aac7c329;
+  padding-bottom: 4px;
+}
+.aq-light-controls label {
+  margin-top: 0;
+}
+.aq-light-controls .aq-toggle {
+  margin: 17px 0;
 }
 .aq-panel-title > span:last-child {
   font-size: 25px;
@@ -396,7 +421,7 @@ input[type='range'] {
 }
 .aq-notice {
   position: absolute;
-  bottom: 178px;
+  bottom: 210px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
@@ -526,6 +551,11 @@ input[type='range'] {
   .aq-panel-title {
     grid-column: 1/-1;
     margin-bottom: 0;
+  }
+  .aq-light-controls {
+    grid-column: 1/-1;
+    grid-row: 5;
+    margin-top: 14px;
   }
   .aq-settings label {
     margin-top: 15px;

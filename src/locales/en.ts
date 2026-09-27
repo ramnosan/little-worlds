@@ -1,4 +1,6 @@
 export const en = {
+  'aq.time': 'Time of day',
+  'aq.cycle': 'Automatic cycle',
   Strawberry: 'Strawberry',
   Peach: 'Peach',
   Mint: 'Mint',

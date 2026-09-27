@@ -87,6 +87,12 @@ for (const [languageIndex, language] of ['en', 'de'].entries()) {
           await page.locator('#help-close').click();
         }
         if (level.id === 'aquarium') {
+          await expect(page.locator('label[for="aq-time"]')).toContainText(
+            language === 'de' ? 'Tageszeit' : 'Time of day',
+          );
+          await expect(page.locator('#aq-cycle')).toHaveAccessibleName(
+            language === 'de' ? 'Automatischer Wechsel' : 'Automatic cycle',
+          );
           await page.locator('#aq-ball').click();
           await expect(page.locator('#aq-count')).toHaveText(
             language === 'de' ? '1 / 6 Schwimmball' : '1 / 6 floating ball',

@@ -22,6 +22,10 @@ export class WaterReflection {
     this.inverse.copy(this.mirror.matrixWorld).invert();
     this.texture.name = 'Aquarium above-water reflection';
   }
+  useByteTarget() {
+    this.mirror.getRenderTarget().dispose();
+    this.texture.type = T.UnsignedByteType;
+  }
 
   resize(width: number, height: number, low: boolean) {
     // Resolution follows the viewport aspect and has a fixed GPU budget.
@@ -50,7 +54,7 @@ export class WaterReflection {
       water.visible = sides.visible = false;
       // Reuse the same studio environment that already illuminates the tank.
       scene.background = scene.environment;
-      scene.backgroundIntensity = 0.65;
+      scene.backgroundIntensity = Math.min(0.65, scene.environmentIntensity);
       scene.backgroundBlurriness = 0.08;
       camera.updateMatrixWorld();
       this.mirror.onBeforeRender(

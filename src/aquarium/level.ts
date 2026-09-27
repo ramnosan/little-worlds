@@ -18,6 +18,9 @@ root.innerHTML = `<div class="aquarium-app">
     <div class="aq-specimen" aria-hidden="true"><span>${t('03 — GLASS TANK')}</span><i></i><span>${t('LIGHT · WATER · MOVEMENT')}</span></div>
     <aside class="aq-settings" aria-label="${t('Aquarium settings')}">
       <div class="aq-panel-title"><span>${t('YOUR LITTLE SEA')}</span><span>≈</span></div>
+      <div class="aq-light-controls"><label for="aq-time">${t('aq.time')} <output id="aq-time-value">15:00</output></label>
+      <input id="aq-time" type="range" min="0" max="1439" value="900" aria-label="${t('aq.time')}">
+      <button id="aq-cycle" class="aq-toggle" aria-pressed="true"><span>${t('aq.cycle')}</span><i></i></button></div>
       <label for="aq-strength">${t('Wave strength')} <output id="aq-strength-value">45%</output></label>
       <input id="aq-strength" type="range" min="0" max="100" value="45">
       <div class="aq-range-labels"><span>${t('Gentle')}</span><span>${t('Lively')}</span></div>
@@ -153,6 +156,7 @@ function reset() {
   if (contextLost) return;
   cancel();
   world.reset();
+  view.lighting.reset();
   reduced = false;
   view.quality(false);
   view.resetCamera();
@@ -164,6 +168,26 @@ function on(id: string, callback: () => void) {
 }
 on('aq-pause', pause);
 on('aq-ball', addBall);
+on('aq-cycle', () => {
+  view.lighting.automatic = !view.lighting.automatic;
+  syncLighting();
+});
+el('aq-time').addEventListener(
+  'input',
+  (event) => {
+    view.lighting.setTime(Number((event.target as HTMLInputElement).value) / 1440);
+    syncLighting();
+  },
+  { signal },
+);
+function syncLighting() {
+  const minutes = Math.floor(view.lighting.phase * 1440 + 1e-7);
+  const label = `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+  (el('aq-time') as HTMLInputElement).value = String(minutes);
+  el('aq-time').setAttribute('aria-valuetext', label);
+  el('aq-time-value').textContent = label;
+  el('aq-cycle').setAttribute('aria-pressed', String(view.lighting.automatic));
+}
 rippleButton.addEventListener(
   'pointerdown',
   (e) => {
@@ -359,6 +383,8 @@ function animate(now: number) {
   if (document.hidden || contextLost) return;
   if (chargeStart !== null) updateCharge(now);
   world.advance(delta);
+  view.lighting.advance(Math.min(delta, 0.1), world.paused);
+  syncLighting();
   view.render();
 }
 sync();
@@ -372,6 +398,8 @@ if (import.meta.env.DEV) {
       geometries: view.renderer.info.memory.geometries,
       textures: view.renderer.info.memory.textures,
       koi: { ...view.koi.snapshot(), fish: world.koi.snapshot(), enabled: world.koi.enabled },
+      lighting: view.lighting.snapshot(),
+      rendering: view.renderingSnapshot(),
     }),
   });
 }
