@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 const levels = [
   {
     id: 'plant',
-    title: ['Dutch iris · Little Worlds', 'Holländische Iris · Little Worlds'],
+    title: ['Plant · Little Worlds', 'Plant · Little Worlds'],
     pause: '#plant-pause',
     reset: '#plant-reset',
     status: '#plant-status',

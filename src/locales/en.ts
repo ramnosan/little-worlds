@@ -1,8 +1,8 @@
 export const en = {
-  'Dutch iris': 'Dutch iris',
-  'page.plant': 'Dutch iris · Little Worlds',
+  Plant: 'Plant',
+  'page.plant': 'Plant · Little Worlds',
   'plant.edition': 'A LITTLE ROOM TO GROW.',
-  'plant.eyebrow': 'LEVEL 07 / DUTCH IRIS',
+  'plant.eyebrow': 'LEVEL 07 / PLANT',
   'plant.title': 'A little bulb.',
   'plant.titleAccent': 'A living garden.',
   'plant.intro':
@@ -19,9 +19,10 @@ export const en = {
   'plant.speed': 'Playback speed',
   'plant.fit': 'Fit view',
   'plant.footer': 'Small worlds. Room to grow.',
-  'plant.shortcuts': 'RIGHT-DRAG: PAN · SCROLL: ZOOM · SPACE: PAUSE · R: RESTART',
+  'plant.shortcuts':
+    'LEFT-DRAG: PAN · RIGHT-DRAG: ORBIT · SCROLL: ZOOM · SPACE: PAUSE · R: RESTART',
   'plant.canvas':
-    'Iris garden. Click below the soil surface to plant. Arrow keys move the bulb preview; Enter plants. Right-drag to pan; scroll or pinch to zoom.',
+    'Iris garden. Click below the soil surface to plant. Arrow keys move the bulb preview; Enter plants. Left-drag to pan, right-drag to orbit the glass tank, and scroll or pinch to zoom.',
   'plant.paused': 'Growth paused',
   'plant.growing': 'Quietly growing',
   'plant.empty': 'A little space for a new beginning.',

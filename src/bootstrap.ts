@@ -35,7 +35,7 @@ const selectedLevel =
 const loading = document.getElementById('level-loading')!;
 const root = document.getElementById('app')!;
 const names = {
-  plant: t('Dutch iris'),
+  plant: t('Plant'),
   jelly: 'Jelly',
   bubbles: t('Bubbles'),
   aquarium: 'Aquarium',

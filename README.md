@@ -46,11 +46,11 @@ Stay beside a procedural campfire as logs char, settle, and fade into embers in 
 
 Fly a small yellow high-wing model aeroplane from a countryside airfield. Build speed, lift off, bank through the open sky, switch between ground and chase views, and return gently enough to keep the aircraft intact. Keyboard controls model throttle, elevator, ailerons, and rudder, while touchscreens provide a pair of familiar flight sticks.
 
-### 07 · Dutch iris
+### 07 · Plant
 
 Plant up to twelve Dutch iris bulbs in a shallow glass soil tank. One starter bulb begins the garden; click in the planting band to add more, or select a plant to inspect its age and stage. Each bulb has its own growth rate and developing roots. Roots respond to soil resistance, stones, tank boundaries and neighbouring roots. Gentle crowding slows growth without preventing flowering.
 
-An uncrowded iris takes about three minutes to bloom at **1×**, with **5× / 20×**, pause and elapsed time. Plants hold their first bloom while younger bulbs continue developing. **Restart clears the tank**. Right-drag to pan, scroll or pinch to zoom, and use **Fit view** to restore the full tank. On touchscreens, two fingers pan/zoom. With the canvas focused, arrow keys move the bulb preview and Enter plants; **Space** pauses and **R** restarts.
+An uncrowded iris takes about three minutes to bloom at **1×**, with **5× / 20×**, pause and elapsed time. Plants hold their first bloom while younger bulbs continue developing. **Restart clears the tank**. Left-drag to pan, right-drag to orbit around the glass soil tank, scroll or pinch to zoom, and use **Fit view** to restore the full tank. On touchscreens, two fingers pan/zoom. With the canvas focused, arrow keys move the bulb preview and Enter plants; **Space** pauses and **R** restarts.
 
 The procedural scene uses a single high-quality renderer, bounded reusable geometry, soft shadows and translucent leaf/petal lighting. No watering, quality settings, timeline seeking or saved growth. The time and shallow root display are illustrative rather than a validated horticultural model. See the [visual guide](docs/plant-style.md) and [implementation and verification notes](docs/plant-simulation.md).
 

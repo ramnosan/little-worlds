@@ -8,6 +8,7 @@ import {
   STAGES,
   type Point,
 } from '../src/plant/growth';
+import { stemPoint, leafPoint, petalPoint } from '../src/plant/shape';
 const pos = (x = 0, y = -0.85): Point => [x, y, 0.6];
 const start = () => {
   const w = new PlantWorld();
@@ -163,6 +164,69 @@ test('basal roots stay attached for every valid front-plane depth', () => {
       assert.equal(y, -0.85 - 0.28);
       assert.ok((x / 0.095) ** 2 + ((rz - z) / (0.095 * 0.55)) ** 2 <= 1);
       assert.ok(rz >= 0.555 && rz <= 0.655);
+    }
+  }
+});
+
+test('individual forms are reproducible, varied, and keep a curved lean at maturity', () => {
+  const a = new PlantWorld(),
+    b = new PlantWorld();
+  for (let i = 0; i < MAX_PLANTS; i++) {
+    a.plantBulb(pos(-5.3 + i * 0.95));
+    b.plantBulb(pos(-5.3 + i * 0.95));
+  }
+  const forms = structuredClone(a.plants.map((p) => p.form));
+  assert.deepEqual(
+    forms,
+    b.plants.map((p) => p.form),
+  );
+  assert.ok(new Set(forms.map((f) => f.palette)).size >= 4);
+  assert.ok(new Set(a.plants.map((p) => p.leaves.length)).size >= 3);
+  assert.ok(forms.some((f) => f.lean[0] < 0) && forms.some((f) => f.lean[0] > 0));
+  a.advance(320);
+  for (const p of a.plants) {
+    const base = stemPoint(p, 0),
+      tip = stemPoint(p, p.stalk);
+    assert.deepEqual(base, [p.position[0], p.position[1] + 0.24, p.position[2]]);
+    assert.ok(Math.abs(tip[0] - base[0]) > 0.2, 'mature stem retains its lean');
+    const middle = stemPoint(p, p.stalk * 0.5);
+    assert.ok(
+      Math.hypot(middle[0] - (tip[0] + base[0]) / 2, middle[2] - (tip[2] + base[2]) / 2) > 0.001,
+    );
+    p.leaves.forEach((_, i) => assert.deepEqual(leafPoint(p, i, 0, 0), base));
+  }
+  const held = a.plants.map((p) => stemPoint(p, p.stalk));
+  a.advance(60);
+  assert.deepEqual(
+    a.plants.map((p) => p.form),
+    forms,
+  );
+  assert.deepEqual(
+    a.plants.map((p) => stemPoint(p, p.stalk)),
+    held,
+  );
+});
+
+test('iris surfaces stay finite through unfurling and open into standards above drooping falls', () => {
+  for (const seed of [1, 719, 104729]) {
+    const w = new PlantWorld(seed);
+    w.plantBulb(pos());
+    w.advance(300);
+    const p = w.plants[0];
+    for (const opening of [0, 0.1, 0.4, 0.7, 1]) {
+      p.opening = opening;
+      for (const kind of ['standard', 'fall', 'arm'] as const)
+        for (let n = 0; n < 3; n++)
+          for (let i = 0; i <= 20; i++)
+            for (const v of [-1, -0.5, 0, 0.5, 1]) {
+              const point = petalPoint(p, n, i / 20, v, kind);
+              assert.ok(point.every(Number.isFinite));
+              assert.ok(Math.hypot(...point) < 2.2, 'organ stays inside fitted flower bounds');
+            }
+    }
+    for (let n = 0; n < 3; n++) {
+      assert.ok(petalPoint(p, n, 1, 0, 'standard')[1] > 0.8);
+      assert.ok(petalPoint(p, n, 1, 0, 'fall')[1] < -0.25);
     }
   }
 });

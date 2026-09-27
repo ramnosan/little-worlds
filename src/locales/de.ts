@@ -1,10 +1,10 @@
 import type { en } from './en';
 
 export const de: { [Key in keyof typeof en]: string } = {
-  'Dutch iris': 'Holländische Iris',
-  'page.plant': 'Holländische Iris · Little Worlds',
+  Plant: 'Plant',
+  'page.plant': 'Plant · Little Worlds',
   'plant.edition': 'EIN WENIG RAUM ZUM WACHSEN.',
-  'plant.eyebrow': 'LEVEL 07 / HOLLÄNDISCHE IRIS',
+  'plant.eyebrow': 'LEVEL 07 / PLANT',
   'plant.title': 'Eine kleine Zwiebel.',
   'plant.titleAccent': 'Ein lebendiger Garten.',
   'plant.intro':
@@ -21,9 +21,10 @@ export const de: { [Key in keyof typeof en]: string } = {
   'plant.speed': 'Abspieltempo',
   'plant.fit': 'Gesamtansicht',
   'plant.footer': 'Kleine Welten. Raum zum Wachsen.',
-  'plant.shortcuts': 'RECHTS ZIEHEN: VERSCHIEBEN · SCROLLEN: ZOOM · LEERTASTE: PAUSE · R: NEUSTART',
+  'plant.shortcuts':
+    'LINKS ZIEHEN: VERSCHIEBEN · RECHTS ZIEHEN: DREHEN · SCROLLEN: ZOOM · LEERTASTE: PAUSE · R: NEUSTART',
   'plant.canvas':
-    'Irisgarten. Unter die Erdoberfläche klicken zum Pflanzen. Pfeiltasten bewegen die Vorschau, Enter pflanzt. Rechts ziehen zum Verschieben; scrollen oder zwei Finger zum Zoomen.',
+    'Irisgarten. Unter die Erdoberfläche klicken zum Pflanzen. Pfeiltasten bewegen die Vorschau, Enter pflanzt. Links ziehen zum Verschieben, rechts ziehen zum Drehen um den Glaskasten; scrollen oder zwei Finger zum Zoomen.',
   'plant.paused': 'Wachstum pausiert',
   'plant.growing': 'Wächst in aller Ruhe',
   'plant.empty': 'Ein wenig Platz für einen neuen Anfang.',

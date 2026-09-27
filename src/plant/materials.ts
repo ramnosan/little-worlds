@@ -131,33 +131,116 @@ export function bulbTexture() {
     }
   });
 }
-export function petalTexture(fall = false) {
-  return canvasTexture(512, (ctx) => {
-    const g = ctx.createLinearGradient(0, 0, 0, 512);
-    g.addColorStop(0, fall ? '#acaae6' : '#6951bb');
-    g.addColorStop(0.55, fall ? '#c4c2ef' : '#7962da');
-    g.addColorStop(1, fall ? '#8273cc' : '#5146a3');
+// Tip, limb and throat. Blue/violet and silvery bicolours occur in Dutch iris cultivars.
+const PETAL_PALETTES = [
+  ['#8271d6', '#4936ad', '#e5dcfa', '#7978cf', '#4443ad'],
+  ['#687fdf', '#304caf', '#e4e7ff', '#7a98eb', '#3c61bf'],
+  ['#b18bd4', '#7640a3', '#f0def3', '#bfa5e3', '#8a61bd'],
+  ['#edeafa', '#c2b5e3', '#fcf7df', '#8d99de', '#6574bb'],
+  ['#eef0fc', '#d8dff1', '#fff5d5', '#edeaf7', '#c9cde5'],
+];
+
+export function petalTexture(kind: 'standard' | 'fall' | 'arm' = 'standard', palette = 0) {
+  const fall = kind === 'fall',
+    arm = kind === 'arm';
+  const colors = PETAL_PALETTES[palette];
+  const texture = canvasTexture(1024, (ctx) => {
+    // Canvas top is UV v=1 (the petal tip); the attached claw is at the bottom.
+    const g = ctx.createLinearGradient(0, 0, 0, 1024);
+    g.addColorStop(0, arm ? colors[2] : colors[fall ? 3 : 0]);
+    g.addColorStop(0.48, arm ? colors[0] : colors[fall ? 4 : 1]);
+    g.addColorStop(0.82, colors[2]);
+    g.addColorStop(1, '#d9dcb3');
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 512, 512);
-    const r = seededRandom(61);
-    for (let i = 0; i < 65; i++) {
-      ctx.strokeStyle = fall ? '#5043ab50' : '#d5c4ff65';
-      ctx.lineWidth = 0.6 + r();
-      const x = r() * 512;
+    ctx.fillRect(0, 0, 1024, 1024);
+    const r = seededRandom(61 + palette * 37 + (fall ? 7 : 0));
+    const edgeLight = ctx.createLinearGradient(0, 0, 1024, 0);
+    edgeLight.addColorStop(0, '#f2e6ff55');
+    edgeLight.addColorStop(0.15, '#ffffff00');
+    edgeLight.addColorStop(0.5, '#21164a19');
+    edgeLight.addColorStop(0.85, '#ffffff00');
+    edgeLight.addColorStop(1, '#f2e6ff55');
+    ctx.fillStyle = edgeLight;
+    ctx.fillRect(0, 0, 1024, 1024);
+    // Branching longitudinal veins converge into the narrow claw.
+    for (let i = 0; i < 145; i++) {
+      const x = (i / 144) * 1024,
+        bend = (r() - 0.5) * 45;
+      ctx.strokeStyle = i % 4 === 0 ? '#f1e4ff46' : '#32217232';
+      ctx.lineWidth = i % 5 === 0 ? 1.6 : 0.55 + r() * 0.8;
       ctx.beginPath();
-      ctx.moveTo(256 + (x - 256) * 0.3, 0);
-      ctx.bezierCurveTo(x, 180, x + 15, 330, x, 512);
+      ctx.moveTo(512 + (x - 512) * 0.18, 1024);
+      ctx.bezierCurveTo(x + bend, 750, x - bend, 320, x, 0);
       ctx.stroke();
+      if (i % 3 === 0) {
+        ctx.beginPath();
+        ctx.moveTo(x, 420);
+        ctx.bezierCurveTo(x + 12, 300, x + 23, 200, x + 28, 70);
+        ctx.stroke();
+      }
     }
     if (fall) {
-      ctx.fillStyle = '#edbf30';
+      // An ivory halo and long golden signal on the upper face of each fall.
+      const halo = ctx.createRadialGradient(512, 555, 15, 512, 555, 270);
+      halo.addColorStop(0, '#fff8d7ed');
+      halo.addColorStop(0.6, '#f5efdbb0');
+      halo.addColorStop(1, '#eee5fb00');
+      ctx.fillStyle = halo;
+      ctx.fillRect(200, 260, 624, 750);
+      const gold = ctx.createLinearGradient(0, 370, 0, 1024);
+      gold.addColorStop(0, '#ffc92e');
+      gold.addColorStop(0.5, '#edb217');
+      gold.addColorStop(1, '#fff0a1');
+      ctx.fillStyle = gold;
       ctx.beginPath();
-      ctx.moveTo(229, 0);
-      ctx.bezierCurveTo(212, 75, 199, 180, 254, 245);
-      ctx.bezierCurveTo(301, 180, 300, 75, 284, 0);
+      ctx.moveTo(468, 1024);
+      ctx.bezierCurveTo(450, 850, 398, 555, 438, 380);
+      ctx.bezierCurveTo(450, 310, 482, 276, 512, 242);
+      ctx.bezierCurveTo(571, 305, 593, 426, 580, 537);
+      ctx.bezierCurveTo(568, 790, 553, 896, 553, 1024);
+      ctx.closePath();
       ctx.fill();
+      for (let i = 0; i < 21; i++) {
+        const x = 476 + r() * 66;
+        ctx.strokeStyle = i % 3 ? '#fff3a964' : '#ad741f40';
+        ctx.lineWidth = 0.7 + r();
+        ctx.beginPath();
+        ctx.moveTo(x, 970);
+        ctx.quadraticCurveTo(x + (r() - 0.5) * 45, 610, 512 + (x - 512) * 0.55, 293 + r() * 75);
+        ctx.stroke();
+      }
+    }
+    // Minute epidermal grain breaks up the otherwise perfectly smooth surface.
+    for (let i = 0; i < 42000; i++) {
+      ctx.fillStyle = i % 2 ? '#ffffff0b' : '#261e500a';
+      ctx.fillRect(r() * 1024, r() * 1024, 0.5 + r() * 1.5, 1 + r() * 2);
     }
   });
+  texture.anisotropy = 8;
+  return texture;
+}
+
+export function petalMaterial(map: T.Texture) {
+  const material = new T.MeshPhysicalMaterial({
+    map,
+    side: T.DoubleSide,
+    roughness: 0.57,
+    metalness: 0,
+    sheen: 0.65,
+    sheenColor: new T.Color('#d5c5f5'),
+    sheenRoughness: 0.72,
+    bumpMap: map,
+    bumpScale: 0.006,
+  });
+  material.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <lights_fragment_end>',
+      `#include <lights_fragment_end>
+      float petalBacklight = pow(max(0.0, dot(-normal, normalize(vec3(-0.6, 0.7, 0.4)))), 2.0);
+      reflectedLight.indirectDiffuse += diffuseColor.rgb * (0.08 + 0.32 * petalBacklight);`,
+    );
+  };
+  return material;
 }
 
 export function leafMaterial(map: T.Texture) {

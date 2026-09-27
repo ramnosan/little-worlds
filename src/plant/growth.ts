@@ -41,6 +41,20 @@ export interface IrisLeaf {
   angle: number;
   lean: number;
   width: number;
+  twist: number;
+  droop: number;
+}
+export interface IrisForm {
+  lean: [number, number];
+  bend: [number, number];
+  flowerSize: number;
+  petalWidth: number;
+  petalCurl: number;
+  headTilt: [number, number];
+  palette: number;
+  tint: number;
+  foliage: number;
+  petalVariation: number[];
 }
 export interface IrisPlant {
   id: number;
@@ -57,6 +71,7 @@ export interface IrisPlant {
   opening: number;
   height: number;
   rotation: number;
+  form: IrisForm;
   crowding: number;
   revision: number;
   rootRevision: number;
@@ -177,20 +192,35 @@ export class PlantWorld {
       stalk: 0,
       bud: 0,
       opening: 0,
-      height: 4.5 + rng() * 0.8,
+      height: 3.8 + rng() * 1.9,
       rotation: rng() * 6.28,
       crowding: 1,
       revision: 0,
       rootRevision: 0,
       randomState: (rng() * 4294967296) >>> 0,
+      form: {
+        lean: [(rng() < 0.5 ? -1 : 1) * (0.085 + rng() * 0.18), (rng() - 0.5) * 0.24],
+        bend: [(rng() - 0.5) * 0.85, (rng() - 0.5) * 0.5],
+        flowerSize: 0.88 + rng() * 0.38,
+        petalWidth: 0.82 + rng() * 0.36,
+        petalCurl: 0.75 + rng() * 0.65,
+        headTilt: [(rng() - 0.5) * 0.3, (rng() - 0.5) * 0.3],
+        palette: [2, 3, 0, 1, 4][Math.floor(rng() * 5)],
+        tint: rng(),
+        foliage: rng(),
+        petalVariation: Array.from({ length: 9 }, () => rng()),
+      },
     };
-    for (let i = 0; i < 6; i++)
+    const leafCount = 4 + Math.floor(rng() * 5);
+    for (let i = 0; i < leafCount; i++)
       p.leaves.push({
         length: 0,
-        targetLength: 1.9 + rng() * 1.3,
-        angle: (i % 2 ? 1 : -1) * (0.3 + rng() * 0.35),
-        lean: rng() * 0.25,
-        width: 0.1 + rng() * 0.035,
+        targetLength: (1.5 + rng() * 2.1) * (p.height / 4.7),
+        angle: p.rotation + (i % 2 ? Math.PI : 0) + (rng() - 0.5) * 0.95,
+        lean: 0.12 + rng() * 0.43,
+        width: 0.065 + rng() * 0.08,
+        twist: (rng() - 0.5) * 1.3,
+        droop: 0.08 + rng() * 0.3,
       });
     this.plants.push(p);
     this.revision++;

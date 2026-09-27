@@ -89,7 +89,7 @@ test('keyboard planting, controls, elapsed time, restart and shortcut focus guar
   await expect(page.locator('#plant-timeline')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Water', exact: true })).toHaveCount(0);
 });
-test('pan, pinch and drag never plant; zoom and fit recover the full tank', async ({ page }) => {
+test('left drag pans, right drag orbits the tank, and fit restores the view', async ({ page }) => {
   await open(page);
   const before = await stats(page),
     canvas = page.locator('canvas'),
@@ -98,12 +98,23 @@ test('pan, pinch and drag never plant; zoom and fit recover the full tank', asyn
   await page.mouse.down();
   await page.mouse.move(target.x + 50, target.y, { steps: 5 });
   await page.mouse.up();
-  expect((await stats(page)).plants).toHaveLength(1);
+  const panned = await stats(page);
+  expect(panned.plants).toHaveLength(1);
+  expect(panned.target).not.toEqual(before.target);
+  panned.camera.forEach((value, i) =>
+    expect(value - panned.target[i]).toBeCloseTo(before.camera[i] - before.target[i]),
+  );
+  await page.locator('#plant-fit').click();
+  expect((await stats(page)).target).toEqual([0, -1.96, 0.04]);
   await page.mouse.move(target.x, target.y);
   await page.mouse.down({ button: 'right' });
   await page.mouse.move(target.x + 60, target.y + 20, { steps: 5 });
   await page.mouse.up({ button: 'right' });
-  expect((await stats(page)).camera).not.toEqual(before.camera);
+  const orbited = await stats(page);
+  expect(orbited.plants).toHaveLength(1);
+  expect(orbited.camera).not.toEqual(before.camera);
+  expect(orbited.target).toEqual(before.target);
+  expect(orbited.zoom).toBeCloseTo(before.zoom);
   await page.mouse.wheel(0, -300);
   await expect.poll(async () => (await stats(page)).zoom).toBeGreaterThan(1);
   const session = await page.context().newCDPSession(page),
@@ -129,7 +140,8 @@ test('pan, pinch and drag never plant; zoom and fit recover the full tank', asyn
   expect((await stats(page)).plants).toHaveLength(1);
   await page.locator('#plant-fit').click();
   expect((await stats(page)).zoom).toBeCloseTo(1);
-  expect((await stats(page)).camera).toEqual(before.camera);
+  (await stats(page)).camera.forEach((value, i) => expect(value).toBeCloseTo(before.camera[i]));
+  expect((await stats(page)).target).toEqual(before.target);
 });
 test('hidden tab suspends without catch-up and context recovery preserves organs', async ({
   page,
@@ -207,7 +219,7 @@ for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     await open(page);
     await expect(page.locator('.level-nav a')).toHaveCount(7);
-    await expect(page.locator('.level-nav [aria-current="page"]')).toHaveText('07 Dutch iris');
+    await expect(page.locator('.level-nav [aria-current="page"]')).toHaveText('07 Plant');
     for (const [label, seconds] of [
       ['bulb', 0],
       ['root', 12],
@@ -229,7 +241,7 @@ for (const width of [1440, 390, 320]) {
     expect((await page.locator('canvas').boundingBox())!.height).toBeGreaterThanOrEqual(420);
     await expect(page.getByRole('button', { name: /Graphics/ })).toHaveCount(0);
     await page.getByRole('combobox', { name: 'Language / Sprache' }).selectOption('de');
-    await expect(page).toHaveTitle('Holländische Iris · Little Worlds');
+    await expect(page).toHaveTitle('Plant · Little Worlds');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );

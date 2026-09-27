@@ -10,12 +10,14 @@ import {
   type PlantWorld,
   type Point,
 } from './growth';
+import { stemPoint, leafPoint, petalPoint } from './shape';
 import {
   gardenTexture,
   soilTexture,
   leafTexture,
   bulbTexture,
   petalTexture,
+  petalMaterial,
   leafMaterial,
   seededRandom,
 } from './materials';
@@ -152,12 +154,14 @@ class Ribbons {
         }
     this.geometry.attributes.position.needsUpdate = true;
     this.geometry.computeVertexNormals();
+    // Raycasting must follow the deformed surface, including the leaning flower head.
+    this.geometry.computeBoundingSphere();
   }
 }
 interface Slot {
   group: T.Group;
   bulb: T.Mesh;
-  stem: T.Mesh;
+  stem: Ribbons;
   roots: RootMesh;
   leaves: Ribbons;
   standards: Ribbons;
@@ -177,6 +181,7 @@ export class PlantRenderer {
   readonly controls: OrbitControls;
   readonly slots: Slot[] = [];
   private textures: T.Texture[] = [];
+  private flowerMaps: { standard: T.Texture; fall: T.Texture; arm: T.Texture }[] = [];
   private observer: ResizeObserver;
   private disposed = false;
   private preview: T.Mesh;
@@ -188,7 +193,7 @@ export class PlantRenderer {
   private raycaster = new T.Raycaster();
   private interactionPlane = new T.Plane(new T.Vector3(0, 0, 1), -0.6);
   private selection: number | null = null;
-  private fitTarget = new T.Vector3(0, 0.65, 0);
+  private fitTarget = new T.Vector3(0, -1.96, 0.04);
   private direction = new T.Vector3(0.2, 0.1, 1).normalize();
   constructor(
     readonly container: HTMLElement,
@@ -205,22 +210,27 @@ export class PlantRenderer {
     canvas.tabIndex = 0;
     container.append(canvas);
     this.controls = new OrbitControls(this.camera, canvas);
-    this.controls.enableRotate = false;
+    this.controls.enableRotate = true;
     this.controls.enableDamping = false;
     this.controls.screenSpacePanning = true;
     this.controls.mouseButtons = {
-      LEFT: null,
+      LEFT: T.MOUSE.PAN,
       MIDDLE: T.MOUSE.DOLLY,
-      RIGHT: T.MOUSE.PAN,
+      RIGHT: T.MOUSE.ROTATE,
     };
     this.controls.touches = { ONE: null, TWO: T.TOUCH.DOLLY_PAN };
     this.controls.addEventListener('change', () => this.clampCamera());
     this.environment();
     const bulbMap = bulbTexture(),
-      leafMap = leafTexture(),
-      standardMap = petalTexture(),
-      fallMap = petalTexture(true);
-    this.textures.push(bulbMap, leafMap, standardMap, fallMap);
+      leafMap = leafTexture();
+    this.textures.push(bulbMap, leafMap);
+    this.flowerMaps = Array.from({ length: 5 }, (_, palette) => {
+      const standard = petalTexture('standard', palette),
+        fall = petalTexture('fall', palette),
+        arm = petalTexture('arm', palette);
+      this.textures.push(standard, fall, arm);
+      return { standard, fall, arm };
+    });
     const bulbMaterial = new T.MeshStandardMaterial({
       map: bulbMap,
       bumpMap: bulbMap,
@@ -228,13 +238,6 @@ export class PlantRenderer {
       roughness: 0.94,
     });
     const rootMaterial = new T.MeshStandardMaterial({ color: 0xe8ddc0, roughness: 0.87 });
-    const foliage = leafMaterial(leafMap),
-      standards = leafMaterial(standardMap),
-      falls = leafMaterial(fallMap);
-    standards.emissive.setHex(0x34265c);
-    standards.emissiveIntensity = 0.18;
-    falls.emissive.setHex(0x565075);
-    falls.emissiveIntensity = 0.12;
     const bulbGeometry = new T.LatheGeometry(
       [
         new T.Vector2(0, -0.28),
@@ -249,28 +252,28 @@ export class PlantRenderer {
       ],
       32,
     );
-    const stemGeometry = new T.CylinderGeometry(0.022, 0.041, 1, 12);
-    const stemMaterial = new T.MeshStandardMaterial({ color: 0x799552, roughness: 0.7 });
     for (let i = 0; i < MAX_PLANTS; i++) {
+      const foliage = leafMaterial(leafMap);
+      const stemMaterial = new T.MeshStandardMaterial({ color: 0x799552, roughness: 0.7 });
       const group = new T.Group(),
         roots = new RootMesh(rootMaterial),
-        leaves = new Ribbons(6, foliage);
+        leaves = new Ribbons(8, foliage, 64, 12);
       const slot: Slot = {
         group,
         bulb: new T.Mesh(bulbGeometry, bulbMaterial),
-        stem: new T.Mesh(stemGeometry, stemMaterial),
+        stem: new Ribbons(1, stemMaterial, 80, 16),
         roots,
         leaves,
-        standards: new Ribbons(3, standards),
-        falls: new Ribbons(3, falls),
-        arms: new Ribbons(3, standards, 20, 6),
-        sheath: new Ribbons(2, foliage, 20, 6),
+        standards: new Ribbons(3, petalMaterial(this.flowerMaps[0].standard), 72, 32),
+        falls: new Ribbons(3, petalMaterial(this.flowerMaps[0].fall), 80, 36),
+        arms: new Ribbons(3, petalMaterial(this.flowerMaps[0].arm), 48, 20),
+        sheath: new Ribbons(2, foliage, 40, 12),
         revision: -1,
         id: 0,
       };
       group.add(
         slot.bulb,
-        slot.stem,
+        slot.stem.mesh,
         roots.mesh,
         leaves.mesh,
         slot.standards.mesh,
@@ -279,7 +282,7 @@ export class PlantRenderer {
         slot.sheath.mesh,
       );
       slot.bulb.castShadow = true;
-      slot.stem.castShadow = true;
+      slot.stem.mesh.castShadow = true;
       group.visible = false;
       this.scene.add(group);
       this.slots.push(slot);
@@ -490,82 +493,84 @@ export class PlantRenderer {
       slot.roots.update(p);
       slot.rootRevision = p.rootRevision;
     }
-    const x = p.position[0],
-      z = p.position[2],
-      baseY = p.position[1] + 0.24;
+    if (force) {
+      const maps = this.flowerMaps[p.form.palette];
+      for (const [ribbon, map] of [
+        [slot.standards, maps.standard],
+        [slot.falls, maps.fall],
+        [slot.arms, maps.arm],
+      ] as const) {
+        const material = ribbon.mesh.material as T.MeshPhysicalMaterial;
+        material.map = material.bumpMap = map;
+        material.color.setHSL(
+          0.72 + p.form.tint * 0.08,
+          0.06 + p.form.tint * 0.08,
+          0.91 + p.form.tint * 0.07,
+        );
+        material.needsUpdate = true;
+      }
+      (slot.leaves.mesh.material as T.MeshStandardMaterial).color.setHSL(
+        0.22 + p.form.foliage * 0.07,
+        0.12 + p.form.foliage * 0.17,
+        0.69 + p.form.foliage * 0.23,
+      );
+      (slot.stem.mesh.material as T.MeshStandardMaterial).color.setHSL(
+        0.22 + p.form.foliage * 0.06,
+        0.3,
+        0.36 + p.form.foliage * 0.16,
+      );
+    }
     const stemHeight = Math.max(p.shoot, p.stalk);
-    slot.stem.visible = stemHeight > 0.001;
-    slot.stem.position.set(x, baseY + stemHeight / 2, z);
-    slot.stem.scale.y = stemHeight;
+    slot.stem.mesh.visible = stemHeight > 0.001;
+    if (slot.stem.mesh.visible) {
+      slot.stem.update((_n, u, v) => {
+        const h = stemHeight * u,
+          center = new T.Vector3(...stemPoint(p, h));
+        const tangent = new T.Vector3(...stemPoint(p, h + 0.001)).sub(center).normalize();
+        const side = new T.Vector3(0, 0, 1).cross(tangent).normalize();
+        const normal = tangent.clone().cross(side);
+        const radius = (0.041 - 0.019 * u) * (0.86 + p.form.flowerSize * 0.14);
+        center.addScaledVector(side, Math.cos(v * Math.PI) * radius);
+        center.addScaledVector(normal, Math.sin(v * Math.PI) * radius);
+        return center.toArray() as Point;
+      });
+    }
     const leafGrowth = p.leaves.reduce((sum, leaf) => sum + leaf.length, 0);
     slot.leaves.mesh.visible = leafGrowth > 0;
     if (slot.leaves.mesh.visible && (force || slot.leafGrowth !== leafGrowth))
-      slot.leaves.update((n, u, v) => {
-        const leaf = p.leaves[n],
-          length = leaf.length;
-        const phi = p.rotation * 0.25 + n * 0.23,
-          side = n % 2 ? 1 : -1;
-        const spread = side * (0.15 + leaf.lean) * length * u * u;
-        const width = leaf.width * Math.sin(Math.PI * u) ** 0.45 * (1 - u * 0.35);
-        const y = baseY + length * u * 0.98;
-        return [
-          x + spread * Math.cos(phi) + v * width * Math.cos(phi),
-          y - Math.abs(spread) * 0.15,
-          z +
-            spread * Math.sin(phi) * 0.5 +
-            v * width * Math.sin(phi) +
-            Math.abs(v) * 0.025 * Math.sin(Math.PI * u),
-        ];
-      });
+      slot.leaves.update((n, u, v) => leafPoint(p, n, u, v));
     slot.leafGrowth = leafGrowth;
-    const flowerBase: Point = [x, baseY + p.stalk, z];
-    const scale = 0.15 + 0.85 * p.bud,
+    const flowerBase = new T.Vector3(...stemPoint(p, p.stalk));
+    const tangent = new T.Vector3(...stemPoint(p, p.stalk + 0.01)).sub(flowerBase).normalize();
+    const orientation = new T.Quaternion().setFromUnitVectors(new T.Vector3(0, 1, 0), tangent);
+    orientation.multiply(
+      new T.Quaternion().setFromEuler(
+        new T.Euler(p.form.headTilt[0] * p.bud, 0, p.form.headTilt[1] * p.bud),
+      ),
+    );
+    const transform = (point: Point): Point =>
+      new T.Vector3(...point).applyQuaternion(orientation).add(flowerBase).toArray() as Point;
+    const scale = (0.15 + 0.85 * p.bud) * p.form.flowerSize,
       open = smooth(p.opening, 0, 1);
-    function petal(n: number, u: number, v: number, kind: 'standard' | 'fall' | 'arm'): Point {
-      const angle =
-        (p.rotation - 3.14) * 0.12 +
-        (n * Math.PI * 2) / 3 +
-        (kind === 'standard' ? Math.PI / 3 : 0);
-      let radial: number, y: number, width: number;
-      if (kind === 'standard') {
-        radial = 0.05 + u * (0.045 + 0.29 * open);
-        y = u * 0.87 - 0.07 * open * u * u;
-        width = 0.28 * Math.sin(Math.PI * u) ** 0.7 * (0.15 + 0.85 * open);
-      } else if (kind === 'fall') {
-        radial = 0.025 + u * (0.045 + 0.9 * open);
-        y = u * 0.78 * (1 - open) + open * (0.17 * Math.sin(Math.PI * u) - 0.48 * u * u);
-        width = 0.34 * Math.sin(Math.PI * u) ** 0.7 * (0.12 + 0.88 * open);
-      } else {
-        radial = 0.025 + u * (0.04 + 0.43 * open);
-        y = u * 0.55 * (1 - open) + open * (0.2 + 0.18 * Math.sin(Math.PI * u) - 0.12 * u);
-        width = 0.11 * Math.sin(Math.PI * u) ** 0.7 * (0.2 + 0.8 * open);
-      }
-      const ripple = 0.018 * Math.sin(u * 30 + n) * v * v * open;
-      return [
-        flowerBase[0] + scale * (Math.sin(angle) * radial + Math.cos(angle) * v * width),
-        flowerBase[1] + scale * (y + ripple),
-        flowerBase[2] + scale * (Math.cos(angle) * radial - Math.sin(angle) * v * width),
-      ];
-    }
     slot.standards.mesh.visible = slot.falls.mesh.visible = slot.arms.mesh.visible = p.bud > 0.18;
     const flowerGrowth = p.stalk + p.bud + p.opening;
     const flowerChanged = force || slot.flowerGrowth !== flowerGrowth;
     if (slot.standards.mesh.visible && flowerChanged) {
-      slot.standards.update((n, u, v) => petal(n, u, v, 'standard'));
-      slot.falls.update((n, u, v) => petal(n, u, v, 'fall'));
-      slot.arms.update((n, u, v) => petal(n, u, v, 'arm'));
+      slot.standards.update((n, u, v) => transform(petalPoint(p, n, u, v, 'standard')));
+      slot.falls.update((n, u, v) => transform(petalPoint(p, n, u, v, 'fall')));
+      slot.arms.update((n, u, v) => transform(petalPoint(p, n, u, v, 'arm')));
     }
     slot.sheath.mesh.visible = p.bud > 0.01;
     if (slot.sheath.mesh.visible && flowerChanged)
       slot.sheath.update((n, u, v) => {
         const phi = p.rotation + n * Math.PI,
-          radial = (0.1 * Math.sin(Math.PI * u) + open * 0.25 * u) * scale,
-          width = 0.12 * Math.sin(Math.PI * u);
-        return [
-          x + Math.cos(phi) * radial + Math.sin(phi) * v * width,
-          flowerBase[1] + u * 0.82 * scale * (1 - open * 0.6),
-          z + Math.sin(phi) * radial - Math.cos(phi) * v * width,
-        ];
+          radial = (0.13 * Math.sin(Math.PI * u) + open * 0.3 * u) * scale,
+          width = 0.14 * Math.sin(Math.PI * u);
+        return transform([
+          Math.cos(phi) * radial + Math.sin(phi) * v * width,
+          -0.16 + u * 1.08 * scale * (1 - open * 0.72),
+          Math.sin(phi) * radial - Math.cos(phi) * v * width,
+        ]);
       });
     slot.flowerGrowth = flowerGrowth;
     slot.revision = p.revision;
@@ -579,8 +584,8 @@ export class PlantRenderer {
     this.fit();
   }
   fit() {
-    const halfHeight = 5.4,
-      halfWidth = 6.6,
+    const halfHeight = 8.1,
+      halfWidth = 8.1,
       tan = Math.tan(T.MathUtils.degToRad(this.camera.fov / 2));
     this.fitDistance = Math.max(halfHeight / tan, halfWidth / (tan * this.camera.aspect)) * 1.1;
     this.camera.far = Math.max(100, this.fitDistance * 3);
@@ -596,7 +601,7 @@ export class PlantRenderer {
       delta = new T.Vector3(
         clamp(target.x, -6, 6) - target.x,
         clamp(target.y, -3, 5) - target.y,
-        -target.z,
+        this.fitTarget.z - target.z,
       );
     target.add(delta);
     this.camera.position.add(delta);
@@ -626,7 +631,7 @@ export class PlantRenderer {
     this.scene.updateMatrixWorld(true);
     const objects = this.slots
       .filter((s) => s.group.visible)
-      .flatMap((s) => [s.bulb, s.stem, s.leaves.mesh, s.standards.mesh, s.falls.mesh]);
+      .flatMap((s) => [s.bulb, s.stem.mesh, s.leaves.mesh, s.standards.mesh, s.falls.mesh]);
     const hit = this.raycaster.intersectObjects(objects, false).find((h) => h.object.visible);
     if (!hit) return null;
     return this.slots.find((s) => s.group === hit.object.parent)?.id || null;
@@ -674,6 +679,7 @@ export class PlantRenderer {
   stats() {
     return {
       camera: this.camera.position.toArray(),
+      target: this.controls.target.toArray(),
       zoom: this.fitDistance / this.camera.position.distanceTo(this.controls.target),
       geometries: this.renderer.info.memory.geometries,
       textures: this.renderer.info.memory.textures,
