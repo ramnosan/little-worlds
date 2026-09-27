@@ -2,7 +2,8 @@ import { initializeLanguage, t } from './i18n';
 
 const level = new URLSearchParams(location.search).get('level');
 initializeLanguage(
-  level === 'airplane' ||
+  level === 'plant' ||
+    level === 'airplane' ||
     level === 'fire' ||
     level === 'railway' ||
     level === 'aquarium' ||
@@ -13,6 +14,7 @@ initializeLanguage(
 // Keep each import in its own loader so production optimization cannot combine
 // the branches and associate every level with the default level's CSS preload.
 const loadLevel = {
+  plant: () => import('./plant/level'),
   airplane: () => import('./airplane/level'),
   fire: () => import('./fire/level'),
   railway: () => import('./railway/level'),
@@ -22,6 +24,7 @@ const loadLevel = {
 };
 
 const selectedLevel =
+  level === 'plant' ||
   level === 'airplane' ||
   level === 'fire' ||
   level === 'railway' ||
@@ -32,6 +35,7 @@ const selectedLevel =
 const loading = document.getElementById('level-loading')!;
 const root = document.getElementById('app')!;
 const names = {
+  plant: t('Dutch iris'),
   jelly: 'Jelly',
   bubbles: t('Bubbles'),
   aquarium: 'Aquarium',
@@ -66,11 +70,19 @@ async function start() {
     loading.remove();
   } catch (error) {
     console.error('Level loading failed', error);
+    // A mounted level can explain a graphics failure itself. Expose its header so
+    // language/navigation remain usable and avoid announcing two error panels.
+    const levelError = root.querySelector('[role="alert"]');
+    if (levelError) {
+      root.inert = false;
+      root.removeAttribute('aria-busy');
+      loading.remove();
+      return;
+    }
     loading.dataset.error = 'true';
     loading.setAttribute('role', 'alert');
     document.getElementById('loading-title')!.textContent = t('loading.error');
-    document.getElementById('loading-detail')!.textContent =
-      root.querySelector('[role="alert"]')?.textContent || t('loading.retry');
+    document.getElementById('loading-detail')!.textContent = t('loading.retry');
     root.removeAttribute('aria-busy');
     retry.hidden = false;
   }

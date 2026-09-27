@@ -1,0 +1,1367 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f1e8" />
+    <meta
+      name="description"
+      content="An illustrated design direction for a living Dutch iris garden in Little Worlds: plant bulbs and watch individual plants grow."
+    />
+    <title>A living garden — Little Worlds visual guide</title>
+    <style>
+      :root {
+        --paper: #f4f1e8;
+        --ink: #253c2d;
+        --muted: #687363;
+        --gold: #c99a36;
+        --line: #253c2d26;
+        --card: #fbf9f2;
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 24px;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          16px/1.65 'Avenir Next',
+          Avenir,
+          'Segoe UI',
+          sans-serif;
+      }
+      a {
+        color: inherit;
+        text-underline-offset: 4px;
+      }
+      a:hover {
+        color: #786022;
+      }
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid var(--gold);
+        outline-offset: 5px;
+        border-radius: 4px;
+      }
+      .skip {
+        position: absolute;
+        left: 20px;
+        top: -100px;
+        padding: 12px;
+        background: var(--paper);
+        z-index: 2;
+      }
+      .skip:focus {
+        top: 12px;
+      }
+      .wrap {
+        width: min(1280px, calc(100% - 88px));
+        margin: auto;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        align-items: center;
+        min-height: 100px;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        font-size: 25px;
+        letter-spacing: -1px;
+        text-decoration: none;
+        font-weight: 650;
+        white-space: nowrap;
+      }
+      .brand span {
+        font-weight: 350;
+      }
+      .brand i {
+        font-style: normal;
+        font-weight: 300;
+        color: #879461;
+        margin-right: 10px;
+      }
+      nav {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        font-size: 12px;
+      }
+      nav a {
+        text-decoration: none;
+        padding: 10px 0;
+      }
+      .kicker {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 72px;
+        align-items: center;
+        padding: 64px 0 70px;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-weight: 400;
+        line-height: 1.08;
+      }
+      h1 {
+        margin: 24px 0;
+        font-size: clamp(64px, 7.5vw, 106px);
+        letter-spacing: -5px;
+      }
+      h1 em {
+        color: #7e8955;
+        font-weight: 400;
+      }
+      .lead {
+        font-size: 20px;
+        line-height: 1.7;
+        max-width: 490px;
+      }
+      .fine {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        padding: 7px 12px;
+        border-radius: 30px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .pill::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: var(--gold);
+        border-radius: 50%;
+      }
+      .hero-notes {
+        margin: 30px 0 0;
+        padding: 20px 0 0;
+        border-top: 1px solid var(--line);
+        display: flex;
+        gap: 28px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      figure {
+        margin: 0;
+        min-width: 0;
+      }
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+      }
+      .image-link {
+        display: block;
+        text-decoration: none;
+      }
+      .image-link:hover img {
+        box-shadow: 0 0 0 2px #c99a3660;
+      }
+      .hero figure {
+        max-width: 465px;
+        justify-self: end;
+      }
+      figcaption {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px 20px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--muted);
+        padding-top: 14px;
+      }
+      figcaption b {
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .section {
+        padding: 56px 0 64px;
+        border-top: 1px solid var(--line);
+      }
+      .section-head {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: end;
+        margin-bottom: 28px;
+      }
+      h2 {
+        font-size: clamp(34px, 4vw, 52px);
+        letter-spacing: -1.5px;
+        margin: 14px 0 0;
+      }
+      .section-head > p {
+        color: var(--muted);
+        margin: 0;
+        font-size: 15px;
+      }
+      .principles {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+        gap: 32px;
+        margin-top: 30px;
+      }
+      .principles h3 {
+        font-size: 25px;
+        margin: 10px 0;
+      }
+      .principles p {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 0;
+      }
+      .num {
+        font-size: 11px;
+        color: #9a782d;
+        letter-spacing: 1px;
+      }
+      .note {
+        padding: 18px 24px;
+        border-left: 3px solid var(--gold);
+        background: #e9e8d850;
+        color: var(--muted);
+        font-size: 13px;
+        margin: 28px 0 0;
+      }
+      .reference {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 58px;
+        align-items: center;
+      }
+      .reference img {
+        width: auto;
+        max-width: 100%;
+        max-height: 380px;
+        margin: auto;
+        object-fit: contain;
+        background: #e6e3d6;
+      }
+      .reference h2 {
+        margin-bottom: 22px;
+      }
+      .reference p {
+        color: var(--muted);
+      }
+      .reference .pill {
+        margin-top: 12px;
+      }
+      .material-labels {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+        gap: 18px 28px;
+        margin: 24px 0 30px;
+      }
+      .material-labels div {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .material-labels strong {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+        margin-top: 32px;
+      }
+      .swatch {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .swatch i {
+        display: block;
+        height: 64px;
+        background: var(--color);
+      }
+      .swatch p {
+        padding: 12px 10px;
+        margin: 0;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+      .swatch code {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .rules {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 32px;
+      }
+      .rule-card {
+        border: 1px solid var(--line);
+        padding: 24px;
+        border-radius: 12px;
+        background: var(--card);
+      }
+      .rule-card h3 {
+        margin: 0 0 16px;
+        font-size: 26px;
+      }
+      .rule-card p,
+      .rule-card li {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      ul {
+        padding-left: 19px;
+      }
+      li + li {
+        margin-top: 9px;
+      }
+      .mobile-layout {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 76px;
+        align-items: start;
+        margin-top: 52px;
+      }
+      .mobile-layout figure {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: var(--card);
+      }
+      .mobile-copy {
+        padding-top: 34px;
+      }
+      .mobile-copy h3 {
+        font-size: 34px;
+        margin: 0 0 20px;
+      }
+      .mobile-copy p {
+        color: var(--muted);
+      }
+      .control-spec {
+        padding: 20px;
+        border-radius: 12px;
+        background: #e8eadf;
+        margin: 28px 0;
+      }
+      .control-spec p {
+        margin: 0 0 10px;
+        font-size: 13px;
+      }
+      .tokens {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .token {
+        display: inline-block;
+        padding: 10px 13px;
+        border: 1px solid #b5bdab;
+        border-radius: 8px;
+        font-size: 12px;
+        background: var(--card);
+      }
+      .token.active {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+        gap: 24px;
+      }
+      .step {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .step svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .step-text {
+        padding: 22px;
+      }
+      .step h3 {
+        font-size: 27px;
+        margin: 8px 0 12px;
+      }
+      .step p {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 0;
+      }
+      .behaviors {
+        margin-top: 36px;
+        border-top: 1px solid var(--line);
+      }
+      .behavior {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 28px;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .behavior strong {
+        font-weight: 500;
+      }
+      .behavior p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      details {
+        margin-top: 22px;
+        padding: 16px 20px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      summary {
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      details p {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 26px 0 36px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 18px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      @media (max-width: 900px) {
+        .wrap {
+          width: calc(100% - 48px);
+        }
+        .hero {
+          gap: 32px;
+          padding: 42px 0;
+        }
+        h1 {
+          font-size: 70px;
+          letter-spacing: -3px;
+        }
+        .lead {
+          font-size: 17px;
+        }
+        .mobile-layout {
+          grid-template-columns: 300px 1fr;
+          gap: 32px;
+        }
+        .reference {
+          gap: 30px;
+          grid-template-columns: 230px 1fr;
+        }
+        .palette {
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+        }
+      }
+      @media (max-width: 640px) {
+        .wrap {
+          width: calc(100% - 36px);
+        }
+        header {
+          min-height: 110px;
+          padding: 18px 0;
+          gap: 8px;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        nav {
+          gap: 20px;
+          font-size: 11px;
+        }
+        .hero,
+        .section-head,
+        .reference,
+        .mobile-layout,
+        .rules {
+          grid-template-columns: 1fr;
+          gap: 25px;
+        }
+        .hero {
+          padding: 32px 0 42px;
+        }
+        h1 {
+          font-size: 76px;
+          line-height: 1;
+          margin: 22px 0;
+        }
+        .hero figure {
+          width: 100%;
+          max-width: none;
+        }
+        .hero-notes {
+          gap: 20px;
+        }
+        .section {
+          padding: 36px 0 42px;
+        }
+        h2 {
+          font-size: 36px;
+        }
+        .principles,
+        .steps {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .material-labels {
+          grid-template-columns: 1fr 1fr;
+        }
+        .palette {
+          gap: 8px;
+        }
+        .swatch p {
+          padding: 10px 8px;
+          font-size: 10px;
+        }
+        .reference figure {
+          max-width: 280px;
+          margin: auto;
+        }
+        .mobile-layout {
+          margin-top: 32px;
+        }
+        .mobile-layout figure {
+          max-width: 350px;
+          margin: auto;
+        }
+        .mobile-copy {
+          padding-top: 0;
+        }
+        .behavior {
+          grid-template-columns: 1fr;
+          gap: 7px;
+        }
+        .note {
+          padding: 15px 17px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+      @media print {
+        .wrap {
+          width: 100%;
+        }
+        nav,
+        .skip {
+          display: none;
+        }
+        .section {
+          break-inside: avoid;
+        }
+        body {
+          font-size: 12px;
+        }
+        a {
+          text-decoration: none;
+        }
+      }
+      .stage-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+        gap: 18px;
+      }
+      .stage-card {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 22px;
+        background: var(--card);
+      }
+      .stage-card h3 {
+        margin: 8px 0;
+      }
+      .stage-card p {
+        font-size: 15px;
+      }
+      .hero figure {
+        align-self: center;
+      }
+      .hero figure img {
+        height: auto;
+        object-fit: contain;
+      }
+      .stage-card a {
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to guide</a>
+    <div class="wrap">
+      <header>
+        <a class="brand" href="#main">littleworlds <span>· guide</span></a>
+        <nav aria-label="Guide sections">
+          <a href="#stages">Growth stages</a><a href="#world">Glass tank</a
+          ><a href="#materials">Materials</a><a href="#screens">Screens</a>
+        </nav>
+      </header>
+      <main id="main">
+        <section class="hero" aria-labelledby="title">
+          <div>
+            <p class="kicker">Visual direction 05 / Dutch iris</p>
+            <h1 id="title">A bulb.<br /><em>A bloom.</em></h1>
+            <p class="lead">
+              Plant a bulb. Watch it grow.<br />Discover the roots behind the glass.
+            </p>
+            <p class="fine">
+              Dutch iris, <i>Iris × hollandica</i>, replaces sunflower in this design direction.
+              Individual plants share a shallow 3D glass tank.
+            </p>
+            <span class="pill">Illustrated design targets</span>
+            <p class="fine">
+              Six generated concepts and a researched growth sequence. This guide changes the
+              species and scope; the running level implements the bulb-to-bloom sequence.
+            </p>
+            <div class="hero-notes">
+              <span>01 species<br /><b>Dutch iris</b></span
+              ><span>01 tool<br /><b>Plant bulb</b></span
+              ><span>01 rendering mode<br /><b>High quality</b></span>
+            </div>
+          </div>
+          <figure>
+            <a
+              class="image-link"
+              href="plant-style-assets/iris-macro.png"
+              target="_blank"
+              rel="noopener"
+              ><img
+                src="plant-style-assets/iris-macro.png"
+                width="1536"
+                height="1024"
+                alt="Generated iris bulb with papery tunic, a pointed green shoot and several pale roots at its basal plate."
+            /></a>
+            <figcaption>
+              <b>01 / A beginning below ground</b
+              ><span>Generated design target · open for full size</span>
+            </figcaption>
+          </figure>
+        </section>
+        <section class="section" id="stages" aria-labelledby="stages-title">
+          <div class="section-head">
+            <div>
+              <span class="kicker">Botanical research / 02</span>
+              <h2 id="stages-title">From resting bulb<br />to open iris.</h2>
+            </div>
+            <p>
+              Eight visual milestones explain the full cycle. They overlap in nature; these are
+              presentation stages, not a universal day-by-day schedule.
+            </p>
+          </div>
+          <p class="note">
+            Species correction: Dutch iris is a bulbous plant. For this experience the player places
+            a mature bulb, with its neck upward. The playable sequence runs through first bloom;
+            fading and dormancy are documented for biological context.
+            <a href="https://www.rhs.org.uk/plants/154520/iris-%C3%97-hollandica/details"
+              >RHS: Dutch iris profile</a
+            >
+          </p>
+          <figure>
+            <a
+              class="image-link"
+              href="plant-style-assets/iris-stages.png"
+              target="_blank"
+              rel="noopener"
+              ><img
+                src="plant-style-assets/iris-stages.png"
+                width="1536"
+                height="1024"
+                alt="Eight numbered Dutch iris studies: dormant bulb, roots, green shoot, leaves, closed bud, open flower, spent flower, and yellowing foliage."
+                loading="lazy"
+            /></a>
+            <figcaption>
+              <b>02 / Growth-stage study</b
+              ><span>Generated design target · open for full size</span>
+            </figcaption>
+          </figure>
+          <div class="stage-grid">
+            <article class="stage-card">
+              <span class="num">01 / PROPOSED PLAYABLE</span>
+              <h3>Dormant bulb</h3>
+              <p>
+                Ovoid bulb with a dry brown tunic and pointed neck. No living root fan during
+                dormancy.
+                <a
+                  href="https://extension.msstate.edu/sites/default/files/publications/P3740_web.pdf"
+                  >Mississippi State: Dutch Iris for the Farmer Florist</a
+                >
+              </p>
+              <p>
+                <b>Visual direction:</b> Begin with a mature, planting-ready bulb, not a seed. Keep
+                the bulb below the soil.
+              </p>
+            </article>
+            <article class="stage-card">
+              <span class="num">02 / PROPOSED PLAYABLE</span>
+              <h3>Rooting</h3>
+              <p>
+                Several pale roots emerge from the basal plate on the underside of the bulb.
+                <a
+                  href="https://propg.ifas.ufl.edu/07-geophytes/01-bulbs/01-geophytes-basalplate.html"
+                  >University of Florida: bulb basal plate</a
+                >
+              </p>
+              <p>
+                <b>Visual direction:</b> Extend individual root tips at unequal rates; keep every
+                root attached to the base.
+              </p>
+            </article>
+            <article class="stage-card">
+              <span class="num">03 / PROPOSED PLAYABLE</span>
+              <h3>Shoot emergence</h3>
+              <p>
+                A compact green shoot rises through the soil before the leafy plant develops.
+                <a
+                  href="https://extension.msstate.edu/sites/default/files/publications/P3740_web.pdf"
+                  >Mississippi State: Dutch Iris for the Farmer Florist</a
+                >
+              </p>
+              <p>
+                <b>Visual direction:</b> Show a pointed vegetative spear, not a purple flower bud or
+                a hooked seedling. Rooting and emergence can overlap.
+              </p>
+            </article>
+            <article class="stage-card">
+              <span class="num">04 / PROPOSED PLAYABLE</span>
+              <h3>Leaf growth</h3>
+              <p>
+                Narrow, smooth strap leaves overlap at the base; they have a much finer outline than
+                broad sunflower leaves.
+                <a href="https://plants.ces.ncsu.edu/plants/iris-x-hollandica/"
+                  >NC State: Dutch iris anatomy</a
+                >
+              </p>
+              <p>
+                <b>Visual direction:</b> Lengthen blades from their bases with parallel veins and
+                slight bending; no oval seed-leaf pair.
+              </p>
+            </article>
+            <article class="stage-card">
+              <span class="num">05 / PROPOSED PLAYABLE</span>
+              <h3>Bud and colour tip</h3>
+              <p>
+                A slender closed bud develops on the flower stem. The pencil stage shows a small
+                coloured tip.
+                <a
+                  href="https://extension.msstate.edu/sites/default/files/publications/P3740_web.pdf"
+                  >Mississippi State: Dutch Iris for the Farmer Florist</a
+                >
+              </p>
+              <p>
+                <b>Visual direction:</b> Raise the stalk, then enlarge the pointed bud within its
+                green sheath. Do not open petals prematurely.
+              </p>
+            </article>
+            <article class="stage-card">
+              <span class="num">06 / PROPOSED PLAYABLE</span>
+              <h3>Open flower</h3>
+              <p>
+                Three upright standards alternate with three spreading or drooping falls. Dutch iris
+                is beardless; falls may carry yellow markings.
+                <a href="https://plants.ces.ncsu.edu/plants/iris-x-hollandica/"
+                  >NC State: Dutch iris anatomy</a
+                >
+              </p>
+              <p>
+                <b>Visual direction:</b> Match the supplied blue-violet and pale lavender reference
+                with yellow signals. Open the parts gradually; retain threefold symmetry.
+              </p>
+            </article>
+            <article class="stage-card">
+              <span class="num">07 / LATER CYCLE</span>
+              <h3>After flowering</h3>
+              <p>
+                Flowers fade before the foliage finishes its season; the leaves remain to support
+                the bulb.
+                <a href="https://www.rhs.org.uk/plants/iris/bulb/growing-guide"
+                  >RHS: growing bulb irises</a
+                >
+              </p>
+              <p>
+                <b>Visual direction:</b> Wilt the petals first while keeping leaves green. This is
+                later-cycle research, beyond the first-bloom endpoint.
+              </p>
+            </article>
+            <article class="stage-card">
+              <span class="num">08 / LATER CYCLE</span>
+              <h3>Return to dormancy</h3>
+              <p>
+                Foliage eventually dies back; daughter bulbs can form. Dutch iris loses its living
+                roots during rest.
+                <a
+                  href="https://extension.msstate.edu/sites/default/files/publications/P3740_web.pdf"
+                  >Mississippi State: Dutch Iris for the Farmer Florist</a
+                >
+              </p>
+              <p>
+                <b>Visual direction:</b> Show yellow then straw-brown leaves and fading old roots.
+                Offsets and the following season remain a later extension.
+              </p>
+            </article>
+          </div>
+          <p class="note">
+            Research notes: flowering is seasonal and varies with conditions. RHS describes roughly
+            60cm flowering height and late-spring/early-summer bloom; these guide proportions, not a
+            game timer.
+            <a href="https://www.rhs.org.uk/plants/154520/iris-%C3%97-hollandica/details"
+              >RHS: Dutch iris profile</a
+            >
+            Root attachment follows general bulb anatomy.
+            <a href="https://propg.ifas.ufl.edu/07-geophytes/01-bulbs/01-geophytes-basalplate.html"
+              >University of Florida: bulb basal plate</a
+            >
+            Daughter bulbs are described by
+            <a href="https://www.rhs.org.uk/plants/iris/bulb/growing-guide"
+              >RHS: growing bulb irises</a
+            >. The generated studies exaggerate bulb visibility and do not establish planting depth
+            or exact organ scale.
+          </p>
+        </section>
+        <section class="section" id="world" aria-labelledby="world-title">
+          <div class="section-head">
+            <div>
+              <span class="kicker">The world / 03</span>
+              <h2 id="world-title">One glass tank.<br />Different beginnings.</h2>
+            </div>
+            <p>
+              Plant bulbs at different moments. Vary root paths, leaf lean, stalk height, and flower
+              orientation while retaining iris anatomy.
+            </p>
+          </div>
+          <figure>
+            <a
+              class="image-link"
+              href="plant-style-assets/iris-bed.png"
+              target="_blank"
+              rel="noopener"
+              ><img
+                src="plant-style-assets/iris-bed.png"
+                width="1672"
+                height="941"
+                alt="Dutch iris bulbs at rooting, shoot, bud and flowering stages in a shallow glass soil tank."
+                loading="lazy"
+            /></a>
+            <figcaption>
+              <b>03 / A living iris garden behind glass</b
+              ><span>Generated design target · open for full size</span>
+            </figcaption>
+          </figure>
+          <div class="rules">
+            <article class="rule-card">
+              <h3>A flat aquarium for soil.</h3>
+              <p>
+                Wide rectangular glass cuboid, with depth about 12% of its width. Open top, clear
+                front, narrow side and bottom panes. Soil sits below the rim. Bulbs are fully buried
+                behind the front pane, with soil above the neck and room below for roots. No
+                standing water.
+              </p>
+            </article>
+            <article class="rule-card">
+              <h3>Depth without losing the roots.</h3>
+              <p>
+                Slightly elevated three-quarter frontal camera, gentle perspective, fine glass
+                edges, restrained reflections and a soft grounding shadow. Roots stay inside the
+                glass against opaque soil with small grain occlusions. Fit view includes the base,
+                root tips and tallest flower.
+              </p>
+            </article>
+          </div>
+          <p class="note">
+            The same tank proportions apply on desktop and mobile. The shallow root display is a
+            visual abstraction. Maintain naturally slender mature stems and modest bulb size;
+            enlarge the macro view for detail instead of enlarging every bulb. Roots develop during
+            simulation rather than revealing a finished network.
+          </p>
+        </section>
+        <section class="section reference" aria-labelledby="reference-title">
+          <figure>
+            <a
+              class="image-link"
+              href="plant-style-assets/iris-reference.png"
+              target="_blank"
+              rel="noopener"
+              ><img
+                src="plant-style-assets/iris-reference.png"
+                width="750"
+                height="500"
+                alt="User-supplied blue-violet Dutch iris flowers with pale falls, yellow markings and fine petal veins."
+                loading="lazy"
+            /></a>
+            <figcaption>
+              <b>Supplied flower reference</b
+              ><span>User-supplied photograph · colour and form reference</span>
+            </figcaption>
+          </figure>
+          <div>
+            <span class="kicker">Flower identity</span>
+            <h2 id="reference-title">Blue-violet.<br />A flash of yellow.</h2>
+            <p>
+              Use the supplied image for colour, petal veining and delicacy. It does not establish a
+              named cultivar. Keep the three upright standards, three falls and petal-like style
+              arms readable.
+            </p>
+            <p>
+              Dutch iris has a true bulb and smooth narrow leaves. It is not the thick surface
+              rhizome and broad foliage of a bearded iris.
+              <a href="https://plants.ces.ncsu.edu/plants/iris-x-hollandica/"
+                >NC State: Dutch iris anatomy</a
+              >
+            </p>
+            <span class="pill">Bulb → roots → leaves → bud → bloom</span>
+          </div>
+        </section>
+        <section class="section" id="materials" aria-labelledby="materials-title">
+          <div class="section-head">
+            <div>
+              <span class="kicker">Surface language / 04</span>
+              <h2 id="materials-title">An iris, in detail.</h2>
+            </div>
+            <p>
+              Botanical detail replaces sunflower textures: papery bulb layers, smooth
+              parallel-veined leaves, and translucent petals.
+            </p>
+          </div>
+          <figure>
+            <a
+              class="image-link"
+              href="plant-style-assets/iris-materials.png"
+              target="_blank"
+              rel="noopener"
+              ><img
+                src="plant-style-assets/iris-materials.png"
+                width="1536"
+                height="1024"
+                alt="Six material close-ups: soil, glass, bulb tunic, root base, narrow iris leaf and violet flower petal."
+                loading="lazy"
+            /></a>
+            <figcaption>
+              <b>04 / Material studies, left to right</b
+              ><span>Generated design target · open for full size</span>
+            </figcaption>
+          </figure>
+          <div class="material-labels">
+            <div>
+              <strong>01 / Soil</strong>Dark granular clumps, fibres, cavities and embedded stones.
+            </div>
+            <div>
+              <strong>02 / Glass</strong>Clear face; subtle green edge tint and physical thickness.
+            </div>
+            <div>
+              <strong>03 / Bulb tunic</strong>Dry tan-brown paper, irregular layers and a pointed
+              neck.
+            </div>
+            <div>
+              <strong>04 / Root base</strong>Several cream roots joined to the basal plate; no
+              dominant taproot.
+            </div>
+            <div>
+              <strong>05 / Leaf blade</strong>Narrow grey-green straps, smooth margins and parallel
+              veins.
+            </div>
+            <div>
+              <strong>06 / Flower</strong>Blue-violet standards, pale falls, fine veins and a golden
+              signal.
+            </div>
+          </div>
+          <div class="palette" aria-label="Colour palette">
+            <div class="swatch" style="--color: #f4f1e8">
+              <i></i>
+              <p>Warm ivory<code>#F4F1E8</code></p>
+            </div>
+            <div class="swatch" style="--color: #253c2d">
+              <i></i>
+              <p>Forest ink<code>#253C2D</code></p>
+            </div>
+            <div class="swatch" style="--color: #687363">
+              <i></i>
+              <p>Quiet green<code>#687363</code></p>
+            </div>
+            <div class="swatch" style="--color: #c99a36">
+              <i></i>
+              <p>Tool gold<code>#C99A36</code></p>
+            </div>
+            <div class="swatch" style="--color: #30231b">
+              <i></i>
+              <p>Dark earth<code>#30231B</code></p>
+            </div>
+            <div class="swatch" style="--color: #e8ddc0">
+              <i></i>
+              <p>Root ivory<code>#E8DDC0</code></p>
+            </div>
+            <div class="swatch" style="--color: #6655c9">
+              <i></i>
+              <p>Iris violet<code>#6655C9</code></p>
+            </div>
+            <div class="swatch" style="--color: #b8b4ea">
+              <i></i>
+              <p>Pale fall<code>#B8B4EA</code></p>
+            </div>
+            <div class="swatch" style="--color: #f2c329">
+              <i></i>
+              <p>Signal yellow<code>#F2C329</code></p>
+            </div>
+          </div>
+          <div class="rules">
+            <article class="rule-card">
+              <h3>Soft daylight.</h3>
+              <p>
+                Warm light from upper left; soft contact shadows, subtle leaf and petal
+                transmission. Keep garden background blurred and the active plant sharp. Avoid
+                glowing roots, glossy mud and plastic petals.
+              </p>
+            </article>
+            <article class="rule-card">
+              <h3>One visual standard.</h3>
+              <p>
+                Use one high-quality renderer with no graphics settings. Violet and yellow belong
+                mainly to the flowers; keep ivory, forest and restrained gold in the interface. Soil
+                conditions are automatic; watering stays outside scope.
+              </p>
+            </article>
+          </div>
+        </section>
+        <section class="section" id="screens" aria-labelledby="screens-title">
+          <div class="section-head">
+            <div>
+              <span class="kicker">The interface / 05</span>
+              <h2 id="screens-title">The same quiet frame.<br />A different plant.</h2>
+            </div>
+            <p>
+              Preserve the existing Little Worlds header, navigation, language selector, typography
+              and sidebar. Generated branding and text are composition targets.
+            </p>
+          </div>
+          <figure>
+            <a
+              class="image-link"
+              href="plant-style-assets/iris-desktop.png"
+              target="_blank"
+              rel="noopener"
+              ><img
+                src="plant-style-assets/iris-desktop.png"
+                width="1586"
+                height="992"
+                alt="Desktop concept with Dutch iris sidebar, shallow glass tank and Plant bulb with time controls below."
+                loading="lazy"
+            /></a>
+            <figcaption>
+              <b>05 / Desktop — plant a bulb</b
+              ><span>Generated design target · open for full size</span>
+            </figcaption>
+          </figure>
+          <div class="rules">
+            <article class="rule-card">
+              <h3>Selected plant.</h3>
+              <p>
+                Show identity, time since planting and current stage. Suggested labels: Dormant
+                bulb, Rooting, Emerging shoot, Leaf growth, In bud, In bloom. English navigation: 07
+                Dutch iris. German: 07 Holländische Iris. Keep the plant route.
+              </p>
+            </article>
+            <article class="rule-card">
+              <h3>A readable clock.</h3>
+              <p>
+                Elapsed time is the shared garden clock; each bulb has its own age. Keep
+                pause/resume, 1×/5×/20×, restart and Fit view. Remove percentage progress and
+                backward scrubbing. Biological timing is illustrative, not exact days.
+              </p>
+            </article>
+          </div>
+          <div class="mobile-layout">
+            <figure>
+              <a
+                class="image-link"
+                href="plant-style-assets/iris-mobile.png"
+                target="_blank"
+                rel="noopener"
+                ><img
+                  src="plant-style-assets/iris-mobile.png"
+                  width="780"
+                  height="2017"
+                  alt="Mobile Dutch iris concept with compact introduction above tank and Plant bulb, pause, speeds, elapsed time, restart and Fit view below."
+                  loading="lazy"
+              /></a>
+              <figcaption>
+                <b>06 / Mobile — room for the bloom</b
+                ><span>Generated design target · open for full size</span>
+              </figcaption>
+            </figure>
+            <div class="mobile-copy">
+              <span class="kicker">Small screen, same world</span>
+              <h3>A reachable garden.</h3>
+              <p>
+                Put compact sidebar content above the scene. Maintain at least 420px scene height
+                and 44px touch targets. Fit the full tank and tall flowers with margin. Use zoom for
+                fine root detail.
+              </p>
+              <div class="control-spec">
+                <p>Exact control vocabulary</p>
+                <div class="tokens">
+                  <span class="token active">Plant bulb</span><span class="token">Pause</span
+                  ><span class="token">1×</span><span class="token">5×</span
+                  ><span class="token">20×</span><span class="token">Elapsed 02:34</span
+                  ><span class="token">Restart</span><span class="token">Fit view</span>
+                </div>
+              </div>
+              <p>
+                Restart clears the bed and resets elapsed time. Space toggles playback; R restarts
+                when focus is outside controls. Suspend growth in hidden tabs without catch-up.
+              </p>
+              <p class="note">
+                Proposed endpoint: each plant holds at its first open bloom while other plants
+                continue growing. This is a presentation choice; real flowers subsequently fade. No
+                automatic loop.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="interaction" aria-labelledby="interaction-title">
+          <div class="section-head">
+            <div>
+              <span class="kicker">Interaction language / 06</span>
+              <h2 id="interaction-title">Choose a place.<br />Plant a bulb.</h2>
+            </div>
+            <p>
+              Keep planting separate from camera gestures. These native diagrams define the preview
+              and placed states.
+            </p>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <svg
+                viewBox="0 0 360 210"
+                role="img"
+                aria-label="Point-up bulb placement preview below soil"
+              >
+                <rect width="360" height="210" fill="#d3d9bc" />
+                <path d="M8 90Q90 84 180 90T339 90V201H8Z" fill="#30231b" />
+                <path
+                  d="M172 118C171 132 147 145 150 161Q153 182 172 182Q191 182 194 161C197 146 175 132 172 118Z"
+                  fill="#c99a3633"
+                  stroke="#c99a36"
+                  stroke-width="2"
+                />
+                <path
+                  d="M8 91V201H339V91M339 201L352 192V83L339 91M8 91L21 83H352"
+                  fill="none"
+                  stroke="#e2efe9"
+                  stroke-width="2"
+                />
+                <text x="180" y="52" text-anchor="middle" fill="#253c2d" font-size="15">
+                  Plant here
+                </text>
+              </svg>
+              <div class="step-text">
+                <span class="num">01 / AIM</span>
+                <h3>A point-up preview.</h3>
+                <p>
+                  Choose Plant bulb. A subtle gold bulb outline previews a valid buried location
+                  behind the front pane. Keep soil above its neck; reject positions outside the tank
+                  or overlapping another bulb.
+                </p>
+              </div>
+            </article>
+            <article class="step">
+              <svg
+                viewBox="0 0 360 210"
+                role="img"
+                aria-label="Buried bulb planted at the preview location"
+              >
+                <rect width="360" height="210" fill="#d3d9bc" />
+                <path d="M8 90Q90 84 180 90T339 90V201H8Z" fill="#30231b" />
+                <path
+                  d="M172 118C171 132 147 145 150 161Q153 182 172 182Q191 182 194 161C197 146 175 132 172 118Z"
+                  fill="#986b45"
+                  stroke="#c99a36"
+                  stroke-width="2"
+                />
+                <path
+                  d="M168 139Q155 161 166 177M179 140Q189 161 177 178"
+                  fill="none"
+                  stroke="#c6a278"
+                />
+                <path
+                  d="M8 91V201H339V91M339 201L352 192V83L339 91M8 91L21 83H352"
+                  fill="none"
+                  stroke="#e2efe9"
+                  stroke-width="2"
+                />
+                <text x="180" y="52" text-anchor="middle" fill="#253c2d" font-size="15">
+                  Bulb planted
+                </text>
+              </svg>
+              <div class="step-text">
+                <span class="num">02 / PLACE</span>
+                <h3>A separate beginning.</h3>
+                <p>
+                  Click or tap to place a brown papery bulb and select it. Start its age at
+                  placement; existing plants continue independently. Remove the preview outline at
+                  the planted location.
+                </p>
+              </div>
+            </article>
+          </div>
+          <div class="behaviors">
+            <div class="behavior">
+              <strong>Individual development</strong>
+              <p>
+                Vary organ timing and root paths. Grow new root segments and leaf lengths rather
+                than scaling a complete plant.
+              </p>
+            </div>
+            <div class="behavior">
+              <strong>Automatic conditions</strong>
+              <p>
+                Assume suitable moisture, light and bulb preparation. No watering tool, moisture
+                meter or drying penalty.
+              </p>
+            </div>
+            <div class="behavior">
+              <strong>Inspection</strong>
+              <p>
+                Wheel/pinch zoom; right-drag or two-finger pan. Fit view restores the angled
+                full-tank composition.
+              </p>
+            </div>
+            <div class="behavior">
+              <strong>Continuous opening</strong>
+              <p>
+                Leaves lengthen; the bud swells; petals unfold around a stable attachment. Never pop
+                a complete flower into view.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="sources" aria-labelledby="sources-title">
+          <div class="section-head">
+            <div>
+              <span class="kicker">Research and handoff</span>
+              <h2 id="sources-title">What the next build<br />must preserve.</h2>
+            </div>
+            <p>
+              Research informs anatomy. The glass display, timing, variation rules and bloom hold
+              are design decisions, not a validated botanical model.
+            </p>
+          </div>
+          <div class="rules">
+            <article class="rule-card">
+              <h3>Review anatomy and layout.</h3>
+              <p>
+                Check dormant bulb, root attachment, emergence, leaves, bud and open bloom on
+                desktop/mobile. Verify three standards and three falls, yellow markings, no fuzzy
+                beard, no sunflower seed shell or cotyledons. Keep bulbs and roots embedded, all
+                flowers in frame and controls unobstructed.
+              </p>
+            </article>
+            <article class="rule-card">
+              <h3>Keep later work separate.</h3>
+              <p>
+                The implementation ends at first bloom. Senescence, offset reproduction, seasonal
+                recurrence, watering, graphics selectors and saved progress remain outside it.
+                Implementation details and verification are recorded in plant-simulation.md.
+              </p>
+            </article>
+          </div>
+          <p>
+            Sources checked 27 September 2026. The eight-stage ordering is an editorial synthesis;
+            the linked references do not define a single eight-step timeline.
+          </p>
+          <ul>
+            <li>
+              <a href="https://www.rhs.org.uk/plants/154520/iris-%C3%97-hollandica/details"
+                >RHS: Dutch iris profile</a
+              >
+            </li>
+            <li>
+              <a href="https://plants.ces.ncsu.edu/plants/iris-x-hollandica/"
+                >NC State: Dutch iris anatomy</a
+              >
+            </li>
+            <li>
+              <a href="https://extension.msstate.edu/sites/default/files/publications/P3740_web.pdf"
+                >Mississippi State: Dutch Iris for the Farmer Florist</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://propg.ifas.ufl.edu/07-geophytes/01-bulbs/01-geophytes-basalplate.html"
+                >University of Florida: bulb basal plate</a
+              >
+            </li>
+            <li>
+              <a href="https://www.rhs.org.uk/plants/iris/bulb/growing-guide"
+                >RHS: growing bulb irises</a
+              >
+            </li>
+            <li>
+              <a href="https://extension.illinois.edu/flowers/bulbs"
+                >Illinois Extension: bulb structure</a
+              >
+            </li>
+          </ul>
+          <details>
+            <summary>Image provenance and review notes</summary>
+            <p>
+              Six concepts were generated with the built-in image-generation tool. The supplied iris
+              photograph remains a separate reference. The stage board was corrected to keep stage
+              03 a green vegetative shoot. Images are design targets, not gameplay screenshots or
+              measured botanical diagrams. Bulb exposure and size are illustrative; final geometry
+              must keep bulbs buried with soil contact.
+            </p>
+            <p>
+              <a href="plant-style-assets/iris-prompts.md">Exact Dutch iris prompts</a> ·
+              <a href="plant-style.md">Written specification and research</a>
+            </p>
+            <p>
+              Earlier sunflower concepts and prompts remain archived in the asset directory and are
+              superseded by this guide.
+            </p>
+          </details>
+        </section>
+      </main>
+      <footer>
+        <span>littleworlds · Dutch iris · Visual direction 05</span
+        ><span>27 September 2026 · Illustrated guide only</span>
+      </footer>
+    </div>
+  </body>
+</html>

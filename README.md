@@ -4,7 +4,7 @@ Small worlds. Play a little.
 
 **[Play Little Worlds in your browser](https://ramnosan.github.io/little-worlds/)**
 
-Little Worlds is a collection of six warm, tactile 3D playgrounds built with TypeScript and Three.js. Stretch a jelly, blow soap bubbles, disturb the surface of an aquarium, watch a model train, tend a campfire, or fly a tiny aeroplane. There are no accounts, scores, or online services: each world is simply a small place to explore at your own pace.
+Little Worlds is a collection of seven warm, tactile 3D playgrounds built with TypeScript and Three.js. Stretch a jelly, blow soap bubbles, disturb the surface of an aquarium, watch a model train, tend a campfire, fly a tiny aeroplane, or grow an iris garden. There are no accounts, scores, or online services: each world is simply a small place to explore at your own pace.
 
 The experience supports English and German, mouse and touch controls, and a lighter graphics mode for less powerful devices.
 
@@ -46,6 +46,14 @@ Stay beside a procedural campfire as logs char, settle, and fade into embers in 
 
 Fly a small yellow high-wing model aeroplane from a countryside airfield. Build speed, lift off, bank through the open sky, switch between ground and chase views, and return gently enough to keep the aircraft intact. Keyboard controls model throttle, elevator, ailerons, and rudder, while touchscreens provide a pair of familiar flight sticks.
 
+### 07 · Dutch iris
+
+Plant up to twelve Dutch iris bulbs in a shallow glass soil tank. One starter bulb begins the garden; click in the planting band to add more, or select a plant to inspect its age and stage. Each bulb has its own growth rate and developing roots. Roots respond to soil resistance, stones, tank boundaries and neighbouring roots. Gentle crowding slows growth without preventing flowering.
+
+An uncrowded iris takes about three minutes to bloom at **1×**, with **5× / 20×**, pause and elapsed time. Plants hold their first bloom while younger bulbs continue developing. **Restart clears the tank**. Right-drag to pan, scroll or pinch to zoom, and use **Fit view** to restore the full tank. On touchscreens, two fingers pan/zoom. With the canvas focused, arrow keys move the bulb preview and Enter plants; **Space** pauses and **R** restarts.
+
+The procedural scene uses a single high-quality renderer, bounded reusable geometry, soft shadows and translucent leaf/petal lighting. No watering, quality settings, timeline seeking or saved growth. The time and shallow root display are illustrative rather than a validated horticultural model. See the [visual guide](docs/plant-style.md) and [implementation and verification notes](docs/plant-simulation.md).
+
 ## Run locally
 
 Little Worlds requires Node.js 20.12 or newer and npm. Install the locked dependencies and start the development server:
@@ -62,7 +70,7 @@ npm run build            # Type-check and create the production bundle
 npm run preview          # Preview the production bundle locally
 npm test                 # Run rendering-independent tests
 npm run test:browser     # Run browser interaction and layout tests
-npm run test:production  # Build and check all six desktop/mobile layouts
+npm run test:production  # Build and check all seven desktop/mobile layouts
 ```
 
 GitHub Pages deployment is handled by [the included workflow](.github/workflows/deploy.yml). Set **Settings → Pages → Source** to **GitHub Actions**; pushes to `main` will build and publish the site under `/little-worlds/`.

@@ -2,6 +2,14 @@ import { test, expect, type Page } from '@playwright/test';
 
 const levels = [
   {
+    id: 'plant',
+    title: ['Dutch iris · Little Worlds', 'Holländische Iris · Little Worlds'],
+    pause: '#plant-pause',
+    reset: '#plant-reset',
+    status: '#plant-status',
+    paused: ['Growth paused', 'Wachstum pausiert'],
+  },
+  {
     id: 'airplane',
     title: ['Model Flight · Little Worlds', 'Modellflug · Little Worlds'],
     pause: '#flight-pause',

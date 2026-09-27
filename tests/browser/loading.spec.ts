@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-for (const level of ['jelly', 'bubbles', 'aquarium', 'railway', 'fire', 'airplane']) {
+for (const level of ['jelly', 'bubbles', 'aquarium', 'railway', 'fire', 'airplane', 'plant']) {
   test(`${level} stays covered while its module loads`, async ({ page }) => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => (release = resolve));

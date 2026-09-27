@@ -1,0 +1,486 @@
+@import '../level-nav.css';
+
+:root {
+  font-synthesis: none;
+  color-scheme: light;
+  background: #f4f1e8;
+  color: #253c2d;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+.plant-app {
+  --muted: #687363;
+  min-height: 100dvh;
+  font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
+  padding: 0 3%;
+}
+.plant-app * {
+  box-sizing: border-box;
+}
+.plant-app a {
+  color: inherit;
+  text-decoration: none;
+}
+.plant-header {
+  margin: 0;
+  border-bottom: 1px solid #253c2d20;
+}
+.plant-brand {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+.plant-brand > span:not(.plant-mark) {
+  font-weight: 350;
+}
+.plant-brand sup {
+  font-size: 9px;
+  margin: -14px 0 0 3px;
+}
+.plant-mark {
+  color: #7d8b56;
+  margin-right: 10px;
+  font-size: 34px;
+}
+.plant-edition {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1.2px;
+}
+.plant-main {
+  display: grid;
+  grid-template-columns: minmax(225px, 0.8fr) minmax(0, 2.5fr);
+  gap: clamp(24px, 4vw, 66px);
+  max-width: 1600px;
+  margin: 38px auto 20px;
+}
+.plant-intro {
+  padding-top: 24px;
+}
+.plant-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  font-weight: 600;
+}
+.plant-eyebrow > span {
+  width: 6px;
+  height: 6px;
+  background: #899b60;
+  border-radius: 50%;
+}
+.plant-intro h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: clamp(40px, 4vw, 63px);
+  line-height: 1.06;
+  letter-spacing: -2.5px;
+  margin: 28px 0 22px;
+}
+.plant-intro h1 em {
+  color: #7e8955;
+  font-weight: 400;
+}
+.plant-description {
+  font-size: 14px;
+  line-height: 1.9;
+  max-width: 275px;
+  color: var(--muted);
+}
+.plant-species {
+  margin-top: 42px;
+  border-top: 1px solid #253c2d20;
+  padding-top: 22px;
+}
+.plant-species > span,
+.plant-small-label {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+.plant-species strong {
+  display: block;
+  margin-top: 9px;
+  font-size: 15px;
+  font-weight: 500;
+}
+.plant-species p,
+.plant-stage-card p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.plant-stage-card {
+  padding: 20px;
+  margin-top: 30px;
+  border: 1px solid #253c2d19;
+  border-radius: 12px;
+  background: #faf8f050;
+}
+.plant-stage-card strong {
+  display: block;
+  margin-top: 8px;
+  font-family: Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
+}
+.plant-stage-card p {
+  min-height: 42px;
+  margin-bottom: 0;
+}
+.plant-time-note {
+  margin-top: 22px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.plant-experiment {
+  min-width: 0;
+}
+.plant-scene-frame {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #99ac78;
+  box-shadow: 0 12px 45px #3c362314;
+}
+.plant-world {
+  height: clamp(480px, 62vh, 720px);
+  width: 100%;
+}
+.plant-world canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.plant-scene-caption {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  color: #31402aa0;
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  pointer-events: none;
+}
+.plant-controls {
+  margin-top: 15px;
+  border: 1px solid #253c2d20;
+  border-radius: 14px;
+  padding: 20px 24px 15px;
+  background: #fbf9f1;
+}
+.plant-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+.plant-actions {
+  display: flex;
+  gap: 6px;
+}
+.plant-app button {
+  font: inherit;
+  font-size: 12px;
+  min-height: 44px;
+  padding: 8px 13px;
+  border: 1px solid #253c2d20;
+  border-radius: 8px;
+  color: #253c2d;
+  background: transparent;
+  cursor: pointer;
+}
+.plant-app button:hover {
+  background: #e7eadc;
+}
+.plant-app button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.plant-app :focus-visible {
+  outline: 2px solid #8b7139;
+  outline-offset: 4px;
+}
+#plant-pause {
+  background: #385440;
+  color: #f4f1e8;
+  min-width: 96px;
+}
+.plant-speeds {
+  display: flex;
+  gap: 3px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+.plant-speeds legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.plant-speeds button {
+  min-width: 42px;
+  border-color: transparent;
+}
+.plant-speeds button[aria-pressed='true'] {
+  background: #e7eadc;
+  border-color: #bcc6af;
+}
+.plant-control-notes {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 9px;
+  margin-top: 17px;
+}
+#plant-status::before {
+  content: '';
+  display: inline-block;
+  height: 5px;
+  width: 5px;
+  background: #899b60;
+  border-radius: 50%;
+  margin-right: 7px;
+}
+.plant-notice {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 8px 0;
+}
+.plant-notice:empty {
+  display: none;
+}
+.plant-footer {
+  border-top: 1px solid #253c2d20;
+  padding: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.3px;
+}
+.plant-error {
+  padding: 40px;
+  line-height: 1.7;
+}
+@media (max-width: 1100px) {
+  .plant-main {
+    gap: 24px;
+    grid-template-columns: 225px minmax(0, 1fr);
+  }
+  .plant-toolbar {
+    flex-wrap: wrap;
+  }
+  .plant-speeds {
+    margin-left: auto;
+  }
+}
+@media (max-width: 760px) {
+  .plant-app {
+    padding: 0 18px;
+  }
+  .plant-main {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 20px;
+    gap: 20px;
+  }
+  .plant-intro {
+    padding: 0;
+  }
+  .plant-intro h1 {
+    margin: 16px 0 12px;
+    font-size: 44px;
+  }
+  .plant-description {
+    max-width: none;
+    margin-bottom: 0;
+    font-size: 13px;
+  }
+  .plant-species {
+    display: none;
+  }
+  .plant-stage-card {
+    margin-top: 18px;
+    padding: 13px 16px;
+  }
+  .plant-stage-card strong {
+    font-size: 21px;
+  }
+  .plant-stage-card p {
+    min-height: 0;
+    margin-top: 6px;
+  }
+  .plant-time-note {
+    margin: 10px 0 0;
+  }
+  .plant-world {
+    height: 480px;
+    min-height: 420px;
+  }
+  .plant-scene-caption {
+    left: 15px;
+    right: 15px;
+    font-size: 8px;
+    letter-spacing: 0.6px;
+  }
+  .plant-controls {
+    padding: 16px 14px;
+  }
+  .plant-toolbar {
+    gap: 10px;
+  }
+  .plant-app button {
+    padding-inline: 10px;
+    min-height: 44px;
+  }
+  .plant-speeds {
+    margin-left: 0;
+  }
+  .plant-speeds button {
+    min-width: 44px;
+  }
+  #plant-fit {
+    margin-left: auto;
+  }
+  .plant-control-notes {
+    flex-direction: column;
+    gap: 7px;
+  }
+  .plant-footer {
+    flex-direction: column;
+    font-size: 9px;
+  }
+}
+
+.plant-toolbar {
+  margin-top: 0;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+#plant-tool {
+  background: #385440;
+  color: #f4f1e8;
+}
+#plant-pause {
+  background: transparent;
+  color: #253c2d;
+}
+.plant-clock {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.plant-clock output {
+  font-weight: 600;
+  margin-left: 6px;
+}
+.plant-stage-card select {
+  width: 100%;
+  margin: 9px 0;
+  min-height: 44px;
+  border: 1px solid #253c2d30;
+  border-radius: 8px;
+  background: #faf8f0;
+  color: #253c2d;
+  padding: 8px;
+  font: inherit;
+  font-size: 13px;
+}
+.plant-instructions {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-top: 20px;
+}
+#plant-age {
+  min-height: 0;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 760px) {
+  .plant-control-notes {
+    font-size: 10px;
+  }
+  .plant-clock {
+    margin-left: 0;
+  }
+  .plant-controls {
+    padding: 14px;
+  }
+  .plant-intro h1 {
+    font-size: 38px;
+  }
+  .plant-instructions {
+    margin: 10px 0;
+  }
+  .plant-main {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 760px) {
+  .plant-eyebrow {
+    margin: 0;
+    font-size: 9px;
+  }
+  .plant-intro h1 {
+    margin: 12px 0;
+    font-size: 34px;
+    letter-spacing: -1.5px;
+  }
+  .plant-description {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .plant-stage-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px 12px;
+    padding: 12px;
+    margin-top: 12px;
+    align-items: center;
+  }
+  .plant-stage-card label {
+    grid-column: 1/-1;
+  }
+  .plant-stage-card select {
+    margin: 0;
+  }
+  .plant-stage-card strong {
+    font-family: inherit;
+    font-size: 13px;
+    margin: 0;
+  }
+  #plant-stage-detail {
+    display: none;
+  }
+  #plant-age {
+    grid-column: 1/-1;
+    margin: 0;
+    font-size: 10px;
+  }
+  .plant-time-note {
+    font-size: 9px;
+  }
+  .plant-control-notes > span:last-child {
+    display: none;
+  }
+}
