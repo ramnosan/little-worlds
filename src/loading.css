@@ -1,0 +1,103 @@
+#level-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: 24px;
+  box-sizing: border-box;
+  color-scheme: dark;
+  background: radial-gradient(ellipse at 50% 42%, #263a32 0%, #192720 48%, #111b17 100%);
+  color: #d5dfd6;
+  font:
+    16px/1.6 'Avenir Next',
+    Avenir,
+    'Segoe UI',
+    sans-serif;
+  text-align: center;
+}
+#level-loading .loading-card {
+  max-width: 440px;
+  padding: 32px 0;
+}
+#level-loading .loading-brand {
+  color: #9eafa2;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+#level-loading h1 {
+  margin: 24px 0 10px;
+  font-size: clamp(24px, 5vw, 36px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+#loading-detail {
+  margin: 0;
+  color: #9eafa2;
+  font-size: 14px;
+}
+#level-loading .loading-orbit {
+  position: relative;
+  box-sizing: border-box;
+  width: 76px;
+  height: 76px;
+  margin: 44px auto;
+  border: 1px solid #3d5347;
+  border-top-color: #9bb79a;
+  border-radius: 50%;
+  box-shadow: 0 0 40px #8aa8860c;
+  animation: loading-turn 2.8s linear infinite;
+}
+#level-loading .loading-orbit::before {
+  content: '';
+  position: absolute;
+  inset: 17px;
+  border: 1px solid #6d887466;
+  border-radius: 50%;
+  background: #78957424;
+  box-shadow: inset 0 0 14px #8aa88612;
+}
+#level-loading .loading-orbit::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: calc(50% - 3px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a4bd9f;
+  box-shadow: 0 0 10px #a4bd9f33;
+}
+#loading-retry {
+  margin-top: 24px;
+  padding: 10px 24px;
+  border: 1px solid #637e69;
+  border-radius: 24px;
+  background: #304b3b;
+  color: #d5dfd6;
+  font: inherit;
+  cursor: pointer;
+}
+#loading-retry:hover {
+  background: #3c5b48;
+}
+#loading-retry:focus-visible {
+  outline: 2px solid #a4bd9f;
+  outline-offset: 4px;
+}
+#level-loading[data-error] .loading-orbit {
+  display: none;
+}
+@keyframes loading-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #level-loading .loading-orbit {
+    animation: none;
+  }
+}

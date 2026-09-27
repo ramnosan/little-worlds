@@ -1,6 +1,10 @@
 import type { en } from './en';
 
 export const de: { [Key in keyof typeof en]: string } = {
+  'loading.title': '{level} wird geladen…',
+  'loading.detail': 'Einen kleinen Moment. Eine neue Welt wartet auf dich.',
+  'loading.error': 'Diese kleine Welt konnte nicht geladen werden.',
+  'loading.retry': 'Bitte prüfe deine Verbindung und versuche es erneut.',
   'aq.graphicsHigh': 'Grafik: Hohe Qualität',
   'aq.graphicsEfficient': 'Grafik: Effizient',
   'aq.time': 'Tageszeit',

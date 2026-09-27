@@ -1,5 +1,6 @@
 CAUSTIC//VOLUME — https://github.com/ScottieFox/caustic-volume
-Aquarium optical equations and photon-area projection adapted for Little Worlds.
+Aquarium optical equations, photon-area projection and CAUSTIC//LITE curved wave
+detail adapted for Little Worlds.
 
 MIT License
 

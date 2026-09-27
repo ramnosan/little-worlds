@@ -10,6 +10,20 @@ declare global {
       pausedDifference(): number;
       finCoverage(): number[];
       lampAlignment(): { center: number; ring: number };
+      diffuseResponse(lamp?: boolean): {
+        efficient: number[][];
+        high: number[][];
+        sourceIndependent: number[][];
+        transmission: number[];
+      };
+      nightContrast(): {
+        finite: boolean;
+        dark: number;
+        bright: number;
+        clipping: number;
+        displayDark: number;
+        displayBright: number;
+      };
       snapshot(): { mode: string; volumeSlices?: number; scatteringSamples?: number };
       quality(low: boolean): void;
       light(phase: number): void;
@@ -17,6 +31,49 @@ declare global {
     };
   }
 }
+test('diffuse shading is normalized and caustics replace direct illumination without clipping', async ({
+  page,
+}) => {
+  const found = errors(page);
+  await page.goto('/tests/fixtures/aquarium-optics.html');
+  await page.waitForFunction(() => window.aquariumOpticsFixture);
+  for (const lamp of [false, true]) {
+    const result = await page.evaluate(
+      (lamp) => window.aquariumOpticsFixture.diffuseResponse(lamp),
+      lamp,
+    );
+    for (const [i, power] of [0, 1, 2, 8].entries())
+      for (const [channel, albedo] of [0.5, 0.3, 0.2].entries()) {
+        const expected = (albedo * power) / Math.PI;
+        expect(result.high[i][channel]).toBeCloseTo(expected, 2);
+        expect(result.efficient[i][channel]).toBeCloseTo(
+          expected * result.transmission[channel],
+          2,
+        );
+        expect(result.sourceIndependent[i][channel]).toBeCloseTo(result.efficient[i][channel], 3);
+      }
+  }
+  expect(found).toEqual([]);
+});
+test('night caustics retain dark cells, bright folds and unclipped floor detail in both modes', async ({
+  page,
+}) => {
+  const found = errors(page);
+  await page.goto('/tests/fixtures/aquarium-optics.html');
+  await page.waitForFunction(() => window.aquariumOpticsFixture);
+  for (const low of [false, true]) {
+    await page.evaluate((low) => window.aquariumOpticsFixture.quality(low), low);
+    const result = await page.evaluate(() => window.aquariumOpticsFixture.nightContrast());
+    console.log(JSON.stringify({ low, ...result }));
+    expect(result.finite).toBe(true);
+    expect(result.dark).toBeLessThan(0.7);
+    expect(result.bright).toBeGreaterThan(1.4);
+    expect(result.bright / result.dark).toBeGreaterThan(3);
+    expect(result.clipping).toBeLessThan(0.01);
+    expect(result.displayBright / result.displayDark).toBeGreaterThan(1.5);
+  }
+  expect(found).toEqual([]);
+});
 function errors(page: Page) {
   const found: string[] = [];
   page.on('pageerror', (e) => found.push(e.message));

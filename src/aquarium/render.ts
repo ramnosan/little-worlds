@@ -156,7 +156,7 @@ export class AquariumRenderer {
     const underwaterLighting = new UnderwaterLighting(this.surface.texture, this.efficient.uniform);
     this.koi = new KoiVisuals(world.koi, (m) => underwaterLighting.prepare(m));
     this.scene.add(this.koi.group);
-    const floorMaterial = new T.MeshStandardMaterial({ color: 0xb6a580, roughness: 0.95 });
+    const floorMaterial = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95 });
     underwaterLighting.prepare(floorMaterial, true);
     const floor = new T.Mesh(new T.BoxGeometry(WIDTH, 0.14, DEPTH), floorMaterial);
     floor.name = 'Sand bed';
@@ -397,13 +397,13 @@ export class AquariumRenderer {
     this.sun.position.fromArray(light.sunDirection).multiplyScalar(10);
     this.sun.color.setRGB(...light.color);
     this.sun.intensity = light.sun * SUN_INTENSITY;
-    this.fill.intensity = light.ambient * 2;
+    this.fill.intensity = light.ambient;
     this.lamp.color.setRGB(...LAMP_COLOR);
     this.lamp.intensity = light.lamp * LAMP_INTENSITY;
     this.lampEmitter.material.color
       .setRGB(...LAMP_COLOR)
       .multiplyScalar(0.1 + LAMP_INTENSITY * 1.2 * light.lamp);
-    this.scene.environmentIntensity = light.ambient;
+    this.scene.environmentIntensity = light.ambient * 0.35;
     this.fallbackLight.value = 0.12 + 0.88 * light.daylight + 0.2 * light.lamp;
     this.container
       .closest<HTMLElement>('.aquarium-app')

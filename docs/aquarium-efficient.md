@@ -1,5 +1,7 @@
 # Aquarium Efficient mode
 
+For the subsequent floor-lighting, curved-wave and color corrections, updated captures and measurements, see [Aquarium caustic correction](aquarium-caustics.md).
+
 The graphics button switches between High quality and Efficient. High quality is the first-visit default. `little-worlds.aquarium.graphics` stores the selection; blocked storage keeps a session-only choice. Reset retains graphics quality while resetting the simulation and afternoon lighting. Switching preserves the camera, current waves, balls, fish navigation/animation and time of day.
 
 ## Rendering and lifecycle

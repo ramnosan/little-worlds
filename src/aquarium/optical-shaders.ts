@@ -1,5 +1,6 @@
 import { BVHShaderGLSL } from 'three-mesh-bvh';
 import { LAMP_COLOR, LAMP_INTENSITY, SUN_INTENSITY } from './lighting';
+import { ABSORPTION, SCATTERING, extinctionGLSL, diffuseGLSL, sandGLSL } from './appearance';
 
 export const fullscreenVertex = `out vec2 vUv;
 void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }`;
@@ -22,8 +23,10 @@ uniform vec4 balls[6];
 uniform vec3 ballColors[6];
 uniform vec3 sunDirection, lightColor, lampPosition;
 uniform float sunPower, lampPower, ambient, daylight, sunset;
-const vec3 ABSORB=vec3(.22,.052,.025);
-const vec3 SCATTER=vec3(.017,.031,.036);
+const vec3 ABSORB=vec3(${ABSORPTION.join(',')});
+const vec3 SCATTER=vec3(${SCATTERING.join(',')});
+${diffuseGLSL}
+${sandGLSL}
 const float LEVEL=1.65, PI=3.14159265359;
 const vec3 LAMP_COLOR=vec3(${LAMP_COLOR.join(',')});
 const float SUN_INTENSITY=${SUN_INTENSITY.toFixed(1)}, LAMP_INTENSITY=${LAMP_INTENSITY.toFixed(1)};
@@ -105,13 +108,6 @@ float waterHit(vec3 ro,vec3 rd){
     old=h;t=q;
   }return 1e5;
 }
-float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-vec3 sandColor(vec2 p){
-  vec2 c=floor(p*6.),f=fract(p*6.);f=f*f*(3.-2.*f);
-  float n=mix(mix(hash(c),hash(c+vec2(1,0)),f.x),mix(hash(c+vec2(0,1)),hash(c+1.),f.x),f.y);
-  float ridges=sin(p.y*22.+sin(p.x*2.2)*1.4);
-  return mix(vec3(.38,.29,.17),vec3(.69,.57,.36),.5+.35*n)*(1.+.045*ridges);
-}
 `;
 
 export const photonFragment = `${opticalCommon}
@@ -121,7 +117,8 @@ layout(location=1)out vec4 direction;
 void main(){
   vec2 xz=(vUv-.5)*vec2(6.,3.6);vec3 p=vec3(xz.x,LEVEL+surface(xz).x,xz.y),n=surfaceNormal(xz);
   vec3 L=lightDirection(p),d=refract(-L,n,1./1.333);
-  float power=(1.-fresnel(max(0.,dot(n,L)),1.,1.333))*max(dot(n,L),0.);
+  // Launch cells measure horizontal area, not the tilted surface area.
+  float power=dot(n,L)>0.?(1.-fresnel(max(0.,dot(n,L)),1.,1.333))*max(L.y,0.):0.;
   float lightDistance=lampPower>0.?length(lampPosition-p):40.;
   if(objectDistance(p+n*.003,L,lightDistance-.01)<lightDistance-.02)power=0.;
   float stop=objectDistance(p+d*.003,d,30.);
@@ -158,7 +155,8 @@ void main(){
   float area=abs(ox.x*oy.y-ox.y*oy.x)/max(abs(nx.x*ny.y-nx.y*ny.x),1e-8);
   vec3 d=entryPosition-lampPosition;
   vec3 light=lightColor*sunPower*${SUN_INTENSITY.toFixed(1)}+vec3(${LAMP_COLOR.join(',')})*lampPower*${LAMP_INTENSITY.toFixed(1)}*smoothstep(.55,.88,-normalize(d).y)/max(dot(d,d),.02);
-  color=vec4(light*spectralMask*min(area,18.)*weight*exp(-vec3(.237,.083,.061)*distanceTravelled),1.);
+  if(isnan(area)||isinf(area))area=0.;
+  color=vec4(light*spectralMask*min(area,40.)*weight*exp(-${extinctionGLSL}*distanceTravelled),1.);
 }`;
 
 export const traceFragment = `${opticalCommon}
@@ -180,9 +178,9 @@ vec3 field(vec3 p){
 }
 vec3 shade(vec3 p,vec3 n,vec3 base,bool wet){
   vec3 L=lightDirection(p);vec3 lit;
-  if(wet){vec3 underwaterL=-refract(-L,surfaceNormal(p.xz),1./1.333);lit=field(p)*(.18+.82*max(0.,dot(n,underwaterL)));}
+  if(wet){vec3 underwaterL=-refract(-L,surfaceNormal(p.xz),1./1.333);lit=field(p)*max(0.,dot(n,underwaterL))/max(.2,underwaterL.y);}
   else{float vis=objectDistance(p+n*.004,L,lampPower>0.?length(lampPosition-p):40.);lit=incident(p)*max(0.,dot(n,L))*(vis<(lampPower>0.?length(lampPosition-p)-.02:39.)?0.:1.);}
-  return base*(vec3(ambient)*vec3(.65,.85,1.)+lit);
+  return aquariumDiffuse(base,vec3(ambient)*vec3(.65,.85,1.)+lit);
 }
 vec3 reflectedAir(vec3 p,vec3 d){
   float lamp=sphereHit(p,d,vec4(lampPosition,.105));if(lamp<1e4)return LAMP_COLOR*(.1+lampPower*LAMP_INTENSITY*1.2);
@@ -245,7 +243,7 @@ void main(){
     if(kind>=3){
       terminalKind=kind;
       vec2 material=hitMaterial;
-      vec3 lit=kind==3?base.rgb*(vec3(ambient)*vec3(.65,.85,1.)+texture(causticFloor,p.xz/vec2(6.,3.6)+.5).rgb):shade(p,n,base.rgb,wet);
+      vec3 lit=kind==3?aquariumDiffuse(base.rgb,vec3(ambient)*vec3(.65,.85,1.)+texture(causticFloor,p.xz/vec2(6.,3.6)+.5).rgb):shade(p,n,base.rgb,wet);
       if(kind==4){
         vec3 L=wet?-refract(-lightDirection(p),surfaceNormal(p.xz),1./1.333):lightDirection(p);
         vec3 h=normalize(L-rd);float exponent=max(2.,2./pow(max(.12,material.x),4.)-2.);

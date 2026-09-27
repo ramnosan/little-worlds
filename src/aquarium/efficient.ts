@@ -2,6 +2,7 @@ import * as T from 'three';
 import type { AquariumWorld } from './physics';
 import type { AquariumLight } from './lighting';
 import { LAMP_POSITION, LAMP_COLOR, LAMP_INTENSITY, SUN_INTENSITY } from './lighting';
+import { extinctionGLSL } from './appearance';
 
 // Photon-area projection adapted from CAUSTIC//VOLUME; see public/licenses/caustic-volume.txt.
 // This pass has no mesh queries or animated-geometry bridge.
@@ -41,7 +42,7 @@ export class EfficientCaustics {
           vec3 L=lampPower>0.?normalize(lamp-entry):sun;
           vec3 d=refract(-L,n,1./1.333);travel=(.005-entry.y)/min(-.001,d.y);
           original=xz;projected=(entry+d*travel).xz;
-          weight=max(0.,dot(n,L))*(1.-(.02037+.97963*pow(1.-max(0.,dot(n,L)),5.)));
+          weight=dot(n,L)>0.?max(0.,L.y)*(1.-(.02037+.97963*pow(1.-max(0.,dot(n,L)),5.))):0.;
           for(int i=0;i<6;i++){if(i>=ballCount)break;
             float air=sphere(entry+n*.003,L,balls[i]),wet=sphere(entry+d*.003,d,balls[i]);
             if((air>0.&&air<(lampPower>0.?length(lamp-entry):40.))||(wet>0.&&wet<travel))weight=0.;
@@ -56,7 +57,8 @@ export class EfficientCaustics {
           float compression=abs(a.x*b.y-a.y*b.x)/max(abs(c.x*d.y-c.y*d.x),1e-8);
           vec3 lampDelta=entry-vec3(${LAMP_POSITION.join(',')});
           vec3 light=color*sunPower*${SUN_INTENSITY.toFixed(1)}+vec3(${LAMP_COLOR.join(',')})*lampPower*${LAMP_INTENSITY.toFixed(1)}*smoothstep(.55,.88,-normalize(lampDelta).y)/max(.02,dot(lampDelta,lampDelta));
-          gl_FragColor=vec4(light*min(compression,12.)*weight*exp(-vec3(.237,.083,.061)*travel),1.);
+          if(isnan(compression)||isinf(compression))compression=0.;
+          gl_FragColor=vec4(light*min(compression,40.)*weight*exp(-${extinctionGLSL}*travel),1.);
         }`,
       depthWrite: false,
       depthTest: false,

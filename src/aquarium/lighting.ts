@@ -38,7 +38,7 @@ export function sampleLighting(phase: number): AquariumLight {
     lamp,
     sunDirection: [x / length, y / length, z / length],
     color: [1, 0.57 + 0.37 * warm, 0.3 + 0.57 * warm],
-    ambient: 0.035 + 0.27 * daylight,
+    ambient: 0.06 + 0.245 * daylight,
   };
 }
 export class AquariumLighting {

@@ -1,6 +1,7 @@
 import { chromium } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const output = process.argv[2] ?? 'artifacts/aquarium-efficient';
 const errors = [];
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
@@ -56,7 +57,7 @@ try {
       drawCalls: b.drawCalls,
     };
   };
-  await mkdir('artifacts/aquarium-efficient', { recursive: true });
+  await mkdir(output, { recursive: true });
   const measurements = {};
   for (const mode of ['high', 'efficient']) {
     if (mode === 'efficient') {
@@ -72,7 +73,7 @@ try {
       await page.locator('#aq-pause').click();
       await page.locator('#aq-time').fill(String(minutes));
       await page.waitForTimeout(350);
-      await page.screenshot({ path: `artifacts/aquarium-efficient/${mode}-${phase}-oblique.png` });
+      await page.screenshot({ path: `${output}/${mode}-${phase}-oblique.png` });
       const box = await page.locator('canvas').boundingBox(),
         x = box.x + box.width / 2,
         y = box.y + box.height / 2;
@@ -86,7 +87,7 @@ try {
         await page.mouse.up({ button: 'right' });
         await page.waitForTimeout(400);
         await page.screenshot({
-          path: `artifacts/aquarium-efficient/${mode}-${phase}-${angle}.png`,
+          path: `${output}/${mode}-${phase}-${angle}.png`,
         });
       }
     }
@@ -95,13 +96,13 @@ try {
     await page.locator('#aq-strength').fill('100');
     for (let i = 0; i < 6; i++) await page.locator('#aq-ball').click();
     measurements[mode] = await measure();
-    await page.screenshot({ path: `artifacts/aquarium-efficient/${mode}-stress.png` });
+    await page.screenshot({ path: `${output}/${mode}-stress.png` });
   }
   await page.setViewportSize({ width: 390, height: 844 });
   measurements.mobileViewport = await measure();
-  await page.screenshot({ path: 'artifacts/aquarium-efficient/mobile.png', fullPage: true });
+  await page.screenshot({ path: `${output}/mobile.png`, fullPage: true });
   const report = { hardware, measurements, errors };
-  await writeFile('artifacts/aquarium-efficient/review.json', JSON.stringify(report, null, 2));
+  await writeFile(`${output}/review.json`, JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
   if (errors.length) throw new Error('Browser errors during visual review');
 } finally {

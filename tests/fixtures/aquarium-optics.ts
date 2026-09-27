@@ -2,6 +2,8 @@ import * as T from 'three';
 import { AquariumWorld, NX, NZ } from '../../src/aquarium/physics';
 import { AquariumRenderer } from '../../src/aquarium/render';
 import { LAMP_POSITION } from '../../src/aquarium/lighting';
+import { UnderwaterLighting } from '../../src/aquarium/underwater';
+import { EXTINCTION, diffuseGLSL } from '../../src/aquarium/appearance';
 
 const world = new AquariumWorld();
 world.heights.fill(0);
@@ -119,12 +121,146 @@ function lampAlignment() {
     ring: (brightness(18, 0) + brightness(-18, 0) + brightness(0, 18) + brightness(0, -18)) / 4,
   };
 }
+
+// Actual GPU material responses, read in linear HDR before exposure/tone mapping.
+function diffuseResponse(lamp = false) {
+  const renderer = view.renderer,
+    previous = renderer.getRenderTarget(),
+    tone = renderer.toneMapping;
+  const target = new T.WebGLRenderTarget(8, 8, { type: T.HalfFloatType });
+  const field = new T.DataTexture(new Float32Array([0, 0, 0, 1]), 1, 1, T.RGBAFormat, T.FloatType);
+  const data = new Float32Array([1, 1, 1, 1]);
+  const caustic = new T.DataTexture(data, 1, 1, T.RGBAFormat, T.FloatType);
+  field.needsUpdate = caustic.needsUpdate = true;
+  const material = new T.MeshStandardMaterial({ color: new T.Color(0.5, 0.3, 0.2), roughness: 1 });
+  new UnderwaterLighting(field, { value: caustic }).prepare(material);
+  const prepare = material.onBeforeCompile;
+  material.onBeforeCompile = (shader, renderer) => {
+    prepare(shader, renderer);
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <lights_fragment_end>',
+      '#include <lights_fragment_end>\n reflectedLight.directSpecular=vec3(0.);',
+    );
+  };
+  const geometry = new T.PlaneGeometry(2, 2).rotateX(-Math.PI / 2);
+  const mesh = new T.Mesh<T.PlaneGeometry, T.Material>(geometry, material),
+    scene = new T.Scene();
+  const light = lamp
+    ? new T.SpotLight(0xffffff, 1, 0, 0.8, 0, 2)
+    : new T.DirectionalLight(0xffffff, 1);
+  light.position.set(0, 4, 0);
+  scene.add(mesh, light);
+  const camera = new T.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0.1, 10);
+  camera.position.set(0, 4, 0);
+  camera.up.set(0, 0, -1);
+  camera.lookAt(0, 0, 0);
+  const pixels = new Uint16Array(4);
+  const read = () => {
+    renderer.render(scene, camera);
+    renderer.readRenderTargetPixels(target, 4, 4, 1, 1, pixels);
+    return Array.from(pixels.subarray(0, 3), T.DataUtils.fromHalfFloat);
+  };
+  const traced = new T.ShaderMaterial({
+    uniforms: { energy: { value: 1 } },
+    vertexShader: 'void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:
+      diffuseGLSL +
+      'uniform float energy;void main(){gl_FragColor=vec4(aquariumDiffuse(vec3(.5,.3,.2),vec3(energy)),1.);}',
+    toneMapped: false,
+  });
+  try {
+    renderer.toneMapping = T.NoToneMapping;
+    renderer.setRenderTarget(target);
+    const efficient: number[][] = [],
+      high: number[][] = [],
+      sourceIndependent: number[][] = [];
+    for (const power of [0, 1, 2, 8]) {
+      data.set([power, power, power, 1]);
+      caustic.needsUpdate = true;
+      mesh.material = material;
+      efficient.push(read());
+      light.intensity = 4;
+      sourceIndependent.push(read());
+      light.intensity = 1;
+      mesh.material = traced;
+      traced.uniforms.energy.value = power;
+      high.push(read());
+    }
+    return {
+      efficient,
+      high,
+      sourceIndependent,
+      transmission: EXTINCTION.map((v) => Math.exp(-v * 1.65)),
+    };
+  } finally {
+    renderer.setRenderTarget(previous);
+    renderer.toneMapping = tone;
+    target.dispose();
+    field.dispose();
+    caustic.dispose();
+    material.dispose();
+    traced.dispose();
+    geometry.dispose();
+  }
+}
+function nightContrast() {
+  measure(false, false, 22 / 24);
+  const flat = view.readOpticalCaustics()!;
+  world.waveMaker = true;
+  world.strength = 0.45;
+  world.time = -1;
+  view.render();
+  world.time = 8;
+  view.render();
+  const wavy = view.readOpticalCaustics()!;
+  const ratios: number[] = [];
+  let finite = true;
+  for (let i = 1; i < wavy.data.length; i += 4) {
+    const a = T.DataUtils.fromHalfFloat(flat.data[i]),
+      b = T.DataUtils.fromHalfFloat(wavy.data[i]);
+    finite &&= Number.isFinite(b);
+    if (a > 0.15) ratios.push(b / a);
+  }
+  ratios.sort((a, b) => a - b);
+  view.koi.group.visible = false;
+  view.camera.position.set(0, 8, 0.01);
+  view.controls.target.set(0, 0, 0);
+  view.controls.update();
+  const pixels = framePixels(),
+    size = view.renderer.getDrawingBufferSize(new T.Vector2());
+  const luminance: number[] = [];
+  let clipped = 0;
+  // The central floor region excludes the lamp, rim and glass edges in this fixed view.
+  for (let y = Math.floor(size.y * 0.37); y < size.y * 0.63; y++)
+    for (let x = Math.floor(size.x * 0.3); x < size.x * 0.7; x++) {
+      const i = (y * size.x + x) * 4;
+      luminance.push(0.2126 * pixels[i] + 0.7152 * pixels[i + 1] + 0.0722 * pixels[i + 2]);
+      if (Math.min(pixels[i], pixels[i + 1], pixels[i + 2]) >= 250) clipped++;
+    }
+  luminance.sort((a, b) => a - b);
+  view.koi.group.visible = true;
+  world.waveMaker = false;
+  world.strength = 0;
+  world.time = -2;
+  view.render();
+  view.resetCamera();
+  return {
+    finite,
+    dark: ratios[Math.floor(ratios.length * 0.1)],
+    bright: ratios[Math.floor(ratios.length * 0.9)],
+    clipping: clipped / luminance.length,
+    displayDark: luminance[Math.floor(luminance.length * 0.1)],
+    displayBright: luminance[Math.floor(luminance.length * 0.9)],
+  };
+}
 Object.assign(window, {
   aquariumOpticsFixture: {
     measure,
     pausedDifference,
     finCoverage,
     lampAlignment,
+    diffuseResponse,
+    nightContrast,
     quality: (low: boolean) => view.quality(low),
     snapshot: () => view.renderingSnapshot(),
     light: (phase: number) => {

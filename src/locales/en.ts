@@ -1,4 +1,8 @@
 export const en = {
+  'loading.title': 'Loading {level}…',
+  'loading.detail': 'A little moment. A new world to explore.',
+  'loading.error': 'This little world couldn’t load.',
+  'loading.retry': 'Please check your connection and try again.',
   'aq.graphicsHigh': 'Graphics: High quality',
   'aq.graphicsEfficient': 'Graphics: Efficient',
   'aq.time': 'Time of day',

@@ -265,7 +265,7 @@ view.koi.onStatus = () => {
   retry.hidden = status !== 'error' && status !== 'unavailable';
   retry.disabled = contextLost;
 };
-void view.koi.load(reduced);
+export const ready = Promise.all([view.ready, view.koi.load(reduced)]);
 on('aq-waves', () => {
   world.waveMaker = !world.waveMaker;
   sync();
