@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { undergrowthGeometry, type UndergrowthKind } from './undergrowth';
 import {
   MODEL_SCALE,
   GROUND,
@@ -880,25 +881,59 @@ export class RailwayScenery {
       '#574a35',
       trunks,
     );
-    // Small scrub and grass tufts blend the rock outcrops into the terrain.
-    const scrub: T.Matrix4[] = [];
-    for (let i = 0; i < 1600; i++) {
+    // Broken patches of rooted undergrowth, with open meadow between them.
+    const plants = new Map<string, T.Matrix4[]>();
+    const occupied: { x: number; z: number; radius: number }[] = [];
+    for (let i = 0; i < 4800; i++) {
       const x = random(i * 5 + 71) * 13 - 6.5,
         z = random(i * 5 + 72) * 8.4 - 4.2;
-      if (trackClearance(x, z) < 0.42 || z > 3.3 || (z < -3.45 && x > 0.5)) continue;
-      const s = 0.025 + random(i) * 0.085;
-      this.matrix.position.set(x, terrainHeight(x, z), z);
+      if (z > 3.3 || (z < -3.45 && x > 0.5)) continue;
+      const patch = noise(x * 1.7 + 41, z * 1.7 + 23);
+      if (patch < 0.4 || random(i + 170) > (patch - 0.3) * 1.7) continue;
+      const choice = random(i + 310);
+      const kind: UndergrowthKind = choice < 0.28 ? 'bush' : choice < 0.58 ? 'scrub' : 'grass';
+      const size =
+        (kind === 'bush' ? 0.15 : kind === 'scrub' ? 0.12 : 0.09) * (0.7 + random(i + 91) * 0.7);
+      const radius = size * (kind === 'grass' ? 0.8 : 1.05);
+      const route = nearestTrack(x, z);
+      if (
+        route.clearance < 0.42 + radius ||
+        buildingPads.some((pad) => Math.hypot(pad.x - x, pad.z - z) < 0.4 + radius) ||
+        trees.some((tree) => Math.hypot(tree.x - x, tree.z - z) < 0.055 + radius) ||
+        occupied.some(
+          (plant) => Math.hypot(plant.x - x, plant.z - z) < (plant.radius + radius) * 0.8,
+        )
+      )
+        continue;
+      const y = terrainHeight(x, z);
+      // Skip sharp terrain transitions where a plant would float or pierce a slope.
+      const heights = [
+        [radius, 0],
+        [-radius, 0],
+        [0, radius],
+        [0, -radius],
+      ].map(([dx, dz]) => terrainHeight(x + dx, z + dz));
+      if (Math.max(...heights, y) - Math.min(...heights, y) > size * 0.45) continue;
+      this.matrix.position.set(x, y - size * 0.04, z);
       this.matrix.rotation.set(0, i, 0);
-      this.matrix.scale.set(s, s * 0.6, s);
+      this.matrix.scale.set(size, size * (0.85 + random(i + 42) * 0.3), size);
       this.matrix.updateMatrix();
-      scrub.push(this.matrix.matrix.clone());
+      const key = `${kind}-${i % 3}`;
+      const matrices = plants.get(key) ?? [];
+      matrices.push(this.matrix.matrix.clone());
+      plants.set(key, matrices);
+      occupied.push({ x, z, radius });
     }
-    this.instance(
-      this.geometry('scrub', () => new T.IcosahedronGeometry(1, 1)),
-      '#687439',
-      scrub,
-      true,
-    );
+    for (const kind of ['bush', 'scrub', 'grass'] as const) {
+      for (let variant = 0; variant < 3; variant++) {
+        const key = `${kind}-${variant}`;
+        const matrices = plants.get(key);
+        if (!matrices?.length) continue;
+        const geometry = this.geometry(key, () => undergrowthGeometry(kind, variant));
+        const mesh = this.instance(geometry, 'needles', matrices, true);
+        mesh.name = `Undergrowth ${key}`;
+      }
+    }
   }
 
   private electrification() {
