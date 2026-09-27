@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "tsx --test tests/physics.test.ts tests/collisions.test.ts tests/bubbles.test.ts tests/fusion.test.ts tests/smooth-fusion.test.ts tests/aquarium.test.ts tests/aquarium-lighting.test.ts tests/aquarium-surface.test.ts tests/koi.test.ts tests/railway.test.ts tests/airplane.test.ts tests/fire.test.ts tests/i18n.test.ts tests/plant.test.ts",
+    "test": "tsx --test tests/physics.test.ts tests/collisions.test.ts tests/bubbles.test.ts tests/fusion.test.ts tests/smooth-fusion.test.ts tests/aquarium.test.ts tests/aquarium-lighting.test.ts tests/aquarium-surface.test.ts tests/koi.test.ts tests/railway.test.ts tests/airplane.test.ts tests/fire.test.ts tests/i18n.test.ts tests/plant.test.ts tests/melon.test.mjs",
     "typecheck": "tsc --noEmit",
     "test:browser": "playwright test",
     "test:production": "npm run build && node scripts/check-production-layout.mjs",

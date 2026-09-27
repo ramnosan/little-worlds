@@ -139,7 +139,7 @@ for (const [url, canvas, level] of [
   test(`railway navigation to ${level} and back`, async ({ page }) => {
     await page.goto('/?level=railway');
     await expect(page.locator('#railway-world canvas')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('.level-nav a')).toHaveCount(6);
+    await expect(page.locator('.level-nav a')).toHaveCount(8);
     await page.locator(`.level-nav a[href="${url === '/' ? './' : url.slice(1)}"]`).click();
     await expect(page.locator(`${canvas} canvas`)).toBeVisible({ timeout: 15000 });
     await page.getByRole('link', { name: '04 Model Railway' }).click();

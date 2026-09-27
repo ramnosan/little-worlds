@@ -4,9 +4,9 @@ Small worlds. Play a little.
 
 **[Play Little Worlds in your browser](https://ramnosan.github.io/little-worlds/)**
 
-Little Worlds is a collection of seven warm, tactile 3D playgrounds built with TypeScript and Three.js. Stretch a jelly, blow soap bubbles, disturb the surface of an aquarium, watch a model train, tend a campfire, fly a tiny aeroplane, or grow an iris garden. There are no accounts, scores, or online services: each world is simply a small place to explore at your own pace.
+Little Worlds is a collection of eight warm, tactile 3D playgrounds. The original worlds use TypeScript and Three.js; Melon Jelly is a standalone native WebGPU study. Stretch a jelly, blow soap bubbles, disturb the surface of an aquarium, watch a model train, tend a campfire, fly a tiny aeroplane, grow an iris garden, or play with a watermelon gummy. There are no accounts, scores, or online services: each world is simply a small place to explore at your own pace.
 
-The experience supports English and German, mouse and touch controls, and a lighter graphics mode for less powerful devices.
+All worlds support mouse and touch controls. The original worlds support English and German, with lighter graphics options where available; Melon Jelly follows its English material-study brief and uses native WebGPU.
 
 ## The worlds
 
@@ -54,6 +54,14 @@ An uncrowded iris takes about three minutes to bloom at **1×**, with **5× / 20
 
 The procedural scene uses a single high-quality renderer, bounded reusable geometry, soft shadows and translucent leaf/petal lighting. No watering, quality settings, timeline seeking or saved growth. The time and shallow root display are illustrative rather than a validated horticultural model. See the [visual guide](docs/plant-style.md) and [implementation and verification notes](docs/plant-simulation.md).
 
+### 08 · Melon Jelly
+
+A thick watermelon gummy with ruby flesh, pale pith, striped green rind and individually modeled seeds. Grab any part to stretch the tetrahedral soft body, release to wobble, or drag empty space to inspect both sides. Two touches can hold and twist separate parts. Colour presets, firmness, internal damping, quarter speed, mesh inspection and pause are available in the specimen panel. The canvas also supports arrow-key nudges, **Space** to pause and **R** to reset.
+
+Open [Melon Jelly](public/melon-jelly.html), or visit `melon-jelly.html` on the running site (`?level=melon` also redirects there). **The single HTML file contains all JavaScript, CSS, geometry and WGSL**, with no external runtime dependencies. It requires genuine WebGPU and a supported graphics device; HTTPS or localhost is recommended. An explicit error explains unavailable WebGPU. Reduced-motion preferences start the simulation paused.
+
+The CPU solves XPBD elastic and signed-volume constraints at 120 Hz with bounded catch-up, local grabs, inversion safeguards and frictional ground contact. The native WebGPU renderer uses measured back-face thickness, approximate absorption/refraction, Fresnel lighting and filtered shadow mapping. Readouts use the illustrative scale printed beneath the experiment. This level was created from a prompt by [Vib3Coded](https://x.com/vib3coded/status/2103741107225907467). See [implementation and validation notes](docs/melon-jelly.md).
+
 ## Run locally
 
 Little Worlds requires Node.js 20.12 or newer and npm. Install the locked dependencies and start the development server:
@@ -70,7 +78,7 @@ npm run build            # Type-check and create the production bundle
 npm run preview          # Preview the production bundle locally
 npm test                 # Run rendering-independent tests
 npm run test:browser     # Run browser interaction and layout tests
-npm run test:production  # Build and check all seven desktop/mobile layouts
+npm run test:production  # Build and check all eight desktop/mobile layouts
 ```
 
 GitHub Pages deployment is handled by [the included workflow](.github/workflows/deploy.yml). Set **Settings → Pages → Source** to **GitHub Actions**; pushes to `main` will build and publish the site under `/little-worlds/`.

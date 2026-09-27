@@ -1,6 +1,8 @@
 import { initializeLanguage, t } from './i18n';
 
 const level = new URLSearchParams(location.search).get('level');
+// The native WebGPU study is independently distributable, including its styles.
+if (level === 'melon') location.replace(new URL('melon-jelly.html', location.href));
 initializeLanguage(
   level === 'plant' ||
     level === 'airplane' ||
@@ -87,4 +89,4 @@ async function start() {
     retry.hidden = false;
   }
 }
-void start();
+if (level !== 'melon') void start();
