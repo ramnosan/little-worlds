@@ -28,11 +28,12 @@ root.innerHTML = `<div class="railway-app">
         <input id="rw-speed" type="range" min="0" max="200" step="5" value="100">
         <div class="rw-range-labels"><span>${t('Stopped')}</span><span>${t('Full speed')}</span></div>
         <p class="rw-note">${t('A slow glide through the trees.')}<br>${t('A lively turn around the bend.')}</p>
+        <button id="rw-follow" class="rw-quality rw-follow" aria-pressed="false"><span aria-hidden="true">◎</span> <span>${t('Follow train')}</span></button>
         <button id="rw-quality" class="rw-quality" aria-pressed="false">◌ <span>${t('Lighter graphics')}</span></button>
       </aside>
     </div>
     <div class="rw-bottom">
-      <p class="rw-hint"><span>◎</span> ${t('A new perspective.')}<small>${t('Drag to orbit · Scroll or pinch to zoom')}</small></p>
+      <p class="rw-hint"><span>◎</span> ${t('A new perspective.')}<small id="rw-camera-hint">${t('Drag to orbit · Scroll or pinch to zoom')}</small></p>
       <div class="rw-toolbar"><button id="rw-pause" aria-label="${t('Pause simulation')}">Ⅱ <span>${t('Pause')}</span></button><span></span><button id="rw-reset">↻ <span>${t('Reset')}</span></button></div>
       <p class="rw-status" role="status"><span id="rw-live"></span><span id="rw-status">${t('Travelling through Kleinwald')}</span></p>
     </div>
@@ -75,6 +76,11 @@ function sync() {
     world.paused ? t('Resume simulation') : t('Pause simulation'),
   );
   el('rw-quality').setAttribute('aria-pressed', String(light));
+  el('rw-follow').setAttribute('aria-pressed', String(view.followTrain));
+  root.querySelector('.rw-layout')!.classList.toggle('is-following', view.followTrain);
+  el('rw-camera-hint').textContent = view.followTrain
+    ? t('Following the train · Disable Follow train to orbit and zoom')
+    : t('Drag to orbit · Scroll or pinch to zoom');
   el('rw-status').textContent = world.paused
     ? t('A little travel break')
     : world.speed === 0
@@ -107,6 +113,15 @@ speed.addEventListener(
 );
 el('rw-pause').addEventListener('click', pause, { signal });
 el('rw-reset').addEventListener('click', reset, { signal });
+el('rw-follow').addEventListener(
+  'click',
+  () => {
+    if (contextLost) return;
+    view.setFollowTrain(!view.followTrain);
+    sync();
+  },
+  { signal },
+);
 el('rw-quality').addEventListener(
   'click',
   () => {
@@ -163,7 +178,7 @@ function animate(now: number) {
   last = now;
   if (document.hidden || contextLost) return;
   world.advance(delta);
-  view.render();
+  view.render(delta);
 }
 sync();
 view.render();

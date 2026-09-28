@@ -298,6 +298,11 @@ export const en = {
   'Kleinwald miniature world': 'Kleinwald miniature world',
   'A WORLD ON A TABLE': 'A WORLD ON A TABLE',
   'Model railway settings': 'Model railway settings',
+  'Follow train': 'Follow train',
+  'Following the train · Disable Follow train to orbit and zoom':
+    'Following the train · Disable Follow train to orbit and zoom',
+  'Model railway. Camera following the train. Disable Follow train to orbit and zoom.':
+    'Model railway. Camera following the train. Disable Follow train to orbit and zoom.',
   'YOUR LITTLE TIMETABLE': 'YOUR LITTLE TIMETABLE',
   'ROUND TRIP': 'ROUND TRIP',
   '1 locomotive · 2 carriages · endless time': '1 locomotive · 2 carriages · endless time',

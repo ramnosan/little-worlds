@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run build:helicopter && tsc --noEmit && vite build",
+    "build:helicopter": "node scripts/build-helicopter.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "test": "tsx --test tests/physics.test.ts tests/collisions.test.ts tests/bubbles.test.ts tests/fusion.test.ts tests/smooth-fusion.test.ts tests/aquarium.test.ts tests/aquarium-lighting.test.ts tests/aquarium-surface.test.ts tests/koi.test.ts tests/railway.test.ts tests/airplane.test.ts tests/fire.test.ts tests/i18n.test.ts tests/plant.test.ts tests/melon.test.mjs",
     "typecheck": "tsc --noEmit",
@@ -24,6 +25,7 @@
     "@playwright/test": "^1.63.0",
     "@types/node": "^20.17.0",
     "@types/three": "^0.180.0",
+    "esbuild": "0.28.2",
     "prettier": "^3.9.9",
     "tsx": "^4.20.0",
     "typescript": "~5.9.2",

@@ -19,6 +19,7 @@ import {
 } from '../src/railway/physics';
 import { GAUGE, GROUND, terrainHeight } from '../src/railway/scenery';
 import { Vector3 } from 'three';
+import { followCameraPose, TUNNEL_CAMERA_BACK, tunnelCameraBlend } from '../src/railway/camera';
 import {
   CLOUD_DRIFT_PERIOD,
   CLOUD_LAYOUT,
@@ -169,4 +170,42 @@ test('pause, zero speed, invalid input, speed limits and reset are deterministic
   const snapshot = world.stats();
   snapshot.cars[0].x = 999;
   assert.notEqual(world.stats().cars[0].x, 999);
+});
+
+test('follow camera and its sightline fit both curved tunnel bores', () => {
+  const position = new Vector3(),
+    target = new Vector3(),
+    point = new Vector3();
+  for (const section of ROUTE_SECTIONS.filter((s) => s.kind === 'tunnel')) {
+    for (let s = section.start; s <= section.end; s += 0.04) {
+      // Sample by camera distance, including the exit after the locomotive is outside.
+      const locomotive = s + TUNNEL_CAMERA_BACK;
+      assert.equal(followCameraPose(locomotive, position, target), 1);
+      const cameraTrack = trackPose(s);
+      close(position.x, cameraTrack.x);
+      close(position.z, cameraTrack.z);
+      for (let f = 0; f <= 1; f += 0.1) {
+        point.lerpVectors(position, target, f);
+        const route = nearestTrack(point.x, point.z);
+        const lateral = route.lateral - LINE_OFFSET / 2;
+        assert.ok(Math.abs(lateral) < TUNNEL_HALF_WIDTH - 0.05, 'sightline clears the walls');
+        assert.ok(point.y > route.y + 0.1, 'sightline clears the floor');
+        assert.ok(point.y < route.y + 0.48, 'sightline stays below the arch');
+      }
+    }
+  }
+});
+
+test('tunnel camera transitions are continuous across portals and lap wrap', () => {
+  const position = new Vector3(),
+    target = new Vector3(),
+    previous = new Vector3();
+  followCameraPose(-0.01, previous, target);
+  for (let s = 0; s < TRACK_LENGTH + 0.02; s += 0.01) {
+    const blend = followCameraPose(s, position, target);
+    assert.ok(blend >= 0 && blend <= 1);
+    assert.ok(position.distanceTo(previous) < 0.08, 'no jump at transitions');
+    previous.copy(position);
+  }
+  assert.equal(tunnelCameraBlend(START_DISTANCE), 0);
 });

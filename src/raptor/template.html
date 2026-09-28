@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e8eae9" />
+    <meta
+      name="description"
+      content="Raptor 22. An interactive, procedural F-22 aircraft study in the Horizon 05 collection."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%2323323b'/%3E%3Cpath d='M10 28L20 10l10 18M14 22h12' stroke='%23fff' fill='none' stroke-width='2'/%3E%3C/svg%3E"
+    />
+    <title>Raptor 22 · Horizon 05 · Little Worlds</title>
+    <style>
+      :root {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #293940;
+        background: #e8eae9;
+        font-synthesis: none;
+        --line: #29394026;
+        --muted: #69777d;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button,
+      input,
+      a {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        border: 1px solid var(--line);
+        background: transparent;
+        border-radius: 3px;
+        min-height: 42px;
+      }
+      button:hover,
+      .aircraft-nav a:hover {
+        background: #ffffff70;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      :focus-visible {
+        outline: 2px solid #327d9e;
+        outline-offset: 4px;
+      }
+      button[aria-pressed='true'] {
+        background: #293e49;
+        border-color: #293e49;
+        color: white;
+      }
+      .app {
+        max-width: 2000px;
+        margin: auto;
+        padding: 0 42px;
+        min-height: 860px;
+        height: 100svh;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        height: 82px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 10px;
+        letter-spacing: 2px;
+        font-weight: 600;
+      }
+      .mark {
+        width: 28px;
+        height: 28px;
+      }
+      .back {
+        font-size: 9px;
+        letter-spacing: 1.4px;
+        color: var(--muted);
+        padding: 14px 0;
+      }
+      .intro {
+        padding-top: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      h1 {
+        font-size: clamp(46px, 4.6vw, 72px);
+        font-weight: 400;
+        letter-spacing: -3.7px;
+        line-height: 1.05;
+        margin: 0;
+      }
+      h1 span {
+        color: #809197;
+      }
+      .intro p {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 13px 0 0;
+      }
+      .edition {
+        font: 9px/1.9 monospace;
+        letter-spacing: 1px;
+        text-align: right;
+        color: var(--muted);
+      }
+      .aircraft-nav {
+        display: flex;
+        gap: 22px;
+        margin-top: 18px;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .aircraft-nav a {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .aircraft-nav a[aria-current='page'] {
+        border-color: #293940;
+        color: #293940;
+      }
+      main {
+        flex: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 234px;
+        gap: 30px;
+        min-height: 455px;
+      }
+      .stage {
+        position: relative;
+        min-width: 0;
+        min-height: 455px;
+      }
+      #viewport {
+        position: absolute;
+        inset: 0;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+        cursor: grab;
+      }
+      canvas:active {
+        cursor: grabbing;
+      }
+      .stage-top,
+      .stage-caption,
+      .scale {
+        position: absolute;
+        pointer-events: none;
+        font: 9px/1.8 monospace;
+        letter-spacing: 1.2px;
+        color: var(--muted);
+      }
+      .stage-top {
+        top: 25px;
+        left: 0;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .dot {
+        width: 5px;
+        height: 5px;
+        background: #568477;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .stage-caption {
+        left: 0;
+        bottom: 25px;
+      }
+      .stage-caption b {
+        font-weight: 400;
+        color: #293940;
+      }
+      .scale {
+        right: 15px;
+        bottom: 28px;
+        text-align: right;
+      }
+      .scale::before {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 5px;
+        border: 1px solid #849399;
+        border-top: 0;
+        margin: 0 0 8px auto;
+      }
+      .panel {
+        align-self: center;
+        padding: 25px 0;
+      }
+      .eyebrow {
+        font: 9px monospace;
+        color: var(--muted);
+        letter-spacing: 1.6px;
+        margin: 0 0 14px;
+      }
+      h2 {
+        font-size: 22px;
+        font-weight: 400;
+        letter-spacing: -0.6px;
+        margin: 0 0 8px;
+      }
+      .subtitle {
+        font-size: 11px;
+        line-height: 1.7;
+        color: var(--muted);
+        margin: 0 0 17px;
+      }
+      .specs {
+        margin: 0 0 22px;
+      }
+      .specs div {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 11px;
+      }
+      dt {
+        color: var(--muted);
+      }
+      dd {
+        margin: 0;
+      }
+      .status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 9px;
+        margin: 0 0 9px;
+      }
+      .status strong {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 400;
+      }
+      #telemetry {
+        font: 9px monospace;
+        color: var(--muted);
+        margin: 0 0 21px;
+      }
+      .finishes {
+        display: flex;
+        gap: 9px;
+      }
+      .finishes button {
+        width: 48px;
+        min-height: 39px;
+        padding: 5px;
+      }
+      .finishes button[aria-pressed='true'] {
+        background: transparent;
+        border-color: #334d5c;
+      }
+      .swatch {
+        display: block;
+        height: 24px;
+        border: 1px solid #0001;
+      }
+      .gray {
+        background: linear-gradient(145deg, #929ca3 48%, #77838d 49%, #77838d 70%, #acb5b9 71%);
+      }
+      .arctic {
+        background: linear-gradient(145deg, #f0f1ea 48%, #718794 49%, #718794 70%, #c5cccd 71%);
+      }
+      .graphite {
+        background: linear-gradient(145deg, #414c55 48%, #273039 49%, #273039 70%, #62727d 71%);
+      }
+      #finish-name {
+        font-size: 10px;
+        color: var(--muted);
+        margin: 9px 0 23px;
+      }
+      .range-label {
+        display: flex;
+        justify-content: space-between;
+        font: 10px monospace;
+        margin-bottom: 9px;
+      }
+      .range-label label {
+        font-family: Arial, sans-serif;
+      }
+      #throttle {
+        width: 100%;
+        height: 22px;
+        margin: 0;
+        cursor: pointer;
+        accent-color: #334e5d;
+      }
+      .range-ends {
+        display: flex;
+        justify-content: space-between;
+        font: 8px monospace;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .controls {
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding-top: 20px;
+      }
+      .control-group {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .controls button {
+        padding: 0 13px;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+      .controls .primary {
+        color: white;
+        background: #293e49;
+        border-color: #293e49;
+        min-width: 134px;
+      }
+      .controls .primary:hover {
+        background: #405d6a;
+      }
+      .separator {
+        height: 22px;
+        width: 1px;
+        margin: 0 5px;
+        background: var(--line);
+      }
+      .view-label {
+        font: 9px monospace;
+        letter-spacing: 1px;
+        color: var(--muted);
+        margin-right: 7px;
+      }
+      .icon-button {
+        width: 42px;
+        padding: 0 !important;
+        font-size: 18px !important;
+      }
+      footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px 0 23px;
+        color: var(--muted);
+        font: 8px/1.7 monospace;
+        letter-spacing: 0.5px;
+      }
+      footer p {
+        margin: 0;
+      }
+      .hint {
+        display: flex;
+        gap: 18px;
+      }
+      #notice {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        max-width: 340px;
+        font-size: 10px;
+        line-height: 1.6;
+        color: #4b6778;
+        pointer-events: none;
+      }
+      #fallback {
+        position: absolute;
+        inset: 20%;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      #fallback[hidden] {
+        display: none;
+      }
+      .error-detail {
+        color: var(--muted);
+      }
+      @media (min-width: 1600px) {
+        .app {
+          padding: 0 65px;
+        }
+        main {
+          grid-template-columns: minmax(0, 1fr) 250px;
+          gap: 40px;
+        }
+      }
+      @media (max-width: 1100px) {
+        .app {
+          padding: 0 24px;
+        }
+        main {
+          grid-template-columns: minmax(0, 1fr) 210px;
+          gap: 16px;
+        }
+        .controls {
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+        .view-label {
+          display: none;
+        }
+        .controls button {
+          padding: 0 10px;
+        }
+        .hint {
+          gap: 9px;
+        }
+      }
+      @media (max-width: 700px) {
+        .app {
+          height: auto;
+          min-height: 100svh;
+          padding: 0 20px;
+        }
+        header {
+          height: 64px;
+        }
+        .brand {
+          font-size: 8px;
+          letter-spacing: 1px;
+          gap: 8px;
+        }
+        .mark {
+          width: 22px;
+          height: 22px;
+        }
+        .back {
+          font-size: 8px;
+          letter-spacing: 0.5px;
+        }
+        .intro {
+          padding-top: 24px;
+        }
+        h1 {
+          font-size: 48px;
+          letter-spacing: -2.7px;
+        }
+        .intro p {
+          font-size: 10px;
+          max-width: 220px;
+          line-height: 1.6;
+        }
+        .edition {
+          font-size: 8px;
+        }
+        .edition span {
+          display: none;
+        }
+        .aircraft-nav {
+          gap: 17px;
+          font-size: 9px;
+          margin-top: 13px;
+        }
+        main {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          min-height: 0;
+        }
+        .stage {
+          min-height: 370px;
+          height: 370px;
+          margin: 0 -10px;
+        }
+        .stage-top {
+          left: 10px;
+          top: 20px;
+          font-size: 8px;
+        }
+        .stage-caption {
+          left: 10px;
+          bottom: 17px;
+          font-size: 8px;
+          letter-spacing: 0.5px;
+        }
+        .scale {
+          right: 10px;
+          bottom: 19px;
+          font-size: 8px;
+        }
+        .panel {
+          align-self: auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 18px;
+          border-top: 1px solid var(--line);
+          padding: 23px 0;
+        }
+        .eyebrow {
+          font-size: 8px;
+        }
+        h2 {
+          font-size: 20px;
+        }
+        .subtitle {
+          font-size: 10px;
+        }
+        .specs {
+          margin: 0;
+        }
+        .specs div {
+          font-size: 9px;
+          padding: 8px 0;
+        }
+        .status {
+          font-size: 8px;
+        }
+        #telemetry {
+          font-size: 8px;
+          line-height: 1.7;
+        }
+        .finishes {
+          gap: 6px;
+        }
+        .finishes button {
+          width: 40px;
+        }
+        #finish-name {
+          font-size: 9px;
+          min-height: 12px;
+        }
+        .controls {
+          justify-content: center;
+        }
+        .control-group {
+          gap: 5px;
+        }
+        .controls button {
+          font-size: 10px;
+          padding: 0 9px;
+        }
+        .controls .primary {
+          min-width: 124px;
+        }
+        .separator {
+          margin: 0 3px;
+        }
+        .icon-button {
+          width: 37px;
+        }
+        footer {
+          display: block;
+          text-align: center;
+        }
+        .hint {
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 6px 14px;
+          margin-bottom: 10px;
+        }
+        #notice {
+          left: 10px;
+          top: 42px;
+          max-width: 290px;
+          font-size: 9px;
+        }
+        #fallback {
+          inset: 12%;
+        }
+      }
+      @media (max-width: 360px) {
+        .app {
+          padding: 0 14px;
+        }
+        .edition {
+          display: none;
+        }
+        .controls button {
+          padding: 0 7px;
+        }
+        .control-group {
+          gap: 4px;
+          flex-wrap: wrap;
+          justify-content: center;
+          max-width: 100%;
+        }
+        .separator {
+          display: none;
+        }
+        .panel {
+          gap: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div class="brand">
+          <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path
+              d="M3 27 16 4l13 23M9 20h14M12 27l4-7 4 7"
+              stroke="currentColor"
+              stroke-width="1.3"
+            /></svg
+          >AERONAUT <span style="opacity: 0.35">/</span> OBJECT STUDIES
+        </div>
+        <a class="back" href="./">← LITTLE WORLDS</a>
+      </header>
+      <div class="intro">
+        <div>
+          <h1>Raptor <span>22.</span></h1>
+          <p>A study in precision. A presence without compromise.</p>
+        </div>
+        <div class="edition">HORIZON 05 COLLECTION<br /><span>AIR SUPERIORITY</span> — 022</div>
+      </div>
+      <nav class="aircraft-nav" aria-label="Aircraft studies">
+        <a href="horizon-05.html">Horizon 05 · Helicopter</a
+        ><a href="raptor-22.html" aria-current="page">Raptor 22 · Fighter jet</a>
+      </nav>
+      <main>
+        <section class="stage" aria-label="Interactive F-22 Raptor studio">
+          <div id="viewport"></div>
+          <div class="stage-top"><span class="dot"></span> LIVE 3D EXPLORATION</div>
+          <div id="notice" role="status" aria-live="polite"></div>
+          <div class="stage-caption"><b>F-22 / RAPTOR</b><br />FORM FOLLOWS FLIGHT</div>
+          <div class="scale">DESIGN STUDY</div>
+          <div id="fallback" role="alert" hidden>
+            <h2>A little more graphics power.</h2>
+            <p>
+              This 3D study needs WebGL 2. Enable hardware acceleration or open this file in a
+              recent Chrome, Edge, Firefox, or Safari browser.
+            </p>
+            <p class="error-detail">Your browser could not start the 3D renderer.</p>
+            <button id="retry">Try again</button>
+          </div>
+          <noscript>Please enable JavaScript to explore the Raptor.</noscript>
+        </section>
+        <aside class="panel" aria-label="Aircraft specifications and settings">
+          <div>
+            <p class="eyebrow">01 / THE AIRCRAFT</p>
+            <h2>Poised for possibility.</h2>
+            <p class="subtitle">The unmistakable silhouette of<br />a fifth-generation fighter.</p>
+            <dl class="specs">
+              <div>
+                <dt>Designation</dt>
+                <dd>F-22 Raptor</dd>
+              </div>
+              <div>
+                <dt>Length</dt>
+                <dd>18.9 m</dd>
+              </div>
+              <div>
+                <dt>Wingspan</dt>
+                <dd>13.6 m</dd>
+              </div>
+              <div>
+                <dt>Powerplant</dt>
+                <dd>2 × F119 turbofan</dd>
+              </div>
+              <div>
+                <dt>Flight controls</dt>
+                <dd>Thrust vectoring</dd>
+              </div>
+            </dl>
+          </div>
+          <div>
+            <div class="status">
+              <span>AIRCRAFT STATUS</span
+              ><strong><span class="dot"></span><span id="status">Preparing</span></strong>
+            </div>
+            <p id="telemetry">N1 000% / GEAR DOWN</p>
+            <p class="eyebrow">02 / PRESENTATION FINISH</p>
+            <div class="finishes" role="group" aria-label="Presentation finish">
+              <button data-finish="gray" aria-label="Air-superiority gray" aria-pressed="true">
+                <span class="swatch gray"></span></button
+              ><button data-finish="arctic" aria-label="Arctic demonstrator" aria-pressed="false">
+                <span class="swatch arctic"></span></button
+              ><button
+                data-finish="graphite"
+                aria-label="Dark graphite concept"
+                aria-pressed="false"
+              >
+                <span class="swatch graphite"></span>
+              </button>
+            </div>
+            <p id="finish-name">Air-superiority gray</p>
+            <div class="range-label">
+              <label for="throttle">Engine throttle</label
+              ><output id="throttle-value" for="throttle">65%</output>
+            </div>
+            <input id="throttle" type="range" min="0" max="100" value="65" step="1" />
+            <div class="range-ends"><span>IDLE</span><span>MAXIMUM</span></div>
+          </div>
+        </aside>
+      </main>
+      <div class="controls" role="group" aria-label="Scene controls">
+        <div class="control-group">
+          <button id="engines" class="primary" aria-pressed="false">▷ &nbsp; Start engines</button
+          ><button id="flight" aria-pressed="false">↑ &nbsp; Flight display</button
+          ><span class="separator"></span
+          ><button id="auto" aria-pressed="false">↻ &nbsp; Auto orbit</button>
+        </div>
+        <div class="control-group">
+          <span class="view-label">PERSPECTIVE</span><button data-view="front">Front</button
+          ><button data-view="side">Side</button><button data-view="rear">Rear</button
+          ><button data-view="top">Top</button><span class="separator"></span
+          ><button id="reset" class="icon-button" aria-label="Reset camera" title="Reset camera">
+            ⟲</button
+          ><button
+            id="fullscreen"
+            class="icon-button"
+            aria-label="Enter fullscreen"
+            title="Fullscreen"
+          >
+            ⛶
+          </button>
+        </div>
+      </div>
+      <footer>
+        <div class="hint">
+          <span>DRAG TO ORBIT</span><span>SCROLL / PINCH TO ZOOM</span
+          ><span>SPACE: ENGINES · F: FLIGHT · R: RESET</span>
+        </div>
+        <p>A STUDY IN FLIGHT &nbsp; / &nbsp; AERONAUT © 2026</p>
+      </footer>
+    </div>
+    <!-- Three.js, MIT license:
+THREE_LICENSE
+-->
+    <script>
+      /* SCENE_BUNDLE */
+    </script>
+  </body>
+</html>

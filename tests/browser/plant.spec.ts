@@ -218,7 +218,7 @@ for (const width of [1440, 390, 320]) {
   test('visual iris stages and accessible layout at ' + width + 'px', async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 });
     await open(page);
-    await expect(page.locator('.level-nav a')).toHaveCount(8);
+    await expect(page.locator('.level-nav a')).toHaveCount(9);
     await expect(page.locator('.level-nav [aria-current="page"]')).toHaveText('07 Plant');
     for (const [label, seconds] of [
       ['bulb', 0],

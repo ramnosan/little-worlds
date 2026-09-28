@@ -1,4 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
+import {
+  nearestTrack,
+  LINE_OFFSET,
+  TUNNEL_HALF_WIDTH,
+  TUNNEL_SPRING,
+} from '../../src/railway/physics';
 
 type Snapshot = {
   distance: number;
@@ -7,10 +13,13 @@ type Snapshot = {
   speed: number;
   light: boolean;
   camera: number[];
+  cameraMode: 'free' | 'follow';
+  cameraTarget: number[];
+  elapsed: number;
   geometries: number;
   textures: number;
   clouds: { positions: number[][]; steps: number; reducedMotion: boolean };
-  cars: { distance: number; x: number; z: number }[];
+  cars: { distance: number; x: number; y: number; z: number; tx: number; tz: number }[];
 };
 const stats = (page: Page) =>
   page.evaluate(() => (window as unknown as { __railwayDebug: () => Snapshot }).__railwayDebug());
@@ -18,6 +27,139 @@ const setSpeed = async (page: Page, value: string) => {
   await page.locator('#rw-speed').fill(value);
   await expect(page.locator('#rw-speed-value')).toHaveText(`${value}%`);
 };
+
+test('follow camera switches, freezes, restores the free view and resets', async ({ page }) => {
+  await page.goto('/?level=railway');
+  await expect(page.locator('#railway-world canvas')).toBeVisible({ timeout: 15000 });
+  const follow = page.getByRole('button', { name: 'Follow train', exact: true });
+  await expect(follow).toHaveAttribute('aria-pressed', 'false');
+  await page.locator('#rw-pause').click();
+  const initial = await stats(page);
+  const box = (await page.locator('canvas').boundingBox())!;
+  const x = box.x + box.width / 2,
+    y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 80, y + 20, { steps: 8 });
+  await page.mouse.up();
+  // Capture and switch in one task, including any orbit inertia still in flight.
+  const free = await page.evaluate(() => {
+    const snapshot = (window as unknown as { __railwayDebug: () => Snapshot }).__railwayDebug();
+    document.getElementById('rw-follow')!.click();
+    return snapshot;
+  });
+  expect(free.camera).not.toEqual(initial.camera);
+  await expect(follow).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#rw-camera-hint')).toContainText('Following the train');
+  await expect(page.locator('canvas')).toHaveAttribute('aria-label', /Camera following/);
+  const paused = await stats(page);
+  expect(paused.cameraMode).toBe('follow');
+  expect(paused.camera).not.toEqual(free.camera);
+  await page.locator('canvas').scrollIntoViewIfNeeded();
+  const followBox = (await page.locator('canvas').boundingBox())!;
+  const followX = followBox.x + followBox.width / 2,
+    followY = followBox.y + followBox.height / 2;
+  await page.mouse.move(followX, followY);
+  await page.mouse.down();
+  await page.mouse.move(followX + 100, followY + 40, { steps: 8 });
+  await page.mouse.up();
+  await page.mouse.wheel(0, -250);
+  await page.waitForTimeout(200);
+  expect((await stats(page)).camera).toEqual(paused.camera);
+  expect((await stats(page)).cameraTarget).toEqual(paused.cameraTarget);
+  await page.locator('#rw-pause').click();
+  await expect.poll(async () => (await stats(page)).camera).not.toEqual(paused.camera);
+  await setSpeed(page, '0');
+  const stopped = await stats(page);
+  await page.waitForTimeout(200);
+  expect((await stats(page)).camera).toEqual(stopped.camera);
+  expect((await stats(page)).cameraTarget).toEqual(stopped.cameraTarget);
+  await page.locator('#rw-quality').click();
+  expect((await stats(page)).camera).toEqual(stopped.camera);
+  expect((await stats(page)).cameraMode).toBe('follow');
+  await setSpeed(page, '200');
+  await expect.poll(async () => (await stats(page)).camera).not.toEqual(stopped.camera);
+  await follow.click();
+  const restored = await stats(page);
+  expect(restored.cameraMode).toBe('free');
+  restored.camera.forEach((v, i) => expect(v).toBeCloseTo(free.camera[i], 4));
+  restored.cameraTarget.forEach((v, i) => expect(v).toBeCloseTo(free.cameraTarget[i], 5));
+  await expect(page.locator('#rw-camera-hint')).toContainText('Drag to orbit');
+  await follow.click();
+  await page.locator('#rw-reset').click();
+  await expect(follow).toHaveAttribute('aria-pressed', 'false');
+  expect((await stats(page)).cameraMode).toBe('free');
+  (await stats(page)).camera.forEach((v, i) => expect(v).toBeCloseTo(initial.camera[i], 5));
+  await page.locator('canvas').hover();
+  await page.mouse.wheel(0, -250);
+  await expect.poll(async () => (await stats(page)).camera).not.toEqual(initial.camera);
+});
+
+test('follow camera stays behind the locomotive throughout a lap and on mobile', async ({
+  page,
+}) => {
+  test.setTimeout(150_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/?level=railway');
+  await page.locator('#rw-follow').click();
+  await setSpeed(page, '200');
+  // Cover both tunnels, the bridge, tight curves and the wrapped route seam.
+  const visitedTunnels = new Set<string>();
+  for (const elapsed of [0, 25, 33, 43, 50, 57, 68, 76]) {
+    await expect
+      .poll(async () => (await stats(page)).elapsed, { timeout: 40_000 })
+      .toBeGreaterThan(elapsed);
+    const snapshot = await stats(page),
+      car = snapshot.cars[0];
+    expect(snapshot.cameraMode).toBe('follow');
+    expect(snapshot.camera.every(Number.isFinite)).toBe(true);
+    const route = nearestTrack(snapshot.camera[0], snapshot.camera[2]);
+    if (route.section?.kind === 'tunnel') {
+      visitedTunnels.add(route.section.id);
+      const lateral = route.lateral - LINE_OFFSET / 2;
+      expect(Math.abs(lateral)).toBeLessThan(TUNNEL_HALF_WIDTH - 0.05);
+      const roof = route.y + TUNNEL_SPRING + Math.sqrt(TUNNEL_HALF_WIDTH ** 2 - lateral ** 2);
+      expect(snapshot.camera[1]).toBeLessThan(roof - 0.05);
+      expect(snapshot.camera[1]).toBeGreaterThan(route.y + 0.1);
+    }
+    expect(
+      (snapshot.camera[0] - car.x) * car.tx + (snapshot.camera[2] - car.z) * car.tz,
+    ).toBeLessThan(-0.6);
+    expect(
+      Math.hypot(snapshot.cameraTarget[0] - car.x, snapshot.cameraTarget[2] - car.z),
+    ).toBeLessThan(1.3);
+    await page
+      .locator('canvas')
+      .screenshot({ path: `artifacts/railway-follow-lap-${elapsed}.png` });
+    if (elapsed === 33) {
+      await page.locator('#rw-pause').click();
+      const paused = await stats(page);
+      await page.waitForTimeout(150);
+      expect((await stats(page)).camera).toEqual(paused.camera);
+      await page.locator('#rw-follow').click();
+      await page.locator('#rw-follow').click();
+      (await stats(page)).camera.forEach((v, i) => expect(v).toBeCloseTo(paused.camera[i], 5));
+      await page.locator('#rw-quality').click();
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page
+        .locator('canvas')
+        .screenshot({ path: 'artifacts/railway-tunnel-mobile-light.png' });
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await page.locator('#rw-quality').click();
+      await page.locator('#rw-pause').click();
+    }
+  }
+  expect([...visitedTunnels].sort()).toEqual(['hochgrat', 'tannenfels']);
+  await page.locator('#rw-pause').click();
+  await page.screenshot({ path: 'artifacts/railway-follow-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.screenshot({ path: 'artifacts/railway-follow-mobile.png', fullPage: true });
+  await page.locator('#rw-follow').click();
+  expect((await stats(page)).cameraMode).toBe('free');
+  expect(errors).toEqual([]);
+});
 
 test('clouds drift, reset reproducibly, and respond to reduced motion', async ({ page }) => {
   await page.goto('/?level=railway');
@@ -139,7 +281,7 @@ for (const [url, canvas, level] of [
   test(`railway navigation to ${level} and back`, async ({ page }) => {
     await page.goto('/?level=railway');
     await expect(page.locator('#railway-world canvas')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('.level-nav a')).toHaveCount(8);
+    await expect(page.locator('.level-nav a')).toHaveCount(9);
     await page.locator(`.level-nav a[href="${url === '/' ? './' : url.slice(1)}"]`).click();
     await expect(page.locator(`${canvas} canvas`)).toBeVisible({ timeout: 15000 });
     await page.getByRole('link', { name: '04 Model Railway' }).click();
@@ -182,6 +324,11 @@ test('mobile touch orbit, pinch and navigation remain usable', async ({ browser 
   try {
     await page.goto('/?level=railway');
     await page.locator('#rw-pause').tap();
+    await page.locator('#rw-follow').tap();
+    await expect(page.locator('#rw-follow')).toHaveAttribute('aria-pressed', 'true');
+    expect((await stats(page)).cameraMode).toBe('follow');
+    await page.locator('#rw-follow').tap();
+    expect((await stats(page)).cameraMode).toBe('free');
     await page.locator('canvas').scrollIntoViewIfNeeded();
     const original = await stats(page),
       box = (await page.locator('canvas').boundingBox())!;
@@ -238,6 +385,7 @@ test('context loss pauses the railway and presents recovery instructions', async
   await expect(page.locator('#rw-notice')).toContainText('Reload the page');
   await expect(page.locator('#rw-speed')).toBeDisabled();
   await expect(page.locator('#rw-reset')).toBeDisabled();
+  await expect(page.locator('#rw-follow')).toBeDisabled();
   expect((await stats(page)).paused).toBe(true);
 });
 
@@ -245,6 +393,7 @@ test('hidden tabs stop motion and return without a catch-up jump', async ({ page
   await page.goto('/?level=railway');
   await expect(page.locator('#railway-world canvas')).toBeVisible({ timeout: 15000 });
   await expect.poll(async () => (await stats(page)).travel).toBeGreaterThan(0.1);
+  await page.locator('#rw-follow').click();
   await page.evaluate(() => {
     Object.defineProperty(document, 'hidden', { configurable: true, value: true });
     document.dispatchEvent(new Event('visibilitychange'));
@@ -252,6 +401,7 @@ test('hidden tabs stop motion and return without a catch-up jump', async ({ page
   const hidden = await stats(page);
   await page.waitForTimeout(400);
   expect((await stats(page)).travel).toBe(hidden.travel);
+  expect((await stats(page)).camera).toEqual(hidden.camera);
   await page.evaluate(() => {
     Reflect.deleteProperty(document, 'hidden');
     document.dispatchEvent(new Event('visibilitychange'));

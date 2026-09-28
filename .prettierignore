@@ -2,3 +2,5 @@ node_modules/
 dist/
 artifacts/
 package-lock.json
+public/horizon-05.html
+public/raptor-22.html

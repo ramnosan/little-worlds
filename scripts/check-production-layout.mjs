@@ -25,6 +25,8 @@ try {
       'airplane',
       'plant',
       'melon',
+      'helicopter',
+      'raptor',
     ]) {
       const page = await browser.newPage({ viewport: { width, height: 1000 } });
       const errors = [];
@@ -33,9 +35,12 @@ try {
         if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
       });
       try {
-        await page.goto(`${baseUrl}${level === 'melon' ? 'melon-jelly.html' : `?level=${level}`}`, {
-          waitUntil: 'networkidle',
-        });
+        await page.goto(
+          `${baseUrl}${level === 'melon' ? 'melon-jelly.html' : level === 'helicopter' ? 'horizon-05.html' : level === 'raptor' ? 'raptor-22.html' : `?level=${level}`}`,
+          {
+            waitUntil: 'networkidle',
+          },
+        );
         const canvas = page.locator('canvas');
         await canvas.waitFor({ state: 'visible' });
         const bounds = await canvas.boundingBox();
@@ -52,7 +57,7 @@ try {
         }));
         assert.equal(
           layout.headerDisplay,
-          level === 'melon' ? 'flex' : 'grid',
+          level === 'melon' || level === 'helicopter' || level === 'raptor' ? 'flex' : 'grid',
           `${level}: header layout missing`,
         );
         assert.ok(layout.pageWidth <= layout.viewport + 1, `${level}: horizontal overflow`);
@@ -68,8 +73,18 @@ try {
           const panel = await page.locator('.panel').boundingBox();
           if (width < 760)
             assert.ok(panel.y >= bounds.y + bounds.height, 'Melon: controls overlap the scene');
+        } else if (level === 'helicopter' || level === 'raptor') {
+          assert.equal(await page.locator('#status').innerText(), 'On platform');
+          assert.equal(
+            await page.locator('a.back').count(),
+            1,
+            'Horizon: missing return navigation',
+          );
+          const panel = await page.locator('.panel').boundingBox();
+          if (width < 760)
+            assert.ok(panel.y >= bounds.y + bounds.height, 'Horizon: controls overlap the scene');
         } else {
-          assert.equal(layout.levels, 8, `${level}: expected eight navigation entries`);
+          assert.equal(layout.levels, 9, `${level}: expected nine navigation entries`);
           assert.equal(layout.activeLevels, 1, `${level}: missing active level`);
         }
         if (level === 'plant') {

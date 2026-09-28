@@ -131,9 +131,11 @@ for (const [languageIndex, language] of ['en', 'de'].entries()) {
     }
     for (const width of [1440, 1024, 390]) {
       test(`all headers fit at ${width}px`, async ({ page }) => {
+        test.setTimeout(120_000);
         await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
         for (const level of levels) {
           await page.goto(`/?level=${level.id}`);
+          await expect(page.locator('#level-loading')).toBeHidden({ timeout: 30_000 });
           await expect(selector(page)).toBeVisible();
           await expect(selector(page)).toBeInViewport();
           await expect(page.locator('.level-nav')).toBeInViewport();

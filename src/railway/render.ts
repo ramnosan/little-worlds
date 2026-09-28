@@ -13,6 +13,7 @@ import {
 import { GAUGE, RailwayScenery } from './scenery';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RailwayClouds } from './clouds';
+import { followCameraPose } from './camera';
 
 export class RailwayRenderer {
   readonly renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
@@ -35,6 +36,16 @@ export class RailwayRenderer {
   private to = new T.Vector3();
   private direction = new T.Vector3();
   private up = new T.Vector3(0, 1, 0);
+  private followingTrain = false;
+  private tunnelBlend = 0;
+  private freePosition = new T.Vector3();
+  private freeTarget = new T.Vector3();
+  private followPosition = new T.Vector3();
+  private followTarget = new T.Vector3();
+
+  get followTrain() {
+    return this.followingTrain;
+  }
 
   constructor(
     readonly container: HTMLElement,
@@ -288,12 +299,13 @@ export class RailwayRenderer {
     const { width, height } = this.container.getBoundingClientRect();
     this.camera.aspect = Math.max(1, width) / Math.max(1, height);
     // Widen the vertical view on portrait screens to retain the entire table.
-    this.camera.fov = this.camera.aspect < 1 ? 49 : 38;
+    this.camera.fov = this.followCameraFov();
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(Math.max(1, width), Math.max(1, height));
   }
 
   resetCamera() {
+    this.setFollowTrain(false);
     this.controls.enableDamping = false;
     // Consume any remaining orbit inertia before restoring the starting pose.
     this.controls.update();
@@ -301,6 +313,63 @@ export class RailwayRenderer {
     this.camera.position.set(10.6, 11.15, 13.95);
     this.controls.update();
     this.controls.enableDamping = true;
+  }
+
+  private followCameraFov() {
+    return T.MathUtils.lerp(
+      this.camera.aspect < 1 ? 49 : 38,
+      58,
+      this.followingTrain ? this.tunnelBlend : 0,
+    );
+  }
+
+  setFollowTrain(enabled: boolean) {
+    if (enabled === this.followingTrain) return;
+    if (enabled) {
+      // Clear pending orbit inertia, but preserve the exact visible free view.
+      this.freePosition.copy(this.camera.position);
+      this.freeTarget.copy(this.controls.target);
+      this.controls.enableDamping = false;
+      this.controls.update();
+      this.controls.enableDamping = true;
+      this.controls.enabled = false;
+      this.followingTrain = true;
+      this.updateFollowCamera(1);
+    } else {
+      this.followingTrain = false;
+      this.camera.position.copy(this.freePosition);
+      this.controls.target.copy(this.freeTarget);
+      this.controls.enabled = true;
+      this.controls.update();
+    }
+    this.renderer.domElement.setAttribute(
+      'aria-label',
+      enabled
+        ? t('Model railway. Camera following the train. Disable Follow train to orbit and zoom.')
+        : t('Model railway. Drag to orbit. Scroll or pinch to zoom.'),
+    );
+    this.camera.near = enabled ? 0.02 : 0.1;
+    this.camera.fov = this.followCameraFov();
+    this.camera.updateProjectionMatrix();
+  }
+
+  private updateFollowCamera(alpha: number) {
+    const blend = followCameraPose(
+      this.world.carDistance(0),
+      this.followPosition,
+      this.followTarget,
+    );
+    this.tunnelBlend = blend;
+    const fov = this.followCameraFov();
+    if (this.camera.fov !== fov) {
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+    }
+    // Inside, follow the curved track exactly: world-space lag can cut through walls.
+    const smoothing = T.MathUtils.lerp(alpha, 1, blend);
+    this.camera.position.lerp(this.followPosition, smoothing);
+    this.controls.target.lerp(this.followTarget, smoothing);
+    this.camera.lookAt(this.controls.target);
   }
 
   quality(light: boolean) {
@@ -316,7 +385,7 @@ export class RailwayRenderer {
     });
   }
 
-  render() {
+  render(delta = 0) {
     this.cars.forEach((car, i) => {
       const distance = this.world.carDistance(i);
       const front = trackPose(distance + AXLE_OFFSET),
@@ -348,7 +417,12 @@ export class RailwayRenderer {
       mesh.scale.y = this.direction.length();
       mesh.quaternion.setFromUnitVectors(this.up, this.direction.normalize());
     });
-    this.controls.update();
+    if (this.followingTrain) {
+      if (!this.world.paused && this.world.speed > 0)
+        this.updateFollowCamera(1 - Math.exp(-6 * Math.max(0, delta)));
+    } else {
+      this.controls.update();
+    }
     this.camera.updateMatrixWorld();
     this.clouds.update(this.camera, this.world.elapsed);
     this.renderer.render(this.scene, this.camera);
@@ -357,6 +431,8 @@ export class RailwayRenderer {
   stats() {
     return {
       camera: this.camera.position.toArray(),
+      cameraMode: this.followingTrain ? 'follow' : 'free',
+      cameraTarget: this.controls.target.toArray(),
       light: this.lowQuality,
       geometries: this.renderer.info.memory.geometries,
       textures: this.renderer.info.memory.textures,

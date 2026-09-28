@@ -305,6 +305,11 @@ export const de: { [Key in keyof typeof en]: string } = {
   'Kleinwald miniature world': 'Miniaturwelt Kleinwald',
   'A WORLD ON A TABLE': 'EINE WELT AUF EINEM TISCH',
   'Model railway settings': 'Modelleisenbahn einstellen',
+  'Follow train': 'Zug verfolgen',
+  'Following the train · Disable Follow train to orbit and zoom':
+    'Kamera folgt dem Zug · Zum Drehen und Zoomen „Zug verfolgen“ ausschalten',
+  'Model railway. Camera following the train. Disable Follow train to orbit and zoom.':
+    'Modelleisenbahn. Die Kamera folgt dem Zug. Zum Drehen und Zoomen „Zug verfolgen“ ausschalten.',
   'YOUR LITTLE TIMETABLE': 'DEIN KLEINER FAHRPLAN',
   'ROUND TRIP': 'RUNDREISE',
   '1 locomotive · 2 carriages · endless time': '1 Lokomotive · 2 Waggons · unendlich Zeit',

@@ -9,6 +9,7 @@ const levels = [
   { id: 'airplane', number: '06', name: t('Model Flight'), href: '?level=airplane' },
   { id: 'plant', number: '07', name: t('Plant'), href: '?level=plant' },
   { id: 'melon', number: '08', name: 'Melon Jelly', href: 'melon-jelly.html' },
+  { id: 'helicopter', number: '09', name: 'Horizon 05', href: 'horizon-05.html' },
 ] as const;
 
 export function levelNav(current: (typeof levels)[number]['id']) {

@@ -4,9 +4,9 @@ Small worlds. Play a little.
 
 **[Play Little Worlds in your browser](https://ramnosan.github.io/little-worlds/)**
 
-Little Worlds is a collection of eight warm, tactile 3D playgrounds. The original worlds use TypeScript and Three.js; Melon Jelly is a standalone native WebGPU study. Stretch a jelly, blow soap bubbles, disturb the surface of an aquarium, watch a model train, tend a campfire, fly a tiny aeroplane, grow an iris garden, or play with a watermelon gummy. There are no accounts, scores, or online services: each world is simply a small place to explore at your own pace.
+Little Worlds is a collection of nine interactive 3D playgrounds and object studies. The original worlds use TypeScript and Three.js; Melon Jelly is a standalone native WebGPU study. Stretch a jelly, blow soap bubbles, disturb the surface of an aquarium, watch a model train, tend a campfire, fly a tiny aeroplane, grow an iris garden, play with a watermelon gummy, or explore a detailed helicopter. There are no accounts, scores, or online services: each world is simply a small place to explore at your own pace.
 
-All worlds support mouse and touch controls. The original worlds support English and German, with lighter graphics options where available; Melon Jelly follows its English material-study brief and uses native WebGPU.
+All worlds support mouse and touch controls. The original worlds support English and German, with lighter graphics options where available; Melon Jelly and Horizon 05 follow their English object-study briefs.
 
 ## The worlds
 
@@ -62,6 +62,18 @@ Open [Melon Jelly](public/melon-jelly.html), or visit `melon-jelly.html` on the 
 
 The CPU solves XPBD elastic and signed-volume constraints at 120 Hz with bounded catch-up, local grabs, inversion safeguards and frictional ground contact. The native WebGPU renderer uses measured back-face thickness, approximate absorption/refraction, Fresnel lighting and filtered shadow mapping. Readouts use the illustrative scale printed beneath the experiment. This level was created from a prompt by [Vib3Coded](https://x.com/vib3coded/status/2103741107225907467). See [implementation and validation notes](docs/melon-jelly.md).
 
+### 09 · Horizon 05
+
+![A glacier-blue and white helicopter on a circular studio display platform](docs/screenshots/09-horizon-05.png)
+
+A procedural light twin helicopter presented on a circular studio platform. Inspect curved, fitted glazing, door seals, rivets, twin engines, exhausts, a five-blade main rotor with pitch linkages, and a ten-blade tail rotor inside an open duct. Choose glacier blue and white, rescue orange, or graphite; start both rotors, adjust their speed, lift into a gentle hover, and land softly.
+
+Drag to orbit, scroll or pinch to zoom, and use the front, side, tail, automatic orbit, reset, and fullscreen controls. **Space** toggles the rotors, **H** toggles hover, and **R** resets the camera; with the canvas focused, arrow keys orbit. Stopping the rotors or reducing speed below lift power first lands the aircraft. Reduced-motion preferences suppress idle sway and beacon flashing.
+
+Open [Horizon 05](public/horizon-05.html), or use `?level=helicopter` on the running site. **The single HTML file embeds Three.js, controls, styles, geometry, and reflections and works offline**, including from `file://`. No model, texture, font, or CDN requests are needed. It requires WebGL 2 and explains unavailable graphics support. Rebuild the file after source changes with `npm run build:helicopter` (also part of `npm run build`). This level was created from a prompt by [Vib3Coded](https://x.com/vib3coded/status/2102215638311694336). See [implementation and verification notes](docs/helicopter.md).
+
+The same collection now includes [Raptor 22](public/raptor-22.html), a procedural F-22 study, accessible through the aircraft tabs in Horizon 05. Explore the fitted reflective canopy, recessed intakes, canted tails, articulated control surfaces, twin rectangular exhausts, and retractable landing gear. Choose air-superiority gray, arctic demonstrator, or dark graphite concept. Start the engines, adjust throttle, or begin a flight display with sequenced gear retraction, gentle banking, and a soft return to the platform. **Space** toggles engines, **F** toggles flight display, and **R** resets the camera. Front, side, rear, and top presets, touch orbit/zoom, auto orbit, and fullscreen are included. The Raptor HTML also embeds all dependencies and works offline; the same build command regenerates both aircraft. See [Raptor implementation and verification notes](docs/raptor.md).
+
 ## Run locally
 
 Little Worlds requires Node.js 20.12 or newer and npm. Install the locked dependencies and start the development server:
@@ -78,7 +90,7 @@ npm run build            # Type-check and create the production bundle
 npm run preview          # Preview the production bundle locally
 npm test                 # Run rendering-independent tests
 npm run test:browser     # Run browser interaction and layout tests
-npm run test:production  # Build and check all eight desktop/mobile layouts
+npm run test:production  # Build and check all nine desktop/mobile layouts
 ```
 
 GitHub Pages deployment is handled by [the included workflow](.github/workflows/deploy.yml). Set **Settings → Pages → Source** to **GitHub Actions**; pushes to `main` will build and publish the site under `/little-worlds/`.

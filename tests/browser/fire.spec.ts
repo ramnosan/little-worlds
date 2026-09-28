@@ -226,7 +226,7 @@ for (const [width, height, label] of [
     await page.setViewportSize({ width, height });
     await openFire(page, '/?level=fire&fireFixture=full');
     await expect(page.locator('#fire-world canvas')).toBeVisible();
-    await expect(page.locator('.level-nav a')).toHaveCount(8);
+    await expect(page.locator('.level-nav a')).toHaveCount(9);
     await expect(page.locator('.level-nav [aria-current="page"]')).toHaveText('05 Campfire');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,

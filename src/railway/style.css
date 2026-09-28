@@ -237,6 +237,17 @@ body {
 .rw-quality[aria-pressed='true'] {
   color: #497546;
 }
+.rw-follow {
+  padding: 14px 10px;
+  margin-bottom: 12px;
+  border: 1px solid #d5dac7;
+  border-radius: 8px;
+}
+.rw-follow[aria-pressed='true'] {
+  background: #e0e7d5;
+  border-color: #497546;
+  font-weight: bold;
+}
 .rw-bottom {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -360,6 +371,12 @@ body {
   cursor: default;
 }
 
+@media (min-width: 761px) {
+  /* The close follow view fills the canvas, so keep the introduction above it. */
+  .rw-layout.is-following {
+    margin-top: 20px;
+  }
+}
 @media (min-width: 1650px) {
   .rw-layout {
     margin-top: -70px;
