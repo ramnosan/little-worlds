@@ -1,6 +1,65 @@
 import type { en } from './en';
 
 export const de: { [Key in keyof typeof en]: string } = {
+  Avalanche: 'Lawine',
+  'page.avalanche': 'Lawine · Little Worlds',
+  'avalanche.edition': 'NATUR IN BEWEGUNG',
+  'avalanche.eyebrow': '10 / ALPINES OBSERVATORIUM',
+  'avalanche.title': 'Ein Berg',
+  'avalanche.accent': 'in Bewegung.',
+  'avalanche.intro':
+    'Ein stiller Hang. Ein kleiner Bruch. Beobachte, wie sich eine Schneemasse ihren Weg ins Tal bahnt.',
+  'avalanche.experiment': 'Interaktive Lawine im Gebirge',
+  'avalanche.canvas':
+    'Alpines Gelände. Ziehen zum Drehen, scrollen oder zwei Finger zum Zoomen. Enter löst die Lawine aus, Leertaste pausiert, R setzt zurück. Pfeiltasten drehen die Ansicht.',
+  'avalanche.sceneLabel': 'DIE NORDFLANKE',
+  'avalanche.sceneNote': 'Ein erdachtes Alpental',
+  'avalanche.controls': 'Die Bedingungen',
+  'avalanche.snow': 'Schneeart',
+  'avalanche.powder': 'Pulverschnee',
+  'avalanche.wet': 'Nassschnee',
+  'avalanche.depth': 'Schneebrettdicke',
+  'avalanche.settingsNote': 'Eine Änderung bereitet einen neuen Hang vor.',
+  'avalanche.release': 'Lawine auslösen',
+  'avalanche.replay': 'Erneut auslösen',
+  'avalanche.reset': 'Hang zurücksetzen',
+  'avalanche.speed': 'Abspieltempo',
+  'avalanche.camera': 'Ansicht',
+  'avalanche.overview': 'Panorama',
+  'avalanche.top': 'Von oben',
+  'avalanche.time': 'Zeit',
+  'avalanche.velocity': 'Spitzentempo',
+  'avalanche.distance': 'Weg der Front',
+  'avalanche.volume': 'Bewegter Schnee',
+  'avalanche.phase.ready': 'Der Hang wartet',
+  'avalanche.phase.fracture': 'Die Schwachschicht bricht',
+  'avalanche.phase.flow': 'Der Schnee strömt ins Tal',
+  'avalanche.phase.settled': 'Der Schnee kommt zur Ruhe',
+  'avalanche.pause': 'Simulation pausiert',
+  'avalanche.chapter1': 'Anbruch',
+  'avalanche.chapter2': 'Abgang',
+  'avalanche.chapter3': 'Ablagerung',
+  'avalanche.detail.ready':
+    'Ein zusammenhängendes Schneebrett liegt auf einer Schwachschicht. Löse es aus, um den Bruch zu starten.',
+  'avalanche.detail.fracture':
+    'Der Bruch breitet sich in der Schwachschicht aus. Das abgelöste Schneebrett beginnt zu gleiten.',
+  'avalanche.detail.flow':
+    'Die Schwerkraft beschleunigt den Schnee. Die Rinne bündelt den Strom, der unterwegs weiteren Schnee mitreißt.',
+  'avalanche.detail.settled':
+    'Im flacheren Gelände bremst die Reibung den dichten Schneestrom. Der Schnee bleibt als Ablagerungsfächer liegen.',
+  'avalanche.sources': 'Hinter der Simulation',
+  'avalanche.sourceNote':
+    'Inspiriert von der SLF-Lawinenforschung und Voellmy-Reibung. Vereinfachtes Modell in erdachtem Gelände; die Werte sind illustrativ.',
+  'avalanche.slf': 'SLF · Wie Lawinen entstehen',
+  'avalanche.ramms': 'RAMMS · Wie Schnee strömt',
+  'avalanche.hint': 'ZIEHEN ZUM DREHEN · SCROLLEN ZUM ZOOMEN',
+  'avalanche.shortcuts': 'ENTER AUSLÖSEN · LEERTASTE PAUSE · R ZURÜCKSETZEN',
+  'avalanche.footer': 'Kleine Welten. Große Kräfte.',
+  'avalanche.webgl':
+    'Dieser Berg benötigt WebGL 2. Aktiviere die Hardwarebeschleunigung und lade die Seite neu.',
+  'avalanche.graphicsLost': 'Grafik pausiert. Die Bergwelt wird wiederhergestellt.',
+  'avalanche.graphicsRestored':
+    'Die Grafik ist wieder da. Setze die Simulation fort, wenn du bereit bist.',
   Plant: 'Plant',
   'page.plant': 'Plant · Little Worlds',
   'plant.edition': 'EIN WENIG RAUM ZUM WACHSEN.',

@@ -4,7 +4,7 @@ Small worlds. Play a little.
 
 **[Play Little Worlds in your browser](https://ramnosan.github.io/little-worlds/)**
 
-Little Worlds is a collection of nine interactive 3D playgrounds and object studies. The original worlds use TypeScript and Three.js; Melon Jelly is a standalone native WebGPU study. Stretch a jelly, blow soap bubbles, disturb the surface of an aquarium, watch a model train, tend a campfire, fly a tiny aeroplane, grow an iris garden, play with a watermelon gummy, or explore a detailed helicopter. There are no accounts, scores, or online services: each world is simply a small place to explore at your own pace.
+Little Worlds is a collection of ten interactive 3D playgrounds and object studies. The original worlds use TypeScript and Three.js; Melon Jelly is a standalone native WebGPU study. Stretch a jelly, blow soap bubbles, disturb the surface of an aquarium, watch a model train, tend a campfire, fly a tiny aeroplane, grow an iris garden, play with a watermelon gummy, explore a detailed helicopter, or release an alpine avalanche. There are no accounts, scores, or online services: each world is simply a small place to explore at your own pace.
 
 All worlds support mouse and touch controls. The original worlds support English and German, with lighter graphics options where available; Melon Jelly and Horizon 05 follow their English object-study briefs.
 
@@ -74,6 +74,12 @@ Open [Horizon 05](public/horizon-05.html), or use `?level=helicopter` on the run
 
 The same collection now includes [Raptor 22](public/raptor-22.html), a procedural F-22 study, accessible through the aircraft tabs in Horizon 05. Explore the fitted reflective canopy, recessed intakes, canted tails, articulated control surfaces, twin rectangular exhausts, and retractable landing gear. Choose air-superiority gray, arctic demonstrator, or dark graphite concept. Start the engines, adjust throttle, or begin a flight display with sequenced gear retraction, gentle banking, and a soft return to the platform. **Space** toggles engines, **F** toggles flight display, and **R** resets the camera. Front, side, rear, and top presets, touch orbit/zoom, auto orbit, and fullscreen are included. The Raptor HTML also embeds all dependencies and works offline; the same build command regenerates both aircraft. See [Raptor implementation and verification notes](docs/raptor.md).
 
+### 10 · Avalanche
+
+Release a snow slab on a miniature alpine mountain. Watch a fracture spread, snow accelerate through the gully, a powder cloud rise, and debris settle in the valley. Compare dry powder with wet snow, vary slab depth, slow the descent to quarter speed, pause, or reset the slope. Drag to orbit, scroll or pinch to zoom; with the canvas focused, **Enter** releases, **Space** pauses and **R** resets.
+
+Open `?level=avalanche`. The procedural Three.js level supports English and German and provides panorama and overhead views. Its deterministic parcel simulation uses terrain gravity, Voellmy-inspired friction and snow entrainment; airborne powder is a separate visual effect. The fictional terrain and readouts are illustrative. See the [research sources, model and verification notes](docs/avalanche.md).
+
 ## Run locally
 
 Little Worlds requires Node.js 20.12 or newer and npm. Install the locked dependencies and start the development server:
@@ -90,7 +96,7 @@ npm run build            # Type-check and create the production bundle
 npm run preview          # Preview the production bundle locally
 npm test                 # Run rendering-independent tests
 npm run test:browser     # Run browser interaction and layout tests
-npm run test:production  # Build and check all nine desktop/mobile layouts
+npm run test:production  # Build and check all ten desktop/mobile layouts
 ```
 
 GitHub Pages deployment is handled by [the included workflow](.github/workflows/deploy.yml). Set **Settings → Pages → Source** to **GitHub Actions**; pushes to `main` will build and publish the site under `/little-worlds/`.

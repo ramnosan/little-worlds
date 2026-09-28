@@ -27,6 +27,7 @@ try {
       'melon',
       'helicopter',
       'raptor',
+      'avalanche',
     ]) {
       const page = await browser.newPage({ viewport: { width, height: 1000 } });
       const errors = [];
@@ -84,7 +85,7 @@ try {
           if (width < 760)
             assert.ok(panel.y >= bounds.y + bounds.height, 'Horizon: controls overlap the scene');
         } else {
-          assert.equal(layout.levels, 9, `${level}: expected nine navigation entries`);
+          assert.equal(layout.levels, 10, `${level}: expected ten navigation entries`);
           assert.equal(layout.activeLevels, 1, `${level}: missing active level`);
         }
         if (level === 'plant') {

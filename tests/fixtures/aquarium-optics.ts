@@ -62,6 +62,71 @@ function pausedDifference() {
   for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) changed++;
   return changed;
 }
+function beamFrame(time = 8, phase = 22 / 24) {
+  world.heights.fill(0);
+  world.balls.length = 0;
+  world.waveMaker = true;
+  world.strength = 0.45;
+  world.paused = true;
+  world.time = -1;
+  view.koi.group.visible = false;
+  view.camera.position.set(0, 1, 5.5);
+  view.controls.target.set(0, 1, 0);
+  view.lighting.setTime(phase);
+  view.render();
+  world.time = time;
+  const pixels = framePixels();
+  const size = view.renderer.getDrawingBufferSize(new T.Vector2());
+  // A front-on region wholly inside the water, excluding the floor and surface.
+  const left = Math.floor(size.x * 0.2),
+    bottom = Math.floor(size.y * 0.38);
+  const width = Math.floor(size.x * 0.6),
+    height = Math.floor(size.y * 0.15);
+  const luminance = new Float32Array(width * height);
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++) {
+      const i = ((bottom + y) * size.x + left + x) * 4;
+      luminance[y * width + x] =
+        0.2126 * pixels[i] + 0.7152 * pixels[i + 1] + 0.0722 * pixels[i + 2];
+    }
+  return { luminance, width, height };
+}
+function beamStability(phase = 22 / 24) {
+  let detail = 0,
+    flicker = 0,
+    mean = 0,
+    square = 0,
+    count = 0;
+  let previous: Float32Array | undefined;
+  for (let frame = 0; frame < 12; frame++) {
+    const { luminance, width, height } = beamFrame(8 + frame / 120, phase);
+    const residual = new Float32Array(luminance.length);
+    for (let y = 2; y < height - 2; y++)
+      for (let x = 2; x < width - 2; x++) {
+        const i = y * width + x;
+        const neighborhood =
+          (luminance[i - 2] +
+            luminance[i + 2] +
+            luminance[i - 2 * width] +
+            luminance[i + 2 * width]) /
+          4;
+        residual[i] = luminance[i] - neighborhood;
+        detail += residual[i] ** 2;
+        if (previous) flicker += (residual[i] - previous[i]) ** 2;
+        mean += luminance[i];
+        square += luminance[i] ** 2;
+        count++;
+      }
+    previous = residual;
+  }
+  return {
+    mean: mean / count,
+    contrast: Math.sqrt(Math.max(0, square / count - (mean / count) ** 2)),
+    detailRms: Math.sqrt(detail / count),
+    flickerRms: Math.sqrt(flicker / ((count * 11) / 12)),
+    pausedDifference: pausedDifference(),
+  };
+}
 function finCoverage() {
   measure();
   view.camera.position.set(0, 7, 0.01);
@@ -257,6 +322,8 @@ Object.assign(window, {
   aquariumOpticsFixture: {
     measure,
     pausedDifference,
+    beamFrame,
+    beamStability,
     finCoverage,
     lampAlignment,
     diffuseResponse,

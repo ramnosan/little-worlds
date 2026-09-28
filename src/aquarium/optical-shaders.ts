@@ -1,6 +1,7 @@
 import { BVHShaderGLSL } from 'three-mesh-bvh';
 import { LAMP_COLOR, LAMP_INTENSITY, SUN_INTENSITY } from './lighting';
 import { ABSORPTION, SCATTERING, extinctionGLSL, diffuseGLSL, sandGLSL } from './appearance';
+import { LIGHT_VOLUME } from './light-volume';
 
 export const fullscreenVertex = `out vec2 vUv;
 void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }`;
@@ -159,26 +160,51 @@ void main(){
   color=vec4(light*spectralMask*min(area,40.)*weight*exp(-${extinctionGLSL}*distanceTravelled),1.);
 }`;
 
+// A normalized, separable nine-texel Gaussian, using five bilinear taps per pass.
+// Clamp every tap to its own atlas tile; adjacent tiles represent different heights.
+export const volumeBlurFragment = `
+uniform sampler2D source;
+uniform vec2 direction;
+out vec4 color;
+void main(){
+  const vec2 sliceSize=vec2(${LIGHT_VOLUME.sliceWidth.toFixed(1)},${LIGHT_VOLUME.sliceHeight.toFixed(1)});
+  const vec2 atlasSize=sliceSize*vec2(${LIGHT_VOLUME.columns.toFixed(1)},${LIGHT_VOLUME.rows.toFixed(1)});
+  vec2 tile=floor(gl_FragCoord.xy/sliceSize)*sliceSize;
+  vec2 lo=(tile+.5)/atlasSize,hi=(tile+sliceSize-.5)/atlasSize;
+  vec2 uv=gl_FragCoord.xy/atlasSize;
+  vec3 sum=texture(source,uv).rgb*.2270270270;
+  sum+=(texture(source,clamp(uv+direction*1.3846153846,lo,hi)).rgb+
+        texture(source,clamp(uv-direction*1.3846153846,lo,hi)).rgb)*.3162162162;
+  sum+=(texture(source,clamp(uv+direction*3.2307692308,lo,hi)).rgb+
+        texture(source,clamp(uv-direction*3.2307692308,lo,hi)).rgb)*.0702702703;
+  color=vec4(sum,1.);
+}`;
+
 export const traceFragment = `${opticalCommon}
 in vec2 vUv;
 layout(location=0)out vec4 result;
 layout(location=1)out vec4 hitInfo;
-uniform sampler2D backgroundMap,backgroundDepth,causticFloor,causticVolume;
+uniform sampler2D backgroundMap,backgroundDepth,causticFloor,causticVolume,scatteringVolume;
 uniform mat4 inverseProjection,cameraWorld,viewProjection;
 uniform vec3 eye;
 uniform int lightMode;
 uniform vec2 resolution;
-vec3 field(vec3 p){
+vec3 field(vec3 p,sampler2D volume){
   if(lightMode==1)return texture(causticFloor,p.xz/vec2(6.,3.6)+.5).rgb;
-  float slice=clamp(p.y/1.95*23.,0.,23.);float a=floor(slice),b=min(23.,a+1.);
-  vec2 uv=clamp(p.xz/vec2(6.,3.6)+.5,vec2(.004),vec2(.996));
-  vec2 ua=(vec2(mod(a,4.),floor(a/4.))+uv)/vec2(4.,6.);
-  vec2 ub=(vec2(mod(b,4.),floor(b/4.))+uv)/vec2(4.,6.);
-  return mix(texture(causticVolume,ua).rgb,texture(causticVolume,ub).rgb,fract(slice));
+  const float lastSlice=${(LIGHT_VOLUME.slices - 1).toFixed(1)};
+  const vec2 tiles=vec2(${LIGHT_VOLUME.columns.toFixed(1)},${LIGHT_VOLUME.rows.toFixed(1)});
+  const vec2 inset=.5/vec2(${LIGHT_VOLUME.sliceWidth.toFixed(1)},${LIGHT_VOLUME.sliceHeight.toFixed(1)});
+  float slice=clamp(p.y/${LIGHT_VOLUME.height}*lastSlice,0.,lastSlice);
+  float a=floor(slice),b=min(lastSlice,a+1.);
+  // Keep bilinear filtering inside each slice, including at tank boundaries.
+  vec2 uv=clamp(p.xz/vec2(6.,3.6)+.5,inset,1.-inset);
+  vec2 ua=(vec2(mod(a,tiles.x),floor(a/tiles.x))+uv)/tiles;
+  vec2 ub=(vec2(mod(b,tiles.x),floor(b/tiles.x))+uv)/tiles;
+  return mix(texture(volume,ua).rgb,texture(volume,ub).rgb,fract(slice));
 }
 vec3 shade(vec3 p,vec3 n,vec3 base,bool wet){
   vec3 L=lightDirection(p);vec3 lit;
-  if(wet){vec3 underwaterL=-refract(-L,surfaceNormal(p.xz),1./1.333);lit=field(p)*max(0.,dot(n,underwaterL))/max(.2,underwaterL.y);}
+  if(wet){vec3 underwaterL=-refract(-L,surfaceNormal(p.xz),1./1.333);lit=field(p,causticVolume)*max(0.,dot(n,underwaterL))/max(.2,underwaterL.y);}
   else{float vis=objectDistance(p+n*.004,L,lampPower>0.?length(lampPosition-p):40.);lit=incident(p)*max(0.,dot(n,L))*(vis<(lampPower>0.?length(lampPosition-p)-.02:39.)?0.:1.);}
   return aquariumDiffuse(base,vec3(ambient)*vec3(.65,.85,1.)+lit);
 }
@@ -231,11 +257,11 @@ void main(){
     if(wet){
       waterTravel=true;
       if(lightMode==0){
-        float stepLength=dist/48.;vec3 scatter=vec3(0);
-        for(int s=0;s<48;s++){
+        float stepLength=dist/${LIGHT_VOLUME.scatteringSamples.toFixed(1)};vec3 scatter=vec3(0);
+        for(int s=0;s<${LIGHT_VOLUME.scatteringSamples};s++){
           float travel=(float(s)+.5)*stepLength;vec3 q=ro+rd*travel;
           float cosine=dot(lightDirection(q),-rd);float phase=.6+.4*cosine*cosine;
-          scatter+=field(q)*SCATTER*phase*exp(-(ABSORB+SCATTER)*travel)*stepLength;
+          scatter+=field(q,scatteringVolume)*SCATTER*phase*exp(-(ABSORB+SCATTER)*travel)*stepLength;
         }radiance+=throughput*scatter;
       }
       throughput*=exp(-(ABSORB+SCATTER)*dist);
@@ -248,7 +274,7 @@ void main(){
         vec3 L=wet?-refract(-lightDirection(p),surfaceNormal(p.xz),1./1.333):lightDirection(p);
         vec3 h=normalize(L-rd);float exponent=max(2.,2./pow(max(.12,material.x),4.)-2.);
         vec3 specular=mix(vec3(.04),base.rgb,material.y);
-        lit=lit*(1.-material.y)+specular*(wet?field(p):incident(p))*pow(max(0.,dot(n,h)),exponent)*max(0.,dot(n,L));
+        lit=lit*(1.-material.y)+specular*(wet?field(p,causticVolume):incident(p))*pow(max(0.,dot(n,h)),exponent)*max(0.,dot(n,L));
       }
       if(kind==5){vec3 h=normalize(lightDirection(p)-rd);lit+=incident(p)*pow(max(0.,dot(n,h)),70.)*.35;}
       if(kind==4&&base.a<.98){radiance+=throughput*lit*base.a;throughput*=1.-base.a;ro=p+rd*.003;continue;}

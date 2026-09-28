@@ -5,7 +5,8 @@ const level = new URLSearchParams(location.search).get('level');
 if (level === 'melon') location.replace(new URL('melon-jelly.html', location.href));
 if (level === 'helicopter') location.replace(new URL('horizon-05.html', location.href));
 initializeLanguage(
-  level === 'plant' ||
+  level === 'avalanche' ||
+    level === 'plant' ||
     level === 'airplane' ||
     level === 'fire' ||
     level === 'railway' ||
@@ -17,6 +18,7 @@ initializeLanguage(
 // Keep each import in its own loader so production optimization cannot combine
 // the branches and associate every level with the default level's CSS preload.
 const loadLevel = {
+  avalanche: () => import('./avalanche/level'),
   plant: () => import('./plant/level'),
   airplane: () => import('./airplane/level'),
   fire: () => import('./fire/level'),
@@ -27,6 +29,7 @@ const loadLevel = {
 };
 
 const selectedLevel =
+  level === 'avalanche' ||
   level === 'plant' ||
   level === 'airplane' ||
   level === 'fire' ||
@@ -38,6 +41,7 @@ const selectedLevel =
 const loading = document.getElementById('level-loading')!;
 const root = document.getElementById('app')!;
 const names = {
+  avalanche: t('Avalanche'),
   plant: t('Plant'),
   jelly: 'Jelly',
   bubbles: t('Bubbles'),

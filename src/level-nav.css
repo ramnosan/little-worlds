@@ -143,7 +143,7 @@
     gap: 5px;
   }
 }
-@media (min-width: 761px) and (max-width: 1500px) {
+@media (min-width: 761px) and (max-width: 1750px) {
   .level-nav a:not([aria-current='page']) span {
     display: none;
   }
@@ -195,7 +195,7 @@
     gap: 0;
   }
   .level-nav a {
-    padding-inline: 7px;
+    padding-inline: 5px;
     gap: 3px;
   }
 }

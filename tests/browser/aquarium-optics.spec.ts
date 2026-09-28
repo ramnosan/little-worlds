@@ -8,6 +8,13 @@ declare global {
         phase?: number,
       ): { mean: number; deviation: number; peak: number; pixels: number[] };
       pausedDifference(): number;
+      beamStability(phase?: number): {
+        mean: number;
+        contrast: number;
+        detailRms: number;
+        flickerRms: number;
+        pausedDifference: number;
+      };
       finCoverage(): number[];
       lampAlignment(): { center: number; ring: number };
       diffuseResponse(lamp?: boolean): {
@@ -74,6 +81,29 @@ test('night caustics retain dark cells, bright folds and unclipped floor detail 
   }
   expect(found).toEqual([]);
 });
+test('underwater beams suppress small moving specks while retaining light and contrast', async ({
+  page,
+}) => {
+  const found = errors(page);
+  await page.goto('/tests/fixtures/aquarium-optics.html');
+  await page.waitForFunction(() => window.aquariumOpticsFixture);
+  for (const phase of [0.5, 22 / 24]) {
+    const result = await page.evaluate(
+      (phase) => window.aquariumOpticsFixture.beamStability(phase),
+      phase,
+    );
+    // Twelve fixed wave frames, with history disabled and no fish/surface/floor in the ROI.
+    // Before filtering: daylight detail/flicker RMS = .475/.596, night = .285/.382.
+    expect(result.detailRms).toBeLessThan(0.27);
+    expect(result.flickerRms).toBeLessThan(0.35);
+    expect(result.mean).toBeGreaterThan(phase === 0.5 ? 70 : 32);
+    expect(result.mean).toBeLessThan(phase === 0.5 ? 85 : 40);
+    expect(result.contrast).toBeGreaterThan(1.5);
+    expect(result.pausedDifference).toBe(0);
+  }
+  expect(found).toEqual([]);
+});
+
 function errors(page: Page) {
   const found: string[] = [];
   page.on('pageerror', (e) => found.push(e.message));
@@ -106,8 +136,8 @@ test('photon caustics follow waves, respond to object occlusion, and freeze exac
     result.blocked.pixels.filter((p, i) => p < result.flat.pixels[i] * 0.6).length,
   ).toBeGreaterThan(20);
   expect(result.pausedDifference).toBe(0);
-  expect(result.high.volumeSlices).toBe(24);
-  expect(result.high.scatteringSamples).toBe(48);
+  expect(result.high.volumeSlices).toBe(48);
+  expect(result.high.scatteringSamples).toBe(96);
   const lamp = await page.evaluate(() => window.aquariumOpticsFixture.lampAlignment());
   expect(lamp.center).toBeGreaterThan(0.75);
   expect(lamp.center - lamp.ring).toBeGreaterThan(0.1);

@@ -3,7 +3,8 @@ import { de } from './locales/de';
 
 export type Language = 'en' | 'de';
 export type TranslationKey = keyof typeof en;
-export type LevelId = 'jelly' | 'bubbles' | 'aquarium' | 'railway' | 'fire' | 'airplane' | 'plant';
+export type LevelId =
+  'jelly' | 'bubbles' | 'aquarium' | 'railway' | 'fire' | 'airplane' | 'plant' | 'avalanche';
 export const LANGUAGE_STORAGE_KEY = 'jelly-studio.language';
 export const dictionaries = { en, de };
 

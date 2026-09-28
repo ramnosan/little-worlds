@@ -3,11 +3,13 @@ import type { AquariumWorld } from './physics';
 import type { AquariumLight } from './lighting';
 import { LAMP_POSITION } from './lighting';
 import { OpticalGeometry } from './optical-geometry';
+import { LIGHT_VOLUME } from './light-volume';
 import {
   fullscreenVertex,
   photonFragment,
   causticVertex,
   causticFragment,
+  volumeBlurFragment,
   traceFragment,
   temporalFragment,
   outputFragment,
@@ -23,12 +25,19 @@ const target = (w = 1, h = 1, count = 1) =>
     depthBuffer: false,
     count,
   });
+const volumeTarget = () =>
+  target(
+    LIGHT_VOLUME.columns * LIGHT_VOLUME.sliceWidth,
+    LIGHT_VOLUME.rows * LIGHT_VOLUME.sliceHeight,
+  );
 
 export class AquariumOptics {
   ready = false;
   readonly fish = new OpticalGeometry();
   readonly floor = target(1024, 640);
-  private readonly volume = target(512, 480);
+  private readonly volume = volumeTarget();
+  private readonly volumeScratch = volumeTarget();
+  private readonly scatteringVolume = volumeTarget();
   private readonly photons = target(256, 156, 2);
   private readonly background = target();
   private readonly current = target(1, 1, 2);
@@ -40,6 +49,7 @@ export class AquariumOptics {
   private readonly quad = new T.Mesh(this.triangle, new T.ShaderMaterial());
   private readonly photonMaterial: T.ShaderMaterial;
   private readonly causticMaterial: T.ShaderMaterial;
+  private readonly volumeBlurMaterial: T.ShaderMaterial;
   private readonly traceMaterial: T.ShaderMaterial;
   private readonly temporalMaterial: T.ShaderMaterial;
   private readonly copyMaterial: T.ShaderMaterial;
@@ -129,12 +139,17 @@ export class AquariumOptics {
       blending: T.AdditiveBlending,
       side: T.DoubleSide,
     });
+    this.volumeBlurMaterial = material(volumeBlurFragment, {
+      source: { value: this.volume.texture },
+      direction: { value: new T.Vector2() },
+    });
     this.traceMaterial = material(traceFragment, {
       ...this.uniforms,
       backgroundMap: { value: this.background.texture },
       backgroundDepth: { value: this.background.depthTexture },
       causticFloor: { value: this.floor.texture },
       causticVolume: { value: this.volume.texture },
+      scatteringVolume: { value: this.scatteringVolume.texture },
       inverseProjection: { value: new T.Matrix4() },
       cameraWorld: { value: new T.Matrix4() },
       viewProjection: { value: new T.Matrix4() },
@@ -179,6 +194,7 @@ export class AquariumOptics {
     const programs = new T.Scene();
     for (const m of [
       this.photonMaterial,
+      this.volumeBlurMaterial,
       this.traceMaterial,
       this.temporalMaterial,
       this.copyMaterial,
@@ -315,17 +331,31 @@ export class AquariumOptics {
       this.causticMaterial.uniforms.spectralMask.value.set(1, 1, 1);
       renderer.autoClear = true;
       if (!this.low) {
-        this.volume.viewport.set(0, 0, 512, 480);
+        this.volume.viewport.set(0, 0, this.volume.width, this.volume.height);
         renderer.setRenderTarget(this.volume);
         renderer.clear();
         renderer.autoClear = false;
-        for (let s = 0; s < 24; s++) {
-          this.volume.viewport.set((s % 4) * 128, Math.floor(s / 4) * 80, 128, 80);
+        for (let s = 0; s < LIGHT_VOLUME.slices; s++) {
+          this.volume.viewport.set(
+            (s % LIGHT_VOLUME.columns) * LIGHT_VOLUME.sliceWidth,
+            Math.floor(s / LIGHT_VOLUME.columns) * LIGHT_VOLUME.sliceHeight,
+            LIGHT_VOLUME.sliceWidth,
+            LIGHT_VOLUME.sliceHeight,
+          );
           renderer.setRenderTarget(this.volume);
-          this.causticMaterial.uniforms.sliceHeight.value = (s / 23) * 1.95;
+          this.causticMaterial.uniforms.sliceHeight.value =
+            (s / (LIGHT_VOLUME.slices - 1)) * LIGHT_VOLUME.height;
           renderer.render(this.causticScene, this.camera);
         }
         renderer.autoClear = true;
+        // Filter scattering only: floor and object lighting retain sharp caustics.
+        const blur = this.volumeBlurMaterial.uniforms;
+        blur.source.value = this.volume.texture;
+        blur.direction.value.set(1 / this.volume.width, 0);
+        this.pass(renderer, this.volumeBlurMaterial, this.volumeScratch);
+        blur.source.value = this.volumeScratch.texture;
+        blur.direction.value.set(0, 1 / this.volume.height);
+        this.pass(renderer, this.volumeBlurMaterial, this.scatteringVolume);
       }
       this.pass(renderer, this.traceMaterial, this.current);
       let color = this.current.texture;
@@ -373,8 +403,8 @@ export class AquariumOptics {
       ready: this.ready,
       quality: this.low ? 'light' : 'high',
       frames: this.frame,
-      volumeSlices: this.low ? 0 : 24,
-      scatteringSamples: this.low ? 0 : 48,
+      volumeSlices: this.low ? 0 : LIGHT_VOLUME.slices,
+      scatteringSamples: this.low ? 0 : LIGHT_VOLUME.scatteringSamples,
       width: this.current.width,
       height: this.current.height,
       fishMeshes: this.fish.count,
@@ -386,6 +416,8 @@ export class AquariumOptics {
             'photons',
             'floor-caustics',
             'volume',
+            'scattering-filter-x',
+            'scattering-filter-z',
             'tank-optics',
             'temporal',
             'history-depth',
@@ -402,6 +434,8 @@ export class AquariumOptics {
     for (const t of [
       this.floor,
       this.volume,
+      this.volumeScratch,
+      this.scatteringVolume,
       this.photons,
       this.background,
       this.current,
@@ -417,6 +451,7 @@ export class AquariumOptics {
     for (const m of [
       this.photonMaterial,
       this.causticMaterial,
+      this.volumeBlurMaterial,
       this.traceMaterial,
       this.temporalMaterial,
       this.copyMaterial,
